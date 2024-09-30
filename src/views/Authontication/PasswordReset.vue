@@ -3,12 +3,15 @@
     <div class="level-two-container">
       <div class="level-three-container">
         <div class="level-four-container login-header">
-          <p class="login-title">CURRY HUT</p>
+          <p class="login-title">NEW PASSWORD</p>
         </div>
         <div class="level-four-container login-content">
-          <input type="text" class="user-input" placeholder="E mail" />
-          <input type="password" class="user-input" placeholder="Password" />
-          <p id="password-text" @click="forgetPassword">Forget Password ?</p>
+          <input type="text" class="user-input" placeholder="Password" />
+          <input
+            type="password"
+            class="user-input"
+            placeholder="Re enter password"
+          />
           <button id="login-button">LOGIN</button>
         </div>
       </div>
@@ -123,6 +126,7 @@ const forgetPassword = () => {
   border-radius: 4px;
   border: 1px solid #41b06e;
   background: #fff;
+  margin-top: 35px;
 }
 #login-button:hover {
   background: #41b06e;

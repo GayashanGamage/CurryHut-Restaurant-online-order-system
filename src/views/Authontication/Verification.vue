@@ -3,13 +3,12 @@
     <div class="level-two-container">
       <div class="level-three-container">
         <div class="level-four-container login-header">
-          <p class="login-title">CURRY HUT</p>
+          <p class="login-title">VERIFICATION CODE</p>
         </div>
         <div class="level-four-container login-content">
-          <input type="text" class="user-input" placeholder="E mail" />
-          <input type="password" class="user-input" placeholder="Password" />
-          <p id="password-text" @click="forgetPassword">Forget Password ?</p>
-          <button id="login-button">LOGIN</button>
+          <P class="info">Check your email</P>
+          <input type="text" class="user-input" placeholder="Code" />
+          <button id="login-button" @click="Passwor_reset">VERIFY</button>
         </div>
       </div>
     </div>
@@ -19,8 +18,8 @@
 <script setup>
 import router from "@/router";
 
-const forgetPassword = () => {
-  router.push("email");
+const Passwor_reset = () => {
+  router.push("passwordreset");
 };
 </script>
 
@@ -48,7 +47,7 @@ const forgetPassword = () => {
 }
 .level-three-container {
   width: 412px;
-  height: 336px;
+  height: 245px;
   border-radius: 6px;
   background: #fff;
   box-shadow: 0px 0px 20px 4px rgba(0, 0, 0, 0.1);
@@ -59,7 +58,7 @@ const forgetPassword = () => {
 }
 .login-header {
   width: 100%;
-  height: 18%;
+  height: 22%;
   border-radius: 6px 6px 0px 0px;
   background: #41b06e;
   display: flex;
@@ -68,7 +67,7 @@ const forgetPassword = () => {
 }
 .login-content {
   width: 100%;
-  height: 82%;
+  height: 78%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -123,9 +122,20 @@ const forgetPassword = () => {
   border-radius: 4px;
   border: 1px solid #41b06e;
   background: #fff;
+  margin-top: 23px;
 }
 #login-button:hover {
   background: #41b06e;
   color: #fff;
+}
+.info {
+  color: #41b06e;
+  font-family: "Space Grotesk";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: normal;
+  align-self: flex-start;
+  margin-left: 45px;
 }
 </style>

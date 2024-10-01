@@ -43,11 +43,15 @@
     >
       <p class="menu-text" id="select-text-six">Site setting</p>
     </div>
-    <p class="logout">Sign out</p>
+    <p class="logout" @click="uistore.openLogoutPopup">Sign out</p>
   </div>
 </template>
 
 <script setup>
+import { useUiStore } from "@/stores/ui";
+
+const uistore = useUiStore();
+
 const changePage = (divElementID, textElementID) => {
   // select all list from menu
   var all = document.getElementsByClassName("menu-item");

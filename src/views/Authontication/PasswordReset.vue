@@ -12,7 +12,7 @@
             class="user-input"
             placeholder="Re enter password"
           />
-          <button id="login-button">LOGIN</button>
+          <button id="login-button" @click="directto('setting')">LOGIN</button>
         </div>
       </div>
     </div>
@@ -22,8 +22,8 @@
 <script setup>
 import router from "@/router";
 
-const forgetPassword = () => {
-  router.push("email");
+const directto = (routerName) => {
+  router.push(routerName);
 };
 </script>
 

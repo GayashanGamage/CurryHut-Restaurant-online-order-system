@@ -8,8 +8,8 @@
         <div class="level-four-container login-content">
           <input type="text" class="user-input" placeholder="E mail" />
           <input type="password" class="user-input" placeholder="Password" />
-          <p id="password-text" @click="forgetPassword">Forget Password ?</p>
-          <button id="login-button">LOGIN</button>
+          <p id="password-text" @click="directto('email')">Forget Password ?</p>
+          <button id="login-button" @click="directto('setting')">LOGIN</button>
         </div>
       </div>
     </div>
@@ -19,8 +19,8 @@
 <script setup>
 import router from "@/router";
 
-const forgetPassword = () => {
-  router.push("email");
+const directto = (routerName) => {
+  router.push(routerName);
 };
 </script>
 

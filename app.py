@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from jose import jwt
 from passlib.hash import pbkdf2_sha256
+from random import randint
 
 load_dotenv()
 app = FastAPI()
@@ -125,6 +126,35 @@ async def login(usercredencial : userCredencials):
         return JSONResponse(status_code=404, content='email not found')
 
 
-    
+@app.get('/secreatecode')
+async def createSereateCode(email : str):
+    # find email
+    userDetails = user.find_one({'email' : email})
+    # if exist create screate code and send via email, then return 'successfull' message
+    if userDetails:
+        # generate secreate code 
+        code = randint(1000, 9999)
+        # store secreate code in database
+        store_code = user.update_one({'email' : email}, {'$set' : {'secreate_code' : code, 'send_time' : datetime.now()}})
+        # check whethere code is store or not
+        if(store_code.modified_count <= 1):
+            # send email
+            subject = "Send seacreate code"
+            sender = {"name":"secrete code","email":"gayashan.randimagamage@gmail.com"}
+            to = [{"email":email,"name": userDetails['first_name']}]
+            headers = {"Some-Custom-Name":"unique-id-1234"}
+            send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(to=to, headers=headers, sender=sender, subject=subject, template_id=7, params={"code" : code})
+
+            api_response = api_instance.send_transac_email(send_smtp_email)
+            print(api_response)
+            if len(api_response.message_id) == 0:
+                return JSONResponse(status_code=500, content='email cannot send')
+
+            return JSONResponse(status_code=200, content="successfull")
+        else:
+            return JSONResponse(status_code=404, content='something went wrong')
+    # else not return 'email not found' message
+    else:
+        return JSONResponse(status_code=401, content='email not found')
 
         

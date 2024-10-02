@@ -8,6 +8,8 @@ import os
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from datetime import datetime
+from jose import jwt
+from passlib.hash import pbkdf2_sha256
 
 load_dotenv()
 app = FastAPI()
@@ -37,13 +39,40 @@ configuration = sib_api_v3_sdk.Configuration()
 configuration.api_key['api-key'] = os.getenv('brevo')
 api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
 
-class UserDetails(BaseModel):
+# dependent functions
+# create JWT joken
+def encodeToken(email, password):
+    token = jwt.encode({'email' : email, 'password' : password}, os.getenv('token'), algorithm='HS256')
+    return token
+
+# decode JWT token
+def decodeToken(token):
+    data = jwt.decode(token, os.getenv('token'), algorithms=['HS-256'])
+    return data
+
+# encode password 
+def encodePassword(palinPassword):
+    encriptPassword = pbkdf2_sha256.hash(palinPassword)    
+    return encriptPassword
+
+# decode password
+def decodePasword(palinPassword, encriptPassword):
+    decriptedPassword = pbkdf2_sha256.verify(palinPassword, encriptPassword)
+    return decriptedPassword
+
+
+class userCredencials(BaseModel):
     email : str
+    password : str
+
+class UserDetails(userCredencials):
     first_name : str
     last_name : str
-    password : str
     type : str
     created : datetime = None
+    send_time : None
+    secreate_code : None
+
 
 
 @app.post('/createAdminAccount')
@@ -54,6 +83,8 @@ async def createAdminUserAccount(userdetials : UserDetails ):
     if adminUser:
         return JSONResponse(status_code=406 , content="email registered" )
 
+    # asign encript password to plain-password
+    userdetials.password = encodePassword(userdetials.password)
     # store data
     store = user.insert_one(userdetials.dict())
     if(store.acknowledged == True):
@@ -72,6 +103,28 @@ async def createAdminUserAccount(userdetials : UserDetails ):
         return JSONResponse(status_code=200, content="successfull")
     else:
         return JSONResponse(status_code=422 , content="something go wrong")
+    
+@app.post('/login')
+async def login(usercredencial : userCredencials):
+    # get user data from database
+    userDetails = user.find_one({'email' : usercredencial.email})
+    # validate password
+    if(userDetails):
+        # decode password
+        decoded = decodePasword(usercredencial.password, userDetails['password'])
+        # validate password
+        if decoded:
+            # create and return JWT token
+            token = encodeToken(usercredencial.email, usercredencial.password)
+            return JSONResponse(status_code=200, content={'token' : token})
+        # password invalied error
+        else:
+            return JSONResponse(status_code=406, content='password incorect')
+    # email not found error
+    else:
+        return JSONResponse(status_code=404, content='email not found')
+
+
     
 
         

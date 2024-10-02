@@ -73,7 +73,16 @@ class UserDetails(userCredencials):
     created : datetime = None
     send_time : None
     secreate_code : None
+    password_change : bool = False
 
+class MailVerification(BaseModel):
+    email : str
+
+class Code(MailVerification):
+    code : int
+
+class Password(MailVerification):
+    password : str
 
 
 @app.post('/createAdminAccount')
@@ -135,7 +144,7 @@ async def createSereateCode(email : str):
         # generate secreate code 
         code = randint(1000, 9999)
         # store secreate code in database
-        store_code = user.update_one({'email' : email}, {'$set' : {'secreate_code' : code, 'send_time' : datetime.now()}})
+        store_code = user.update_one({'email' : email}, {'$set' : {'secreate_code' : code, 'send_time' : datetime.now(), 'password_change' : True}})
         # check whethere code is store or not
         if(store_code.modified_count <= 1):
             # send email
@@ -157,4 +166,17 @@ async def createSereateCode(email : str):
     else:
         return JSONResponse(status_code=401, content='email not found')
 
+@app.post('/codeverification')
+async def codeverification(code : Code):
+    # get user details
+    UserDetails = user.find_one({'email' : code.email})
+    # compaire secrete code and changerbility
+    if(UserDetails['password_change'] and UserDetails['secreate_code'] == code.code):
+        # reset secrete code and password_change
+        user.update_one({'email' : code.email}, {'$set' : {'password_change' : False, 'secreate_code' : None, 'send_time' : None}})
+        # send successfull message
+        return JSONResponse(status_code=200, content='successfull')
+    # send error message
+    else:
+        return JSONResponse(status_code=404, content='incorect secrete code')
         

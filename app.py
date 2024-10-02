@@ -173,10 +173,31 @@ async def codeverification(code : Code):
     # compaire secrete code and changerbility
     if(UserDetails['password_change'] and UserDetails['secreate_code'] == code.code):
         # reset secrete code and password_change
-        user.update_one({'email' : code.email}, {'$set' : {'password_change' : False, 'secreate_code' : None, 'send_time' : None}})
+        user.update_one({'email' : code.email}, {'$set' : {'secreate_code' : None, 'send_time' : None}})
         # send successfull message
         return JSONResponse(status_code=200, content='successfull')
     # send error message
     else:
         return JSONResponse(status_code=404, content='incorect secrete code')
         
+
+@app.post('/resetpassword')
+async def resetpassword(password : Password):
+    # get user detials 
+    UserDetails = user.find_one({'email' : password.email})
+    # check 'password_change' == true ?
+    if(UserDetails['password_change'] == True):
+        # encode password
+        encode = encodePassword(password.password)
+        # update password
+        update = user.update_one({'email' : password.email}, {'$set' : {'password' : encode, 'password_change' : False}})
+        # check update
+        if(update.modified_count == 1):
+            # send 'successfull' message
+            return JSONResponse(status_code=200, content='successfull')
+        else:
+            return JSONResponse(status_code=404, content='something went wrong')
+    # send unseccessfull message
+    else:
+        return JSONResponse(status_code=400, content='something went wrong')
+    

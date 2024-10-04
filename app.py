@@ -11,6 +11,7 @@ from datetime import datetime
 from jose import jwt
 from passlib.hash import pbkdf2_sha256
 from random import randint
+from datetime import datetime
 
 load_dotenv()
 app = FastAPI()
@@ -34,6 +35,7 @@ app.add_middleware(
 client = MongoClient(os.getenv('mongodb'))
 db = client['curryhut']
 user = db['User']
+shop = db['Shop']
 
 # brevo mail server
 configuration = sib_api_v3_sdk.Configuration()
@@ -201,3 +203,70 @@ async def resetpassword(password : Password):
     else:
         return JSONResponse(status_code=400, content='something went wrong')
     
+# setting page endpoints --------------
+# change meal time of the shop
+@app.patch('/changeMealTime', tags=['setting page'])
+async def changeMealTime(mealTime : str, h : int, m : int):
+    # check authontication
+        # if authontication fail then return error message
+    # check mealtime 
+    if mealTime == 'breakfast' or mealTime =='lunch' or mealTime == 'dinner': 
+        # get related data from database
+        timeData = shop.find_one({})
+        # time comparison and send error message
+        if(mealTime == 'breakfast'):
+            comparison = datetime(year=1970, month=1, day=1, hour=4, minute=00).time() < datetime(year=1970, month=1, day=1, hour=h, minute=m).time() < timeData['lunch'].time()
+            if comparison == False:
+                return JSONResponse(status_code=400, content=f'enter time between 4:00 am and {timeData["lunch"].time()}')
+        elif(mealTime == 'lunch'):
+            comparison = timeData['breakfast'].time() < datetime(year=1970, month=1, day=1, hour=h, minute=m).time() < timeData['dinner'].time()
+            if comparison == False:
+                return JSONResponse(status_code=400, content=f'enter time between {timeData["breakfast"].time()}am and {timeData["dinner"].time()}pm')
+        elif(mealTime == 'dinner'):  
+            comparison = timeData['lunch'].time() < datetime(year=1970, month=1, day=1, hour=h, minute=m).time() < datetime(year=1970, month=1, day=1, hour=0, minute=00).time()
+            if comparison == False:
+                return JSONResponse(status_code=400, content=f'enter time between {timeData["lunch"].time()}pm and 00:00')
+        
+        # update meal time
+        shopUpdate = shop.update_one({}, {'$set' : {mealTime : datetime(year=1970, month=1, day=1, hour=h, minute=m)}})
+        # check whether meal time update or not
+        # if successfull then send successfull message
+        if shopUpdate.modified_count == 1:
+            return JSONResponse(status_code=200, content='successfull')
+        #  else send server error - due to unble to update
+        else:
+            return JSONResponse(status_code=500, content='something went wrong')
+    else:
+        return JSONResponse(status_code=404, content='meal time not found')
+    
+
+# change shop opening and close time
+@app.patch('/changeShopTime', tags=['setting page'])
+async def changeShopTime(shopTime : str, h : int, m : int):
+    # check authontication
+        # if authontication fail then return error message
+    # check shoptime variable
+    if  shopTime== 'open_time' or shopTime =='close_time': 
+        # get stored data from database
+        shopData = shop.find_one({})
+        # time comparison
+        if shopTime == 'open_time':
+            comparison = shopData['close_time'].time() < datetime(year=1970, month=1, day=1, hour=h, minute=m).time()
+            if comparison == True:
+                return JSONResponse(status_code=400, content='you cannot set opening time lager than existing close time.')
+        elif shopTime == 'close_time':
+            comparison = shopData['open_time'].time() > datetime(year=1970, month=1, day=1, hour=h, minute=m).time()
+            if comparison == True:
+                return JSONResponse(status_code=400, content='you cannot set close time less than existing open time')
+            
+        # update meal time
+        shopUpdate = shop.update_one({}, {'$set' : {shopTime : datetime(year=1970, month=1, day=1, hour=h, minute=m)}})
+        # check whether meal time update or not
+        # if successfull then send successfull message
+        if shopUpdate.modified_count == 1:
+            return JSONResponse(status_code=200, content='successfull')
+        #  else send server error - due to unble to update
+        else:
+            return JSONResponse(status_code=500, content='something went wrong - server')
+    else:
+        return JSONResponse(status_code=404, content='selected time not fond')

@@ -12,6 +12,7 @@ from jose import jwt
 from passlib.hash import pbkdf2_sha256
 from random import randint
 from datetime import datetime
+from fastapi.encoders import jsonable_encoder
 
 load_dotenv()
 app = FastAPI()
@@ -270,3 +271,31 @@ async def changeShopTime(shopTime : str, h : int, m : int):
             return JSONResponse(status_code=500, content='something went wrong - server')
     else:
         return JSONResponse(status_code=404, content='selected time not fond')
+    
+@app.patch('/operationhold', tags=['setting page'])
+async def operationHold():
+    pass
+    # get existing status of the shop from database
+    shopStatus = shop.find_one({})
+    # check opening time and closing time
+    if (shopStatus['open_time'].time() < datetime.now().time() < shopStatus['close_time'].time()) == True:
+        # if above is ok then swap shutdown status
+        if shopStatus['shutdown'] == True:
+            shop.update_one({}, {'$set' : {'shutdown' : False}})
+            return JSONResponse(status_code=200, content='successfuly open')
+        elif shopStatus['shutdown'] == False:
+            shop.update_one({}, {'$set' : {'shutdown' : True}})
+            return JSONResponse(status_code=200, content='successfuly close')
+
+        # else show error that shop is close
+    else:
+        return JSONResponse(status_code=400, content="you cannot change status of the shop while it's close time ")
+    
+
+@app.get('/shopdetails', tags=['setting page'])
+async def shopDetials():
+    # check authontication
+        # if authontication fail, then return error message
+    shopData = shop.find_one({},{'_id' : 0})
+    a = jsonable_encoder(shopData)
+    return JSONResponse(status_code=200, content=a)

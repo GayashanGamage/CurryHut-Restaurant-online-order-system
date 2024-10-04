@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from typing import Annotated
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pymongo import MongoClient
@@ -8,13 +9,15 @@ import os
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from datetime import datetime
-from jose import jwt
+from jose import jwt, JWTError
 from passlib.hash import pbkdf2_sha256
 from random import randint
 from datetime import datetime
 from fastapi.encoders import jsonable_encoder
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 load_dotenv()
+security = HTTPBearer()
 app = FastAPI()
 
 # CORS midleware
@@ -45,14 +48,18 @@ api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(co
 
 # dependent functions
 # create JWT joken
-def encodeToken(email, password):
-    token = jwt.encode({'email' : email, 'password' : password}, os.getenv('token'), algorithm='HS256')
+def encodeToken(email, password, role):
+    token = jwt.encode({'email' : email, 'password' : password, 'role' : role}, os.getenv('token'), algorithm='HS256')
     return token
 
 # decode JWT token
 def decodeToken(token):
-    data = jwt.decode(token, os.getenv('token'), algorithms=['HS-256'])
-    return data
+    try:
+        data = jwt.decode(token, os.getenv('token'), algorithms=['HS256'])
+        return data
+    except JWTError:
+        return False
+
 
 # encode password 
 def encodePassword(palinPassword):
@@ -64,15 +71,18 @@ def decodePasword(palinPassword, encriptPassword):
     decriptedPassword = pbkdf2_sha256.verify(palinPassword, encriptPassword)
     return decriptedPassword
 
+# deal with barer token
+def authVerification(details : Annotated[HTTPAuthorizationCredentials, Depends(security)]):
+    return decodeToken(details.credentials)
 
 class userCredencials(BaseModel):
     email : str
     password : str
+    role : str
 
 class UserDetails(userCredencials):
     first_name : str
     last_name : str
-    type : str
     created : datetime = None
     send_time : None
     secreate_code : None
@@ -120,7 +130,7 @@ async def createAdminUserAccount(userdetials : UserDetails ):
 @app.post('/login')
 async def login(usercredencial : userCredencials):
     # get user data from database
-    userDetails = user.find_one({'email' : usercredencial.email})
+    userDetails = user.find_one({'email' : usercredencial.email, 'role'  : usercredencial.role})
     # validate password
     if(userDetails):
         # decode password
@@ -128,7 +138,7 @@ async def login(usercredencial : userCredencials):
         # validate password
         if decoded:
             # create and return JWT token
-            token = encodeToken(usercredencial.email, usercredencial.password)
+            token = encodeToken(usercredencial.email, usercredencial.password, usercredencial.role)
             return JSONResponse(status_code=200, content={'token' : token})
         # password invalied error
         else:
@@ -207,9 +217,10 @@ async def resetpassword(password : Password):
 # setting page endpoints --------------
 # change meal time of the shop
 @app.patch('/changeMealTime', tags=['setting page'])
-async def changeMealTime(mealTime : str, h : int, m : int):
+async def changeMealTime(mealTime : str, h : int, m : int, data = Depends(authVerification)):
     # check authontication
-        # if authontication fail then return error message
+    if data == False or data['role'] != 'admin':
+        return JSONResponse(status_code=401, content='unathorized')
     # check mealtime 
     if mealTime == 'breakfast' or mealTime =='lunch' or mealTime == 'dinner': 
         # get related data from database
@@ -243,9 +254,10 @@ async def changeMealTime(mealTime : str, h : int, m : int):
 
 # change shop opening and close time
 @app.patch('/changeShopTime', tags=['setting page'])
-async def changeShopTime(shopTime : str, h : int, m : int):
+async def changeShopTime(shopTime : str, h : int, m : int, data = Depends(authVerification)):
     # check authontication
-        # if authontication fail then return error message
+    if data == False or data['role'] != 'admin':
+        return JSONResponse(status_code=401, content='unathorized')
     # check shoptime variable
     if  shopTime== 'open_time' or shopTime =='close_time': 
         # get stored data from database
@@ -273,9 +285,10 @@ async def changeShopTime(shopTime : str, h : int, m : int):
         return JSONResponse(status_code=404, content='selected time not fond')
     
 @app.patch('/operationhold', tags=['setting page'])
-async def operationHold():
-    pass
-    # get existing status of the shop from database
+async def operationHold(data = Depends(authVerification)):
+    # check authontication
+    if data == False or data['role'] != 'admin':
+        return JSONResponse(status_code=401, content='unauthorized')
     shopStatus = shop.find_one({})
     # check opening time and closing time
     if (shopStatus['open_time'].time() < datetime.now().time() < shopStatus['close_time'].time()) == True:
@@ -293,9 +306,11 @@ async def operationHold():
     
 
 @app.get('/shopdetails', tags=['setting page'])
-async def shopDetials():
+async def shopDetials(data = Depends(authVerification)):
     # check authontication
-        # if authontication fail, then return error message
+    if data == False or data['role'] != 'admin':
+        return JSONResponse(status_code=401, content='unathorized')
+    # get data from database and return
     shopData = shop.find_one({},{'_id' : 0})
     a = jsonable_encoder(shopData)
     return JSONResponse(status_code=200, content=a)

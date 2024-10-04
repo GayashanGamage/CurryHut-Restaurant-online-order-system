@@ -1,3 +1,4 @@
+import { useAuthonticationStore } from "@/stores/authontication";
 import Home from "@/views/Home.vue";
 import Email from "@/views/Authontication/Email.vue";
 import Login from "@/views/Authontication/Login.vue";
@@ -5,6 +6,8 @@ import PasswordReset from "@/views/Authontication/PasswordReset.vue";
 import Verification from "@/views/Authontication/Verification.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import Setting from "@/views/Subpages/Setting.vue";
+
+// const authontication = useAuthonticationStore();
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -33,6 +36,7 @@ const router = createRouter({
       path: "/",
       component: Home,
       name: "home",
+      redirect: "setting",
       children: [
         {
           path: "setting",
@@ -42,6 +46,47 @@ const router = createRouter({
       ],
     },
   ],
+});
+
+router.beforeEach((to, from, next) => {
+  // foword guard
+  if (
+    from.name !== "login" &&
+    to.name === "email" &&
+    useAuthonticationStore().email_page === false
+  )
+    next({ name: "login" });
+
+  // foword guard
+  if (
+    from.name !== "email" &&
+    to.name === "verification" &&
+    useAuthonticationStore().verification_page === false
+  )
+    next({ name: "login" });
+
+  // if press back button then direct to login page - backword
+  if (from.name === "verification" && to.name === "email")
+    next({ name: "login" });
+
+  // forword guard
+  if (
+    from.name !== "verification" &&
+    to.name === "passwordreset" &&
+    useAuthonticationStore().passwordRest_page === false
+  )
+    next({ name: "login" });
+
+  // if press back button then direct to login page - backword
+  if (from.name === "passwordreset" && to.name === "verification")
+    next({ name: "login" });
+  // subpage of the admin page
+  // if (
+  //   useAuthonticationStore().authontication === false &&
+  //   to.name === "setting"
+  // )
+  // next({ name: "login" });
+  else next();
 });
 
 export default router;

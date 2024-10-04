@@ -7,8 +7,15 @@
         </div>
         <div class="level-four-container login-content">
           <P class="info">Check your email</P>
-          <input type="text" class="user-input" placeholder="Code" />
-          <button id="login-button" @click="Passwor_reset">VERIFY</button>
+          <input
+            type="text"
+            class="user-input"
+            placeholder="Code"
+            v-model="authontication.secrete_code"
+          />
+          <button id="login-button" @click="authontication.codeVerification">
+            VERIFY
+          </button>
         </div>
       </div>
     </div>
@@ -17,10 +24,18 @@
 
 <script setup>
 import router from "@/router";
+import { useAuthonticationStore } from "@/stores/authontication";
+import { onBeforeUnmount } from "vue";
+
+const authontication = useAuthonticationStore();
 
 const Passwor_reset = () => {
   router.push("passwordreset");
 };
+
+onBeforeUnmount(() => {
+  authontication.removeSecretecode();
+});
 </script>
 
 <style scoped>

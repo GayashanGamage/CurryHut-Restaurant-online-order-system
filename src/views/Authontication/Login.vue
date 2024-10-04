@@ -6,10 +6,20 @@
           <p class="login-title">CURRY HUT</p>
         </div>
         <div class="level-four-container login-content">
-          <input type="text" class="user-input" placeholder="E mail" />
-          <input type="password" class="user-input" placeholder="Password" />
-          <p id="password-text" @click="directto('email')">Forget Password ?</p>
-          <button id="login-button" @click="directto('setting')">LOGIN</button>
+          <input
+            type="text"
+            class="user-input"
+            placeholder="E mail"
+            v-model="authontication.email"
+          />
+          <input
+            type="password"
+            class="user-input"
+            placeholder="Password"
+            v-model="authontication.passsword"
+          />
+          <p id="password-text" @click="directTo('email')">Forget Password ?</p>
+          <button id="login-button" @click="authontication.login">LOGIN</button>
         </div>
       </div>
     </div>
@@ -18,10 +28,22 @@
 
 <script setup>
 import router from "@/router";
+import { useAuthonticationStore } from "@/stores/authontication";
+import { onBeforeMount, onBeforeUnmount } from "vue";
 
-const directto = (routerName) => {
-  router.push(routerName);
+const authontication = useAuthonticationStore();
+
+const directTo = (destination) => {
+  router.push({ name: destination });
 };
+
+onBeforeMount(() => {
+  authontication.checkCookie();
+});
+
+onBeforeUnmount(() => {
+  authontication.removeLoginDetails();
+});
 </script>
 
 <style scoped>

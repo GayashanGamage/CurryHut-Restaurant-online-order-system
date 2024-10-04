@@ -6,8 +6,15 @@
           <p class="login-title">ADMINISTRATOR EMAIL</p>
         </div>
         <div class="level-four-container login-content">
-          <input type="text" class="user-input" placeholder="E mail" />
-          <button id="login-button" @click="sendCode">SEND CODE</button>
+          <input
+            type="text"
+            class="user-input"
+            placeholder="E mail"
+            v-model="authontication.reset_email"
+          />
+          <button id="login-button" @click="authontication.emailVerification">
+            SEND CODE
+          </button>
         </div>
       </div>
     </div>
@@ -16,10 +23,18 @@
 
 <script setup>
 import router from "@/router";
+import { useAuthonticationStore } from "@/stores/authontication";
+import { onBeforeUnmount } from "vue";
+
+const authontication = useAuthonticationStore();
 
 const sendCode = () => {
   router.push("verification");
 };
+
+onBeforeUnmount(() => {
+  authontication.removeEmail();
+});
 </script>
 
 <style scoped>

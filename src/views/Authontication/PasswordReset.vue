@@ -6,13 +6,21 @@
           <p class="login-title">NEW PASSWORD</p>
         </div>
         <div class="level-four-container login-content">
-          <input type="text" class="user-input" placeholder="Password" />
+          <input
+            type="password"
+            class="user-input"
+            placeholder="Password"
+            v-model="authontication.change_password1"
+          />
           <input
             type="password"
             class="user-input"
             placeholder="Re enter password"
+            v-model="authontication.change_password2"
           />
-          <button id="login-button" @click="directto('setting')">LOGIN</button>
+          <button id="login-button" @click="authontication.chnagePassword">
+            LOGIN
+          </button>
         </div>
       </div>
     </div>
@@ -21,10 +29,18 @@
 
 <script setup>
 import router from "@/router";
+import { useAuthonticationStore } from "@/stores/authontication";
+import { onBeforeUnmount } from "vue";
+
+const authontication = useAuthonticationStore();
 
 const directto = (routerName) => {
   router.push(routerName);
 };
+
+onBeforeUnmount(() => {
+  authontication.removePasswords();
+});
 </script>
 
 <style scoped>

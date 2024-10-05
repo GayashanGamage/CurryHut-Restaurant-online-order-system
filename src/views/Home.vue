@@ -13,14 +13,11 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
 import Menubar from "@/components/Menubar.vue";
 import Logout from "@/components/Logout.vue";
 import { useUiStore } from "@/stores/ui";
 
 const uistore = useUiStore();
-
-const logoutPopup = ref(false);
 </script>
 
 <style scoped>

@@ -16,10 +16,10 @@
         <hr class="ruller" />
         <div class="s-level-four-container shop">
           <p class="cell" id="shop1">Regular opening time :</p>
-          <p class="cell" id="shop2">6.00 a.m</p>
+          <p class="cell" id="shop2">{{ shop.open_time }}</p>
           <button class="action-button cell" id="shop3">Edit</button>
           <p class="cell" id="shop4">Regular closing time :</p>
-          <p class="cell" id="shop5">11:00 a.m</p>
+          <p class="cell" id="shop5">{{ shop.close_time }}</p>
           <button class="action-button cell" id="shop6">Edit</button>
           <p class="cell" id="shop7">Operation hold :</p>
           <button class="action-button cell" id="shop8">Pause</button>
@@ -28,13 +28,13 @@
         <hr class="ruller" />
         <div class="s-level-four-container meal">
           <p class="cell" id="meal1">Brek first time</p>
-          <p class="cell" id="meal2">6:00 a.m</p>
+          <p class="cell" id="meal2">{{ shop.breakfast }}</p>
           <button class="cell action-button" id="meal3">Edit</button>
           <p class="cell" id="meal4">Lunch time</p>
-          <p class="cell" id="meal5">11:00 a.m</p>
+          <p class="cell" id="meal5">{{ shop.lunch }}</p>
           <button class="cell action-button" id="meal6">Edit</button>
           <p class="cell" id="meal7">Dinner</p>
-          <p class="cell" id="meal8">5:00 p.m</p>
+          <p class="cell" id="meal8">{{ shop.dinner }}</p>
           <button class="cell action-button" id="meal9">Edit</button>
         </div>
       </div>
@@ -43,17 +43,48 @@
 </template>
 
 <script setup>
+import axios from "axios";
 import { useAuthonticationStore } from "@/stores/authontication";
-import { onBeforeMount, onBeforeUnmount } from "vue";
+import { onBeforeMount, onBeforeUnmount, ref } from "vue";
+import { useShopStore } from "@/stores/shop";
+import router from "@/router";
 
+// import all pinia stores
 const authontication = useAuthonticationStore();
+const shop = useShopStore();
 
 onBeforeMount(() => {
-  authontication.checkCookie();
+  // 1.remove password from login form
+  // 2.get JWT token and send request '/shopdetails'
+  // 3.if successfull - store data in pinia store
+  // 4.if token invalied - send to login page
+  authontication.passsword = undefined;
+  axios
+    .get(`${import.meta.env.VITE_url}/shopdetails`, {
+      headers: {
+        Authorization: "Bearer " + authontication.authcookie,
+      },
+    })
+    .then((successfull) => {
+      console.log(successfull.data);
+      if (successfull.status === 200) {
+        shop.open_time = successfull.data.open_time;
+        shop.close_time = successfull.data.close_time;
+        shop.shutdown = successfull.data.shutdown;
+        shop.breakfast = successfull.data.breakfast;
+        shop.lunch = successfull.data.lunch;
+        shop.dinner = successfull.data.dinner;
+      }
+    })
+    .catch((error) => {
+      if (error.status == 401) {
+        router.replace({ name: "login" });
+      }
+    });
 });
 
 onBeforeUnmount(() => {
-  authontication.checkCookie();
+  authontication.checkAuthontication();
 });
 </script>
 

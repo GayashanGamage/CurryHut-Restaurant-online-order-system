@@ -8,10 +8,11 @@ import "vue-toast-notification/dist/theme-sugar.css";
 const tost = useToast();
 
 export const useAuthonticationStore = defineStore("authontication", () => {
-  const email = ref(undefined);
+  const email = ref(null);
+  const authcookie = ref(null);
+  const authontication = ref(null);
   const reset_email = ref(undefined);
-  const passsword = ref(undefined);
-  const authontication = ref(false);
+  const passsword = ref(undefined); //this is for login password
   const role = ref(undefined);
   const secrete_code = ref(undefined);
 
@@ -31,10 +32,14 @@ export const useAuthonticationStore = defineStore("authontication", () => {
       .post(`${import.meta.env.VITE_url}/login`, {
         email: email.value,
         password: passsword.value,
+        role: "admin",
       })
       .then((response) => {
         if (response.status == 200) {
           authontication.value = true;
+          // store email in local storange
+          localStorage.setItem("email", email.value);
+          // store cookie in cookie store
           document.cookie = `user=${response.data.token}; expires=Thu, 18 Dec 2024 12:00:00 UTC`;
           router.push({ name: "home" });
         }
@@ -121,25 +126,81 @@ export const useAuthonticationStore = defineStore("authontication", () => {
   }
 
   function removeLoginDetails() {
+    // reset selected variables
     email.value = undefined;
     passsword.value = undefined;
   }
 
   function removeEmail() {
+    // reset selected variables
     email.value = undefined;
   }
   function removeSecretecode() {
+    // reset selected variables
     secrete_code.value = undefined;
   }
 
   function removePasswords() {
+    // reset selected variables
     change_password1.value = undefined;
     change_password2.value = undefined;
     reset_email.value = undefined;
   }
 
+  function checkAuthontication() {
+    // functionality : this is mainly for check all authontication details (email, token)
+
+    // this is for update pinia store from local store and cookie storage
+    email.value = localStorage.getItem("email");
+    checkCookie();
+
+    // 1. check loged email and cookies and authontication status
+    // 2. if one or three not available then redirect to loging page with removing all available values
+    // 3. else return true : this mean all authontication variables are available
+
+    if (
+      email.value === null ||
+      authcookie.value === null ||
+      authontication.value === null
+    ) {
+      email.value = null;
+      localStorage.removeItem("email");
+      authontication.value = null;
+      deleteCookie();
+      router.push({ name: "login" });
+    } else {
+      return true;
+    }
+  }
+
   function checkCookie() {
-    console.log("this is for cookies");
+    // functionality : check the availability of the token in cookies store and store in pinia store
+    // 1. get all cookies
+    // 2. select authontication token using key 'user'
+    // 3. asign authontication value
+    // 4. get authontication token to pinia store
+    let allCookei = document.cookie.split("; ");
+    for (let i = 0; i < allCookei.length; i++) {
+      if (allCookei[i].startsWith("user")) {
+        authontication.value = true;
+        authcookie.value = allCookei[i].slice(5);
+      }
+    }
+  }
+
+  function deleteCookie() {
+    // functionality : remove cookies from cookies store and pinia store
+    // 1. get all cookes
+    // 2. select authontication tokon cookie using 'user'
+    // 3. assign previous day and expire cookie
+    let allCookei = document.cookie.split("; ");
+    for (let i = 0; i < allCookei.length; i++) {
+      if (allCookei[i].startsWith("user")) {
+        document.cookie = `${allCookei[i]}; expires=Thu, 18 Dec 2000 12:00:00 UTC;`;
+        authcookie.value = false;
+        break;
+      }
+    }
   }
 
   return {
@@ -173,5 +234,8 @@ export const useAuthonticationStore = defineStore("authontication", () => {
 
     // cookies
     checkCookie,
+    authcookie,
+    deleteCookie,
+    checkAuthontication,
   };
 });

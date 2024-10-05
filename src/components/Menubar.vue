@@ -25,7 +25,7 @@
     <div
       class="menu-item"
       id="menu-four"
-      @click="changePage('menu-four', 'select-text-four')"
+      @click="changePage('menu-four', 'select-text-four', 'catagory')"
     >
       <p class="menu-text" id="select-text-four">Catogery</p>
     </div>
@@ -39,7 +39,7 @@
     <div
       class="menu-item"
       id="menu-six"
-      @click="changePage('menu-six', 'select-text-six')"
+      @click="changePage('menu-six', 'select-text-six', 'setting')"
     >
       <p class="menu-text" id="select-text-six">Site setting</p>
     </div>
@@ -48,11 +48,12 @@
 </template>
 
 <script setup>
+import router from "@/router";
 import { useUiStore } from "@/stores/ui";
 
 const uistore = useUiStore();
 
-const changePage = (divElementID, textElementID) => {
+const changePage = (divElementID, textElementID, url) => {
   // select all list from menu
   var all = document.getElementsByClassName("menu-item");
   var alltext = document.getElementsByClassName("menu-text");
@@ -69,6 +70,9 @@ const changePage = (divElementID, textElementID) => {
   // add style to newly selected items
   document.getElementById(divElementID).classList.add("select");
   document.getElementById(textElementID).classList.add("select-text");
+
+  // load sub-page
+  router.push({ name: url });
 };
 </script>
 

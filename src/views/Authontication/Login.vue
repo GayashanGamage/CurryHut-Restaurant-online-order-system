@@ -39,6 +39,9 @@ const directTo = (destination) => {
 
 onBeforeMount(() => {
   authontication.checkCookie();
+  if (authontication.authontication == true) {
+    router.push({ name: "setting" });
+  }
 });
 
 onBeforeUnmount(() => {

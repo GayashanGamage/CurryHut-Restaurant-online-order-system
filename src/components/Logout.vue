@@ -22,7 +22,7 @@ import { onBeforeUnmount } from "vue";
 const uistore = useUiStore();
 
 const logout = () => {
-  router.push("login");
+  router.push({ name: "login" });
 };
 
 onBeforeUnmount(() => {

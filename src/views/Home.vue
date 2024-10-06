@@ -9,6 +9,7 @@
       </div>
     </div>
     <Logout v-if="uistore.logoutPopupWindow"></Logout>
+    <Passwordchange v-if="uistore.PasswordChangeWindow"></Passwordchange>
   </div>
 </template>
 
@@ -16,6 +17,7 @@
 import Menubar from "@/components/Menubar.vue";
 import Logout from "@/components/Logout.vue";
 import { useUiStore } from "@/stores/ui";
+import Passwordchange from "@/components/Passwordchange.vue";
 
 const uistore = useUiStore();
 </script>

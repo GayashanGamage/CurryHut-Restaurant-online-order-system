@@ -16,12 +16,17 @@
 
 <script setup>
 import router from "@/router";
+import { useAuthonticationStore } from "@/stores/authontication";
 import { useUiStore } from "@/stores/ui";
 import { onBeforeUnmount } from "vue";
 
+// pinia stores
 const uistore = useUiStore();
+const authontication = useAuthonticationStore();
 
 const logout = () => {
+  authontication.cleanCredencials();
+  uistore.logoutPopupWindow = false;
   router.push({ name: "login" });
 };
 

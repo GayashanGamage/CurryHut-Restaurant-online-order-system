@@ -10,7 +10,13 @@
           <p id="account2" class="cell">info@curryhut.lk</p>
           <p id="account3" class="cell">password</p>
           <p id="account4" class="cell">***********</p>
-          <button class="action-button cell" id="account5">Change</button>
+          <button
+            class="action-button cell"
+            id="account5"
+            @click="openPasswordResetWindow"
+          >
+            Change
+          </button>
         </div>
         <h4 class="sub-title">Shop time</h4>
         <hr class="ruller" />
@@ -45,19 +51,27 @@
 <script setup>
 import axios from "axios";
 import { useAuthonticationStore } from "@/stores/authontication";
-import { onBeforeMount, onBeforeUnmount, ref } from "vue";
+import { onBeforeMount, ref } from "vue";
 import { useShopStore } from "@/stores/shop";
 import router from "@/router";
+import { useUiStore } from "@/stores/ui";
+import { useToast } from "vue-toast-notification";
+
+// toast messages initiating
+const toast = useToast();
 
 // import all pinia stores
 const authontication = useAuthonticationStore();
 const shop = useShopStore();
+const uistore = useUiStore();
 
 onBeforeMount(() => {
+  // function : load all athontication details to pinia store and get requried data from API
   // 1.remove password from login form
   // 2.get JWT token and send request '/shopdetails'
   // 3.if successfull - store data in pinia store
   // 4.if token invalied - send to login page
+  authontication.checkAuthontication();
   authontication.passsword = undefined;
   axios
     .get(`${import.meta.env.VITE_url}/shopdetails`, {
@@ -78,14 +92,38 @@ onBeforeMount(() => {
     })
     .catch((error) => {
       if (error.status == 401) {
+        authontication.cleanCredencials;
         router.replace({ name: "login" });
       }
     });
 });
 
-onBeforeUnmount(() => {
+function openPasswordResetWindow() {
+  // function : send email with 'secreate_code' to admin and open passwordChangeWindow
+  // 1. check authontication
+  // 2. if not available, then crean all credicials and direct to login page
+  // 3. otherwise send request to 'secretecode'
+  // 4. set CodeVerifyWindow visible
+  // 5. if it is successfull, then open password reset popup
   authontication.checkAuthontication();
-});
+  axios
+    .get(`${import.meta.env.VITE_url}/secreatecode`, {
+      params: {
+        email: authontication.email,
+      },
+    })
+    .then((successfull) => {
+      if (successfull.status == 200) {
+        uistore.CodeVerify = true;
+        uistore.PasswordChangeWindow = true;
+      }
+    })
+    .catch((error) => {
+      if (error.status == 404 || error.status == 500) {
+        toast.error("something went wrong. try agian shortly");
+      }
+    });
+}
 </script>
 
 <style scoped>

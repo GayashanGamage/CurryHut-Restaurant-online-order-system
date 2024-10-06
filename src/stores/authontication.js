@@ -156,7 +156,6 @@ export const useAuthonticationStore = defineStore("authontication", () => {
 
     // 1. check loged email and cookies and authontication status
     // 2. if one or three not available then redirect to loging page with removing all available values
-    // 3. else return true : this mean all authontication variables are available
 
     if (
       email.value === null ||
@@ -168,8 +167,6 @@ export const useAuthonticationStore = defineStore("authontication", () => {
       authontication.value = null;
       deleteCookie();
       router.push({ name: "login" });
-    } else {
-      return true;
     }
   }
 
@@ -179,12 +176,20 @@ export const useAuthonticationStore = defineStore("authontication", () => {
     // 2. select authontication token using key 'user'
     // 3. asign authontication value
     // 4. get authontication token to pinia store
+    // 5. if token is not available then, 'authontication' and 'authcookie' set to null
     let allCookei = document.cookie.split("; ");
+    let cookieAvailable = ref(false);
     for (let i = 0; i < allCookei.length; i++) {
       if (allCookei[i].startsWith("user")) {
+        cookieAvailable.value = true;
         authontication.value = true;
         authcookie.value = allCookei[i].slice(5);
+        break;
       }
+    }
+    if (cookieAvailable.value == false) {
+      authontication.value = null;
+      authcookie.value = null;
     }
   }
 
@@ -201,6 +206,14 @@ export const useAuthonticationStore = defineStore("authontication", () => {
         break;
       }
     }
+  }
+
+  function cleanCredencials() {
+    // function : remove all authontication redated data from browser and pinia store
+    deleteCookie();
+    localStorage.removeItem("email");
+    email.value = null;
+    authontication.value = null;
   }
 
   return {
@@ -237,5 +250,6 @@ export const useAuthonticationStore = defineStore("authontication", () => {
     authcookie,
     deleteCookie,
     checkAuthontication,
+    cleanCredencials,
   };
 });

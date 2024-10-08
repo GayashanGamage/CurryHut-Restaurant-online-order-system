@@ -22,10 +22,13 @@ app = FastAPI()
 
 # CORS midleware
 origins = [
-    "http://localhost",
-    "https://localhost",
-    "http://localhost",
-    "http://localhost:5173",
+    # "http://localhost",
+    # "https://localhost",
+    # "http://localhost",
+    # "http://localhost:5173",
+    "https://admin-curryhut.gamage.me",
+    "curryhut-admin.netlify.app",
+    "https://curryhut-admin.netlify.app",
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -229,15 +232,15 @@ async def changeMealTime(mealTime : str, h : int, m : int, data = Depends(authVe
         if(mealTime == 'breakfast'):
             comparison = datetime(year=1970, month=1, day=1, hour=4, minute=00).time() < datetime(year=1970, month=1, day=1, hour=h, minute=m).time() < timeData['lunch'].time()
             if comparison == False:
-                return JSONResponse(status_code=400, content=f'enter time between 4:00 am and {timeData["lunch"].time()}')
+                return JSONResponse(status_code=400, content=f'enter time between 4:00 am and {timeData["lunch"].time()} -1 ')
         elif(mealTime == 'lunch'):
             comparison = timeData['breakfast'].time() < datetime(year=1970, month=1, day=1, hour=h, minute=m).time() < timeData['dinner'].time()
             if comparison == False:
-                return JSONResponse(status_code=400, content=f'enter time between {timeData["breakfast"].time()}am and {timeData["dinner"].time()}pm')
+                return JSONResponse(status_code=400, content=f'enter time between {timeData["breakfast"].time()}am and {timeData["dinner"].time()}pm -2')
         elif(mealTime == 'dinner'):  
-            comparison = timeData['lunch'].time() < datetime(year=1970, month=1, day=1, hour=h, minute=m).time() < datetime(year=1970, month=1, day=1, hour=0, minute=00).time()
+            comparison = timeData['lunch'].time() < datetime(year=1970, month=1, day=1, hour=h, minute=m).time() < datetime(year=1970, month=1, day=1, hour=23, minute=59).time()
             if comparison == False:
-                return JSONResponse(status_code=400, content=f'enter time between {timeData["lunch"].time()}pm and 00:00')
+                return JSONResponse(status_code=400, content=f'enter time between {timeData["lunch"].time()}pm and 00:00 -3')
         
         # update meal time
         shopUpdate = shop.update_one({}, {'$set' : {mealTime : datetime(year=1970, month=1, day=1, hour=h, minute=m)}})
@@ -299,7 +302,6 @@ async def operationHold(data = Depends(authVerification)):
         elif shopStatus['shutdown'] == False:
             shop.update_one({}, {'$set' : {'shutdown' : True}})
             return JSONResponse(status_code=200, content='successfuly close')
-
         # else show error that shop is close
     else:
         return JSONResponse(status_code=400, content="you cannot change status of the shop while it's close time ")
@@ -313,4 +315,13 @@ async def shopDetials(data = Depends(authVerification)):
     # get data from database and return
     shopData = shop.find_one({},{'_id' : 0})
     a = jsonable_encoder(shopData)
-    return JSONResponse(status_code=200, content=a)
+    data = {
+        'open_time' : datetime.fromisoformat(a['open_time']).time(),
+        'close_time' : datetime.fromisoformat(a['close_time']).time(),
+        'breakfast' : datetime.fromisoformat(a['breakfast']).time(),
+        'lunch' : datetime.fromisoformat(a['lunch']).time(),
+        'dinner' : datetime.fromisoformat(a['dinner']).time(),
+        'shutdown' : a['shutdown']
+    }
+    b = jsonable_encoder(data)
+    return JSONResponse(status_code=200, content=b)

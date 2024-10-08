@@ -44,14 +44,22 @@
       <p class="menu-text" id="select-text-six">Site setting</p>
     </div>
     <p class="logout" @click="uistore.openLogoutPopup">Sign out</p>
+    <div
+      class="message-container"
+      v-if="shopstore.shutdown || shopstore.shop_status"
+    >
+      <p class="message-text">Shop is currently closed</p>
+    </div>
   </div>
 </template>
 
 <script setup>
 import router from "@/router";
+import { useShopStore } from "@/stores/shop";
 import { useUiStore } from "@/stores/ui";
 
 const uistore = useUiStore();
+const shopstore = useShopStore();
 
 const changePage = (divElementID, textElementID, url) => {
   // select all list from menu
@@ -106,7 +114,7 @@ const changePage = (divElementID, textElementID, url) => {
 .menu-text {
   color: #fff;
   font-family: "Space Grotesk";
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 300;
   line-height: normal;
   text-transform: capitalize;
@@ -125,5 +133,23 @@ const changePage = (divElementID, textElementID, url) => {
 .menu-item:hover {
   background-color: rgba(245, 239, 255, 0.2);
   cursor: pointer;
+}
+.message-container {
+  background-color: #000;
+  height: 40px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 0px 0px 8px 8px;
+  display: flex;
+  align-items: center;
+}
+.message-text {
+  color: #fff;
+  font-family: "Space Grotesk";
+  font-size: 16px;
+  font-weight: 700;
+  margin-left: 78px;
 }
 </style>

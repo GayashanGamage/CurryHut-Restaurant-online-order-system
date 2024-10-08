@@ -23,25 +23,72 @@
         <div class="s-level-four-container shop">
           <p class="cell" id="shop1">Regular opening time :</p>
           <p class="cell" id="shop2">{{ shop.open_time }}</p>
-          <button class="action-button cell" id="shop3">Edit</button>
+          <button
+            class="action-button cell"
+            id="shop3"
+            @click="uistore.openTimeChangeWindow('open_time')"
+          >
+            Edit
+          </button>
           <p class="cell" id="shop4">Regular closing time :</p>
           <p class="cell" id="shop5">{{ shop.close_time }}</p>
-          <button class="action-button cell" id="shop6">Edit</button>
-          <p class="cell" id="shop7">Operation hold :</p>
-          <button class="action-button cell" id="shop8">Pause</button>
+          <button
+            class="action-button cell"
+            id="shop6"
+            @click="uistore.openTimeChangeWindow('close_time')"
+          >
+            Edit
+          </button>
+          <p class="cell" id="shop7">Operation status :</p>
+          <!-- <button class="action-button cell" id="shop8">Pause</button> -->
+          <div class="cell" id="shop8">
+            <!-- <label class="switch">
+              <input type="checkbox" />
+              <span class="slider"></span> -->
+            <p class="shutdown-text">Open</p>
+            <label class="switch"
+              ><input
+                type="checkbox"
+                @click="shutdownAction(a)"
+                id="checkbox"
+                checked="true"
+              />
+              <div></div>
+            </label>
+            <p class="shutdown-text">Close</p>
+            <!-- </label> -->
+          </div>
         </div>
         <h4 class="sub-title">Meal time</h4>
         <hr class="ruller" />
         <div class="s-level-four-container meal">
-          <p class="cell" id="meal1">Brek first time</p>
+          <p class="cell" id="meal1">Breakfarst time</p>
           <p class="cell" id="meal2">{{ shop.breakfast }}</p>
-          <button class="cell action-button" id="meal3">Edit</button>
+          <button
+            class="cell action-button"
+            id="meal3"
+            @click="uistore.openTimeChangeWindow('breakfast')"
+          >
+            Edit
+          </button>
           <p class="cell" id="meal4">Lunch time</p>
           <p class="cell" id="meal5">{{ shop.lunch }}</p>
-          <button class="cell action-button" id="meal6">Edit</button>
+          <button
+            class="cell action-button"
+            id="meal6"
+            @click="uistore.openTimeChangeWindow('lunch')"
+          >
+            Edit
+          </button>
           <p class="cell" id="meal7">Dinner</p>
           <p class="cell" id="meal8">{{ shop.dinner }}</p>
-          <button class="cell action-button" id="meal9">Edit</button>
+          <button
+            class="cell action-button"
+            id="meal9"
+            @click="uistore.openTimeChangeWindow('dinner')"
+          >
+            Edit
+          </button>
         </div>
       </div>
     </div>
@@ -88,6 +135,13 @@ onBeforeMount(() => {
         shop.breakfast = successfull.data.breakfast;
         shop.lunch = successfull.data.lunch;
         shop.dinner = successfull.data.dinner;
+
+        // shutdown toggle button
+        if (shop.shutdown == false) {
+          document.getElementById("checkbox").checked = false;
+        } else {
+          document.getElementById("checkbox").checked = true;
+        }
       }
     })
     .catch((error) => {
@@ -124,6 +178,35 @@ function openPasswordResetWindow() {
       }
     });
 }
+
+const shutdownAction = () => {
+  // function : sudden shutdown and open action for shop
+  // 1. get checkbox status
+  // 2. send API request
+  // 3. if successfull then show successfull message
+  // 4. else get acction accordingly
+
+  let checkboxAction = document.getElementById("checkbox");
+  axios
+    .patch(`${import.meta.env.VITE_url}/operationhold`, null, {
+      headers: {
+        Authorization: `Bearer ${authontication.authcookie}`,
+      },
+    })
+    .then((response) => {
+      shop.shutdown = !shop.shutdown;
+      toast.success(response.data);
+    })
+    .catch((error) => {
+      if (error.status == 401) {
+        authontication.checkAuthontication();
+      } else if (error.status == 400) {
+        toast.error(error.response.data);
+        checkboxAction.checked = false;
+      }
+    });
+};
+// console.log(new Date(2000, 10, 10, 2, 30));
 </script>
 
 <style scoped>
@@ -240,5 +323,49 @@ function openPasswordResetWindow() {
   padding-bottom: 80px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+}
+.switch input {
+  position: absolute;
+  opacity: 0;
+  /* display: none; */
+}
+
+/**
+* 1. Adjust this to size
+ */
+
+.switch {
+  display: inline-block;
+  font-size: 20px; /* 1 */
+  height: 20px;
+  width: 40px;
+  background: #bdb9a6;
+  border-radius: 1em;
+  margin: 0px 20px;
+}
+
+.switch div {
+  height: 1em;
+  width: 1em;
+  border-radius: 1em;
+  background: #fff;
+  box-shadow: 0 0.1em 0.3em rgba(0, 0, 0, 0.3);
+  /* -webkit-transition: all 300ms; */
+  /* -moz-transition: all 300ms; */
+  /* transition: all 300ms; */
+}
+
+.switch input:checked + div {
+  /* -webkit-transform: translate3d(100%, 0, 0); */
+  /* -moz-transform: translate3d(100%, 0, 0); */
+  transform: translate3d(100%, 0, 0);
+}
+#shop8 {
+  display: flex;
+  align-items: center;
+}
+.shutdown-text {
+  color: #41b06e;
+  font-family: "Space Grotesk";
 }
 </style>

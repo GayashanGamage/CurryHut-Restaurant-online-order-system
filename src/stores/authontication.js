@@ -148,7 +148,7 @@ export const useAuthonticationStore = defineStore("authontication", () => {
   }
 
   function checkAuthontication() {
-    // functionality : this is mainly for check all authontication details (email, token)
+    // functionality : this is mainly for check all authontication details (email, token) and directed to login page
 
     // this is for update pinia store from local store and cookie storage
     email.value = localStorage.getItem("email");

@@ -50,3 +50,50 @@ const uistore = useUiStore();
   grid-area: menu;
 }
 </style>
+
+<style>
+.page-title {
+  color: #41b06e;
+  font-family: "Space Grotesk";
+  font-size: 32px;
+  font-weight: 700;
+  padding: 53px 0px 0px 19px;
+}
+.s-level-one-container {
+  background: rgba(207, 244, 206, 0.5);
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  padding-bottom: 12px;
+}
+.s-level-two-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: auto;
+}
+.s-level-three-container {
+  width: 98%;
+  height: auto;
+  border-radius: 6px;
+  background: #fff;
+  margin-top: 26px;
+}
+.action-button {
+  font-size: 18px;
+  border-radius: 4px;
+  border: 1.5px solid #41b06e;
+  background: #fff;
+  color: #41b06e;
+  font-family: "Space Grotesk";
+  font-size: 18px;
+  font-weight: 400;
+  padding: 4px 18px;
+  width: fit-content;
+  height: 34px;
+}
+.action-button:hover {
+  background: #41b06e;
+  color: #fff;
+}
+</style>

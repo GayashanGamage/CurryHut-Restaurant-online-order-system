@@ -6,7 +6,7 @@ import PasswordReset from "@/views/Authontication/PasswordReset.vue";
 import Verification from "@/views/Authontication/Verification.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import Setting from "@/views/Subpages/Setting.vue";
-import Catagory from "@/views/Subpages/Catagory.vue";
+import Category from "@/views/Subpages/Category.vue";
 
 // const authontication = useAuthonticationStore();
 
@@ -46,8 +46,8 @@ const router = createRouter({
         },
         {
           path: "catagory",
-          component: Catagory,
-          name: "catagory",
+          component: Category,
+          name: "category",
         },
       ],
     },

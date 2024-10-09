@@ -25,9 +25,9 @@
     <div
       class="menu-item"
       id="menu-four"
-      @click="changePage('menu-four', 'select-text-four', 'catagory')"
+      @click="changePage('menu-four', 'select-text-four', 'category')"
     >
-      <p class="menu-text" id="select-text-four">Catogery</p>
+      <p class="menu-text" id="select-text-four">Category</p>
     </div>
     <div
       class="menu-item"

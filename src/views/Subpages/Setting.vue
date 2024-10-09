@@ -210,34 +210,6 @@ const shutdownAction = () => {
 </script>
 
 <style scoped>
-.s-level-one-container {
-  background: rgba(207, 244, 206, 0.5);
-  width: 100%;
-  height: auto;
-  border-radius: 6px;
-}
-
-.page-title {
-  color: #41b06e;
-  font-family: "Space Grotesk";
-  font-size: 32px;
-  font-weight: 700;
-  padding: 53px 0px 0px 19px;
-}
-.s-level-two-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: auto;
-}
-.s-level-three-container {
-  width: 98%;
-  height: auto;
-  border-radius: 6px;
-  background: #fff;
-  margin-top: 26px;
-  margin-bottom: 15px;
-}
 .sub-title {
   color: #000;
   font-family: "Space Grotesk";
@@ -279,29 +251,12 @@ const shutdownAction = () => {
   grid-area: actionButton;
 }
 .cell {
-  color: #000;
   font-family: "Space Grotesk";
   font-size: 18px;
   font-style: normal;
   font-weight: 300;
   line-height: normal;
   margin: 10px 0px;
-}
-.action-button {
-  font-size: 18px;
-  border-radius: 4px;
-  border: 1.5px solid #41b06e;
-  background: #fff;
-  color: #41b06e;
-  font-family: "Space Grotesk";
-  font-size: 18px;
-  font-weight: 400;
-  padding: 4px 18px;
-  width: fit-content;
-}
-.action-button:hover {
-  background: #41b06e;
-  color: #fff;
 }
 .shop {
   width: 1045px;

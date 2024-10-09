@@ -52,13 +52,13 @@ api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(co
 # dependent functions
 # create JWT joken
 def encodeToken(email, password, role):
-    token = jwt.encode({'email' : email, 'password' : password, 'role' : role}, os.getenv('token'), algorithm='HS256')
+    token = jwt.encode({'email' : email, 'password' : password, 'role' : role}, os.getenv('jwt_token'), algorithm='HS256')
     return token
 
 # decode JWT token
 def decodeToken(token):
     try:
-        data = jwt.decode(token, os.getenv('token'), algorithms=['HS256'])
+        data = jwt.decode(token, os.getenv('jwt_token'), algorithms=['HS256'])
         return data
     except JWTError:
         return False
@@ -142,7 +142,7 @@ async def login(usercredencial : userCredencials):
         if decoded:
             # create and return JWT token
             token = encodeToken(usercredencial.email, usercredencial.password, usercredencial.role)
-            return JSONResponse(status_code=200, content={'token' : token})
+            return JSONResponse(status_code=200, content={'jwt_token' : token})
         # password invalied error
         else:
             return JSONResponse(status_code=406, content='password incorect')
@@ -162,7 +162,7 @@ async def createSereateCode(email : str):
         # store secreate code in database
         store_code = user.update_one({'email' : email}, {'$set' : {'secreate_code' : code, 'send_time' : datetime.now(), 'password_change' : True}})
         # check whethere code is store or not
-        if(store_code.modified_count <= 1):
+        if(store_code.modified_count == 1):
             # send email
             subject = "Send seacreate code"
             sender = {"name":"secrete code","email":"gayashan.randimagamage@gmail.com"}

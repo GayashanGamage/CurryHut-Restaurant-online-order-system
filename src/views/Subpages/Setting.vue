@@ -112,45 +112,45 @@ const authontication = useAuthonticationStore();
 const shop = useShopStore();
 const uistore = useUiStore();
 
-onBeforeMount(() => {
-  // function : load all athontication details to pinia store and get requried data from API
-  // 1.remove password from login form
-  // 2.get JWT token and send request '/shopdetails'
-  // 3.if successfull - store data in pinia store
-  // 4.if token invalied - send to login page
-  authontication.checkAuthontication();
-  authontication.passsword = undefined;
-  axios
-    .get(`${import.meta.env.VITE_url}/shopdetails`, {
-      headers: {
-        Authorization: "Bearer " + authontication.authcookie,
-      },
-    })
-    .then((successfull) => {
-      console.log(successfull.data);
-      if (successfull.status === 200) {
-        shop.open_time = successfull.data.open_time;
-        shop.close_time = successfull.data.close_time;
-        shop.shutdown = successfull.data.shutdown;
-        shop.breakfast = successfull.data.breakfast;
-        shop.lunch = successfull.data.lunch;
-        shop.dinner = successfull.data.dinner;
+// onBeforeMount(() => {
+//   // function : load all athontication details to pinia store and get requried data from API
+//   // 1.remove password from login form
+//   // 2.get JWT token and send request '/shopdetails'
+//   // 3.if successfull - store data in pinia store
+//   // 4.if token invalied - send to login page
+//   authontication.checkAuthontication();
+//   authontication.passsword = undefined;
+//   axios
+//     .get(`${import.meta.env.VITE_url}/shopdetails`, {
+//       headers: {
+//         Authorization: "Bearer " + authontication.authcookie,
+//       },
+//     })
+//     .then((response) => {
+//       console.log(response.data);
+//       if (response.status === 200) {
+//         shop.open_time = response.data.open_time;
+//         shop.close_time = response.data.close_time;
+//         shop.shutdown = response.data.shutdown;
+//         shop.breakfast = response.data.breakfast;
+//         shop.lunch = response.data.lunch;
+//         shop.dinner = response.data.dinner;
 
-        // shutdown toggle button
-        if (shop.shutdown == false) {
-          document.getElementById("checkbox").checked = false;
-        } else {
-          document.getElementById("checkbox").checked = true;
-        }
-      }
-    })
-    .catch((error) => {
-      if (error.status == 401) {
-        authontication.cleanCredencials;
-        router.replace({ name: "login" });
-      }
-    });
-});
+//         // shutdown toggle button
+//         if (shop.shutdown == false) {
+//           document.getElementById("checkbox").checked = false;
+//         } else {
+//           document.getElementById("checkbox").checked = true;
+//         }
+//       }
+//     })
+//     .catch((error) => {
+//       if (error.status == 401) {
+//         authontication.cleanCredencials;
+//         router.replace({ name: "login" });
+//       }
+//     });
+// });
 
 function openPasswordResetWindow() {
   // function : send email with 'secreate_code' to admin and open passwordChangeWindow
@@ -166,8 +166,8 @@ function openPasswordResetWindow() {
         email: authontication.email,
       },
     })
-    .then((successfull) => {
-      if (successfull.status == 200) {
+    .then((response) => {
+      if (response.status == 200) {
         uistore.CodeVerify = true;
         uistore.PasswordChangeWindow = true;
       }
@@ -206,7 +206,6 @@ const shutdownAction = () => {
       }
     });
 };
-// console.log(new Date(2000, 10, 10, 2, 30));
 </script>
 
 <style scoped>

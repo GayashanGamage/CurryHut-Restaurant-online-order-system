@@ -22,13 +22,13 @@ app = FastAPI()
 
 # CORS midleware
 origins = [
+    "http://localhost:5173",
+    "http://localhost",
+    "https://localhost",
+    "http://localhost",
     "https://admin-curryhut.gamage.me",
     "curryhut-admin.netlify.app",
     "https://curryhut-admin.netlify.app",
-    # "http://localhost:5173",
-    # "http://localhost",
-    # "https://localhost",
-    # "http://localhost",
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -46,7 +46,7 @@ shop = db['Shop']
 
 # brevo mail server
 configuration = sib_api_v3_sdk.Configuration()
-configuration.api_key['api-key'] = 3554
+configuration.api_key['api-key'] = os.getenv('brevo')
 api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
 
 # dependent functions

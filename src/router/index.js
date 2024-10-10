@@ -35,6 +35,11 @@ const router = createRouter({
     {
       path: "/passwordreset",
       component: PasswordReset,
+      beforeEnter: (to, from) => {
+        if (from.name == "verification") {
+          useAuthonticationStore().fromVerificationtoPasswordresetDataCleaning();
+        }
+      },
       name: "passwordreset",
     },
     {

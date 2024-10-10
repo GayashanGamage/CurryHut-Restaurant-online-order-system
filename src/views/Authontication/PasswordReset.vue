@@ -31,6 +31,7 @@
 import router from "@/router";
 import { useAuthonticationStore } from "@/stores/authontication";
 import { onBeforeUnmount } from "vue";
+import { onBeforeRouteLeave } from "vue-router";
 
 const authontication = useAuthonticationStore();
 
@@ -38,8 +39,10 @@ const directto = (routerName) => {
   router.push(routerName);
 };
 
-onBeforeUnmount(() => {
-  authontication.removePasswords();
+onBeforeRouteLeave((to, from) => {
+  if ((to.name = "login")) {
+    authontication.fromPasswordresettoLoginDataCleaning();
+  }
 });
 </script>
 

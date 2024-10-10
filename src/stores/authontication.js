@@ -17,8 +17,8 @@ export const useAuthonticationStore = defineStore("authontication", () => {
   const secrete_code = ref(undefined);
 
   // this is for change password
-  const change_password1 = ref();
-  const change_password2 = ref();
+  const change_password1 = ref(null);
+  const change_password2 = ref(null);
 
   // page direct validation
   const email_page = ref(false);
@@ -129,14 +129,6 @@ export const useAuthonticationStore = defineStore("authontication", () => {
     // reset selected variables
     email.value = null;
   }
-  function removeSecretecode() {
-    // reset selected variables
-    secrete_code.value = undefined;
-  }
-
-  function removePassword() {
-    passsword.value = null;
-  }
 
   function checkAuthontication() {
     // functionality : this is mainly for check all authontication details (email, token) and directed to login page
@@ -221,6 +213,15 @@ export const useAuthonticationStore = defineStore("authontication", () => {
     passsword.value = undefined;
   }
 
+  function fromVerificationtoPasswordresetDataCleaning() {
+    secrete_code.value = undefined;
+  }
+
+  function fromPasswordresettoLoginDataCleaning() {
+    change_password1.value = null;
+    change_password2.value = null;
+  }
+
   return {
     // all variables
     email,
@@ -246,8 +247,6 @@ export const useAuthonticationStore = defineStore("authontication", () => {
 
     // reset variables due to page chnages
     removeEmail,
-    removeSecretecode,
-    removePassword,
 
     // cookies
     checkCookie,
@@ -260,5 +259,7 @@ export const useAuthonticationStore = defineStore("authontication", () => {
     fromEmailtoLoginDataClearing,
     fromLogintoEmailDataClearing,
     fromLogintoHomeDataClearing,
+    fromVerificationtoPasswordresetDataCleaning,
+    fromPasswordresettoLoginDataCleaning,
   };
 });

@@ -32,10 +32,6 @@ const authontication = useAuthonticationStore();
 const Passwor_reset = () => {
   router.push("passwordreset");
 };
-
-onBeforeUnmount(() => {
-  authontication.removeSecretecode();
-});
 </script>
 
 <style scoped>

@@ -8,8 +8,6 @@ import { createRouter, createWebHistory } from "vue-router";
 import Setting from "@/views/Subpages/Setting.vue";
 import Category from "@/views/Subpages/Category.vue";
 
-// const authontication = useAuthonticationStore();
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -22,6 +20,12 @@ const router = createRouter({
       path: "/email",
       component: Email,
       name: "email",
+      beforeEnter: (to, from) => {
+        if (from.name == "login") {
+          console.log("this is from login page");
+          useAuthonticationStore().fromLogintoEmailDataClearing();
+        }
+      },
     },
     {
       path: "/verification",
@@ -37,6 +41,11 @@ const router = createRouter({
       path: "/",
       component: Home,
       name: "home",
+      beforeEnter: (to, from) => {
+        if (from.name == "login") {
+          useAuthonticationStore().fromLogintoHomeDataClearing();
+        }
+      },
       redirect: "setting",
       children: [
         {

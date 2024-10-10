@@ -25,6 +25,7 @@
 import router from "@/router";
 import { useAuthonticationStore } from "@/stores/authontication";
 import { onBeforeUnmount } from "vue";
+import { onBeforeRouteLeave } from "vue-router";
 
 const authontication = useAuthonticationStore();
 
@@ -34,6 +35,13 @@ const sendCode = () => {
 
 onBeforeUnmount(() => {
   authontication.removeEmail();
+});
+
+// this is execute borefor router leave
+onBeforeRouteLeave((to, from) => {
+  if (to.name == "login") {
+    authontication.fromEmailtoLoginDataClearing();
+  }
 });
 </script>
 

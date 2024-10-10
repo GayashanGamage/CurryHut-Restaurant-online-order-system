@@ -125,26 +125,17 @@ export const useAuthonticationStore = defineStore("authontication", () => {
     }
   }
 
-  function removeLoginDetails() {
-    // reset selected variables
-    email.value = undefined;
-    passsword.value = undefined;
-  }
-
   function removeEmail() {
     // reset selected variables
-    email.value = undefined;
+    email.value = null;
   }
   function removeSecretecode() {
     // reset selected variables
     secrete_code.value = undefined;
   }
 
-  function removePasswords() {
-    // reset selected variables
-    change_password1.value = undefined;
-    change_password2.value = undefined;
-    reset_email.value = undefined;
+  function removePassword() {
+    passsword.value = null;
   }
 
   function checkAuthontication() {
@@ -216,6 +207,20 @@ export const useAuthonticationStore = defineStore("authontication", () => {
     authontication.value = null;
   }
 
+  // variables data crearing from page changing - from_to_DataCleaign
+  function fromEmailtoLoginDataClearing() {
+    reset_email.value = undefined;
+  }
+
+  function fromLogintoEmailDataClearing() {
+    email.value = null;
+    passsword.value = null;
+  }
+
+  function fromLogintoHomeDataClearing() {
+    passsword.value = undefined;
+  }
+
   return {
     // all variables
     email,
@@ -240,10 +245,9 @@ export const useAuthonticationStore = defineStore("authontication", () => {
     chnagePassword,
 
     // reset variables due to page chnages
-    removeLoginDetails,
     removeEmail,
     removeSecretecode,
-    removePasswords,
+    removePassword,
 
     // cookies
     checkCookie,
@@ -251,5 +255,10 @@ export const useAuthonticationStore = defineStore("authontication", () => {
     deleteCookie,
     checkAuthontication,
     cleanCredencials,
+
+    // variables data crearing from page changing
+    fromEmailtoLoginDataClearing,
+    fromLogintoEmailDataClearing,
+    fromLogintoHomeDataClearing,
   };
 });

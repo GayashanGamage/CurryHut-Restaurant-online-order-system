@@ -43,10 +43,6 @@ onBeforeMount(() => {
     router.push({ name: "setting" });
   }
 });
-
-onBeforeUnmount(() => {
-  authontication.removeLoginDetails();
-});
 </script>
 
 <style scoped>

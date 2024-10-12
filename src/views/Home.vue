@@ -13,6 +13,7 @@
     <Timechange v-if="uistore.TimeChangeWindow"></Timechange>
     <Newcategory v-if="uistore.NewCategoryWindow"></Newcategory>
     <Deletecategory v-if="uistore.DeleteCategoryWindow"></Deletecategory>
+    <Editcategory v-if="uistore.EditCategoryWindow"></Editcategory>
   </div>
 </template>
 
@@ -24,6 +25,7 @@ import Passwordchange from "@/components/Passwordchange.vue";
 import Timechange from "@/components/Timechange.vue";
 import Newcategory from "@/components/Newcategory.vue";
 import Deletecategory from "@/components/Deletecategory.vue";
+import Editcategory from "@/components/Editcategory.vue";
 
 const uistore = useUiStore();
 </script>

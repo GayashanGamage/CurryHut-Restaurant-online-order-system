@@ -22,7 +22,12 @@
               <td class="table-row-data">Fried Rice</td>
               <td class="table-row-data">07</td>
               <td class="table-row-data table-row-data-button">
-                <button class="action-button table-button">Edit</button>
+                <button
+                  class="action-button table-button"
+                  @click="uistore.openEditCategoryWindow"
+                >
+                  Edit
+                </button>
               </td>
               <td class="table-row-data table-row-data-button">
                 <button

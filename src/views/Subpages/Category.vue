@@ -25,7 +25,10 @@
                 <button class="action-button table-button">Edit</button>
               </td>
               <td class="table-row-data table-row-data-button">
-                <button class="action-button table-button delete-button">
+                <button
+                  class="action-button table-button delete-button"
+                  @click="uistore.openDeleteCategoryWindow"
+                >
                   Delete
                 </button>
               </td>

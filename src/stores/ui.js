@@ -19,6 +19,7 @@ export const useUiStore = defineStore("ui", () => {
 
   // category page
   const NewCategoryWindow = ref(false);
+  const DeleteCategoryWindow = ref(false);
 
   function openLogoutPopup() {
     logoutPopupWindow.value = true;
@@ -82,6 +83,16 @@ export const useUiStore = defineStore("ui", () => {
     NewCategoryWindow.value = false;
   }
 
+  function openDeleteCategoryWindow() {
+    // console.log("new category window open");
+    DeleteCategoryWindow.value = true;
+  }
+
+  function closeDeleteCategoryWindow() {
+    // console.log("new category window close");
+    DeleteCategoryWindow.value = false;
+  }
+
   return {
     // component visibility
     logoutPopupWindow,
@@ -95,6 +106,7 @@ export const useUiStore = defineStore("ui", () => {
 
     // category page
     NewCategoryWindow,
+    DeleteCategoryWindow,
 
     // funciton
     openLogoutPopup,
@@ -104,5 +116,7 @@ export const useUiStore = defineStore("ui", () => {
     closeTimeChangeWindow,
     openNewCategoryWindow,
     closeNewCategoryWindow,
+    openDeleteCategoryWindow,
+    closeDeleteCategoryWindow,
   };
 });

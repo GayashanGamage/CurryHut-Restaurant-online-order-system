@@ -3,8 +3,8 @@ import { defineStore } from "pinia";
 
 export const useShopStore = defineStore("shop", () => {
   // current time
-  const time_now = ref(new Date());
-  const shop_status = ref(false); // true : close, false : open
+  // const time_now = ref(new Date());
+  // const shop_status = ref(false); // true : close, false : open
 
   const open_time = ref(null);
   const close_time = ref(null);

@@ -25,9 +25,8 @@ const uistore = useUiStore();
 const authontication = useAuthonticationStore();
 
 const logout = () => {
-  authontication.cleanCredencials();
   uistore.logoutPopupWindow = false;
-  router.push({ name: "login" });
+  authontication.logoutAction();
 };
 
 onBeforeUnmount(() => {

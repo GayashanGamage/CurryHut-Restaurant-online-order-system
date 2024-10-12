@@ -22,7 +22,6 @@ const router = createRouter({
       name: "email",
       beforeEnter: (to, from) => {
         if (from.name == "login") {
-          console.log("this is from login page");
           useAuthonticationStore().fromLogintoEmailDataClearing();
         }
       },

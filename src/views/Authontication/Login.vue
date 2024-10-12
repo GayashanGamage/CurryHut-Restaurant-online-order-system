@@ -18,8 +18,8 @@
             placeholder="Password"
             v-model="authontication.passsword"
           />
-          <p id="password-text" @click="directTo('email')">Forget Password ?</p>
-          <button id="login-button" @click="authontication.login">LOGIN</button>
+          <p id="password-text" @click="goToEmailPage()">Forget Password ?</p>
+          <button id="login-button" @click="login">LOGIN</button>
         </div>
       </div>
     </div>
@@ -29,18 +29,45 @@
 <script setup>
 import router from "@/router";
 import { useAuthonticationStore } from "@/stores/authontication";
-import { onBeforeMount, onBeforeUnmount } from "vue";
-
+import axios from "axios";
+import { onBeforeMount } from "vue";
+import { useToast } from "vue-toast-notification";
 const authontication = useAuthonticationStore();
 
-const directTo = (destination) => {
-  router.push({ name: destination });
+const tost = useToast();
+
+function login() {
+  axios
+    .post(`${import.meta.env.VITE_url}/login`, {
+      email: authontication.email,
+      password: authontication.passsword,
+      role: "admin",
+    })
+    .then((response) => {
+      if (response.status == 200) {
+        authontication.value = true;
+        localStorage.setItem("email", authontication.email);
+        document.cookie = `user=${response.data.jwt_token}; expires=Thu, 18 Dec 2024 12:00:00 UTC`;
+        router.push({ name: "home" });
+      }
+    })
+    .catch((error) => {
+      if (error.status == 406) {
+        tost.error("incorect password.");
+      } else if (error.status == 404) {
+        tost.error("incorect E-mail. please enter correct email");
+      }
+    });
+}
+
+const goToEmailPage = () => {
+  router.push({ name: "email" });
 };
 
 onBeforeMount(() => {
-  authontication.checkCookie();
+  authontication.restoreAuthonticationDataToPinia();
   if (authontication.authontication == true) {
-    router.push({ name: "setting" });
+    router.replace({ name: "home" });
   }
 });
 </script>

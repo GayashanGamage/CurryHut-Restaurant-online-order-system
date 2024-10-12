@@ -6,9 +6,6 @@ export const useUiStore = defineStore("ui", () => {
   // other pinia stors
   const shopStore = useShopStore();
 
-  // page refresh
-  const pageRefresh = ref(true);
-
   // Passwordchange component
   const logoutPopupWindow = ref(false);
   const PasswordChangeWindow = ref(false);
@@ -72,17 +69,8 @@ export const useUiStore = defineStore("ui", () => {
     TimeChangeWindow.value = false;
   }
 
-  function pageRefreshAction() {
-    console.log("this is excuted");
-    pageRefresh.value = false;
-    setTimeout(() => {
-      pageRefresh.value = true;
-    }, 100);
-  }
-
   return {
     // component visibility
-    pageRefresh,
     logoutPopupWindow,
     PasswordChangeWindow,
     CodeVerify,
@@ -98,7 +86,5 @@ export const useUiStore = defineStore("ui", () => {
     closeCodeVerifyPopup,
     openTimeChangeWindow,
     closeTimeChangeWindow,
-
-    pageRefreshAction,
   };
 });

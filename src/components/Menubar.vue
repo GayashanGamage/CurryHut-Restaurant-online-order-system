@@ -44,10 +44,7 @@
       <p class="menu-text" id="select-text-six">Site setting</p>
     </div>
     <p class="logout" @click="uistore.openLogoutPopup">Sign out</p>
-    <div
-      class="message-container"
-      v-if="shopstore.shutdown || shopstore.shop_status"
-    >
+    <div class="message-container" v-if="shopstore.shutdown">
       <p class="message-text">Shop is currently closed</p>
     </div>
   </div>

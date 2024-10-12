@@ -8,17 +8,14 @@
         <div class="watch hour" id="hour">
           <p class="time-intro">Hour</p>
           <div class="arrow-button up">
-            <span
-              class="material-symbols-outlined"
-              @click="shopStore.increaseHours"
-            >
+            <span class="material-symbols-outlined" @click="shop.increaseHours">
               keyboard_arrow_up
             </span>
           </div>
           <div class="counter">
-            {{ String(shopStore.hours).padStart(2, "0") }}
+            {{ String(shop.hours).padStart(2, "0") }}
           </div>
-          <div class="arrow-button down" @click="shopStore.decreaseHours">
+          <div class="arrow-button down" @click="shop.decreaseHours">
             <span class="material-symbols-outlined"> keyboard_arrow_down </span>
           </div>
         </div>
@@ -28,15 +25,15 @@
           <div class="arrow-button up">
             <span
               class="material-symbols-outlined"
-              @click="shopStore.increaseMinutes"
+              @click="shop.increaseMinutes"
             >
               keyboard_arrow_up
             </span>
           </div>
           <div class="counter">
-            {{ String(shopStore.minutes).padStart(2, "0") }}
+            {{ String(shop.minutes).padStart(2, "0") }}
           </div>
-          <div class="arrow-button down" @click="shopStore.decreaseMinutes">
+          <div class="arrow-button down" @click="shop.decreaseMinutes">
             <span class="material-symbols-outlined"> keyboard_arrow_down </span>
           </div>
         </div>
@@ -44,22 +41,22 @@
       <p class="expain-text" v-if="uiStore.mealtimeOrShoptime">
         your lunch time will start
         {{
-          shopStore.hours > 12
-            ? String(shopStore.hours - 12).padStart(2, "0")
-            : String(shopStore.hours).padStart(2, "0")
-        }}:{{ String(shopStore.minutes).padStart(2, "0") }}
-        {{ shopStore.hours >= 12 ? " p.m" : " a.m" }}
+          shop.hours > 12
+            ? String(shop.hours - 12).padStart(2, "0")
+            : String(shop.hours).padStart(2, "0")
+        }}:{{ String(shop.minutes).padStart(2, "0") }}
+        {{ shop.hours >= 12 ? " p.m" : " a.m" }}
         from today
       </p>
       <p class="expain-text" v-if="!uiStore.mealtimeOrShoptime">
         your shop
         {{ uiStore.timeDescription }} will be
         {{
-          shopStore.hours > 12
-            ? String(shopStore.hours - 12).padStart(2, "0")
-            : String(shopStore.hours).padStart(2, "0")
-        }}:{{ String(shopStore.minutes).padStart(2, "0") }}
-        {{ shopStore.hours >= 12 ? " p.m" : " a.m" }}
+          shop.hours > 12
+            ? String(shop.hours - 12).padStart(2, "0")
+            : String(shop.hours).padStart(2, "0")
+        }}:{{ String(shop.minutes).padStart(2, "0") }}
+        {{ shop.hours >= 12 ? " p.m" : " a.m" }}
         from today
       </p>
       <div class="button-container">
@@ -85,7 +82,7 @@ import { useToast } from "vue-toast-notification";
 const toast = useToast();
 
 // pinia stores
-const shopStore = useShopStore();
+const shop = useShopStore();
 const uiStore = useUiStore();
 const authontication = useAuthonticationStore();
 
@@ -110,14 +107,13 @@ const saveChangeTime = () => {
         },
         params: {
           mealTime: uiStore.timeDescription,
-          h: shopStore.hours,
-          m: shopStore.minutes,
+          h: shop.hours,
+          m: shop.minutes,
         },
       })
       .then((responce) => {
         if (responce.status == 200) {
           toast.success(`${uiStore.timeDescription} updated successfully`);
-          uiStore.pageRefreshAction();
           uiStore.closeTimeChangeWindow();
         }
       })
@@ -137,14 +133,13 @@ const saveChangeTime = () => {
         },
         params: {
           shopTime: uiStore.timeDescription,
-          h: shopStore.hours,
-          m: shopStore.minutes,
+          h: shop.hours,
+          m: shop.minutes,
         },
       })
       .then((responce) => {
         if (responce.status == 200) {
           toast.success(`${uiStore.timeDescription} update successfully`);
-          uiStore.pageRefreshAction();
           uiStore.closeTimeChangeWindow();
         }
       })

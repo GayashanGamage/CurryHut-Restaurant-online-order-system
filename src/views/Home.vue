@@ -1,11 +1,11 @@
 <template>
   <div class="level-one-container">
     <div class="level-two-container">
-      <div class="dummy menu">
+      <div class="menu">
         <Menubar></Menubar>
       </div>
-      <div class="dummy content">
-        <router-view v-if="uistore.pageRefresh"></router-view>
+      <div class="content">
+        <router-view></router-view>
       </div>
     </div>
     <Logout v-if="uistore.logoutPopupWindow"></Logout>

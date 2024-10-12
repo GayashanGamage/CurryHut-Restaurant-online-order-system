@@ -18,9 +18,7 @@
             placeholder="Re enter password"
             v-model="authontication.change_password2"
           />
-          <button id="login-button" @click="authontication.chnagePassword">
-            LOGIN
-          </button>
+          <button id="login-button" @click="chnagePassword">LOGIN</button>
         </div>
       </div>
     </div>
@@ -30,14 +28,36 @@
 <script setup>
 import router from "@/router";
 import { useAuthonticationStore } from "@/stores/authontication";
-import { onBeforeUnmount } from "vue";
+import axios from "axios";
 import { onBeforeRouteLeave } from "vue-router";
+import { useToast } from "vue-toast-notification";
 
+const tost = useToast();
 const authontication = useAuthonticationStore();
 
-const directto = (routerName) => {
-  router.push(routerName);
-};
+function chnagePassword() {
+  if (authontication.change_password1 !== authontication.change_password2) {
+    tost.error("passwords are not mached");
+  } else {
+    axios
+      .post(`${import.meta.env.VITE_url}/resetpassword`, {
+        email: authontication.reset_email,
+        password: authontication.change_password1,
+      })
+      .then((response) => {
+        if (response.status == 200) {
+          router.push({ name: "login" });
+        }
+      })
+      .catch((error) => {
+        if (error.status == 404) {
+          tost.error("something went wrong. try again !");
+        } else if (error.status == 400) {
+          tost.error("YOU ARE LOOKS BOT. WE NOT ALLOWED FOR YOU !");
+        }
+      });
+  }
+}
 
 onBeforeRouteLeave((to, from) => {
   if ((to.name = "login")) {

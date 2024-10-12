@@ -50,70 +50,9 @@ const toast = useToast();
 const uistore = useUiStore();
 const authontication = useAuthonticationStore();
 
-const verifyCode = () => {
-  // function : check verification code available and send request to API to verify
-  // 1. if 'secreate_code' is null send error
-  // 2. else send request to 'codeverification'
-  // 3. if it is successfull then clearn 'secreate_code' and open password-change window
-  // 4. else send error code
-  if (authontication.secrete_code != null) {
-    axios
-      .post(`${import.meta.env.VITE_url}/codeverification`, {
-        email: authontication.email,
-        code: authontication.secrete_code,
-      })
-      .then((successfull) => {
-        if (successfull.status == 200) {
-          //   set secreate_code as undefined
-          authontication.secrete_code = undefined;
-          uistore.CodeVerify = false;
-          uistore.PasswordRest = true;
-        }
-      })
-      .catch((error) => {
-        if (error.status == 404) {
-          toast.error("incorect secreate code");
-        }
-      });
-  } else {
-    toast.error("Enter Valied secreate code");
-  }
-};
+const verifyCode = () => {};
 
-const closePasswordResetWindow = () => {
-  // fucntion : close password change popup windows
-  uistore.PasswordRest = false;
-  uistore.PasswordChangeWindow = false;
-};
-
-const confirmPassword = () => {
-  // function : change password if authontication details are available and both password correct
-  // 1.check authontication
-  // 2.check borth password correct
-  // 3.if incorrect show error message
-  // 4. otherwise send API request
-  // 5. if success close window
-  // 6.otherwise show error
-  authontication.checkAuthontication();
-  if (authontication.change_password1 === authontication.change_password2) {
-    axios
-      .post(`${import.meta.env.VITE_url}/resetpassword`, {
-        email: authontication.email,
-        password: authontication.change_password1,
-      })
-      .then((successfull) => {
-        if (successfull.status == 200) {
-          toast.success("you update passsword successfully !");
-          setTimeout(closePasswordResetWindow, 1000);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  } else {
-    toast.error("Passwords are not matched");
-  }
-};
+const confirmPassword = () => {};
 </script>
 
 <style scoped>

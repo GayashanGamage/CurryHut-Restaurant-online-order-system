@@ -13,9 +13,7 @@
             placeholder="Code"
             v-model="authontication.secrete_code"
           />
-          <button id="login-button" @click="authontication.codeVerification">
-            VERIFY
-          </button>
+          <button id="login-button" @click="codeVerification">VERIFY</button>
         </div>
       </div>
     </div>
@@ -25,13 +23,29 @@
 <script setup>
 import router from "@/router";
 import { useAuthonticationStore } from "@/stores/authontication";
-import { onBeforeUnmount } from "vue";
+import axios from "axios";
+import { useToast } from "vue-toast-notification";
 
+const tost = useToast();
 const authontication = useAuthonticationStore();
 
-const Passwor_reset = () => {
-  router.push("passwordreset");
-};
+function codeVerification() {
+  axios
+    .post(`${import.meta.env.VITE_url}/codeverification`, {
+      email: authontication.reset_email,
+      code: parseInt(authontication.secrete_code),
+    })
+    .then((response) => {
+      authontication.secrete_code = undefined;
+      // verification_page.value = true;
+      router.push({ name: "passwordreset" });
+    })
+    .catch((error) => {
+      if (error.status == 404) {
+        tost.error("Validation code is incorect.");
+      }
+    });
+}
 </script>
 
 <style scoped>

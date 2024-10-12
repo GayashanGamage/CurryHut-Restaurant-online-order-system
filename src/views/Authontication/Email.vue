@@ -12,7 +12,7 @@
             placeholder="E mail"
             v-model="authontication.reset_email"
           />
-          <button id="login-button" @click="authontication.emailVerification">
+          <button id="login-button" @click="emailVerification">
             SEND CODE
           </button>
         </div>
@@ -24,18 +24,37 @@
 <script setup>
 import router from "@/router";
 import { useAuthonticationStore } from "@/stores/authontication";
+import axios from "axios";
 import { onBeforeUnmount } from "vue";
 import { onBeforeRouteLeave } from "vue-router";
 
 const authontication = useAuthonticationStore();
 
-const sendCode = () => {
-  router.push("verification");
-};
-
-onBeforeUnmount(() => {
-  authontication.removeEmail();
-});
+function emailVerification() {
+  axios
+    .get(`${import.meta.env.VITE_url}/secreatecode`, {
+      params: {
+        email: authontication.reset_email,
+      },
+    })
+    .then((response) => {
+      if (response.status == 200) {
+        // email_page.value = true;
+        router.push({ name: "verification" });
+      }
+    })
+    .catch((error) => {
+      if (error.status == 401) {
+        tost.error("email not found");
+      } else if (error.status == 500) {
+        tost.info(
+          "Verification code cannot send via email due to server error"
+        );
+      } else if (error.status == 404) {
+        tost.info("something went wrong");
+      }
+    });
+}
 
 // this is execute borefor router leave
 onBeforeRouteLeave((to, from) => {

@@ -112,45 +112,34 @@ const authontication = useAuthonticationStore();
 const shop = useShopStore();
 const uistore = useUiStore();
 
-// onBeforeMount(() => {
-//   // function : load all athontication details to pinia store and get requried data from API
-//   // 1.remove password from login form
-//   // 2.get JWT token and send request '/shopdetails'
-//   // 3.if successfull - store data in pinia store
-//   // 4.if token invalied - send to login page
-//   authontication.checkAuthontication();
-//   authontication.passsword = undefined;
-//   axios
-//     .get(`${import.meta.env.VITE_url}/shopdetails`, {
-//       headers: {
-//         Authorization: "Bearer " + authontication.authcookie,
-//       },
-//     })
-//     .then((response) => {
-//       console.log(response.data);
-//       if (response.status === 200) {
-//         shop.open_time = response.data.open_time;
-//         shop.close_time = response.data.close_time;
-//         shop.shutdown = response.data.shutdown;
-//         shop.breakfast = response.data.breakfast;
-//         shop.lunch = response.data.lunch;
-//         shop.dinner = response.data.dinner;
-
-//         // shutdown toggle button
-//         if (shop.shutdown == false) {
-//           document.getElementById("checkbox").checked = false;
-//         } else {
-//           document.getElementById("checkbox").checked = true;
-//         }
-//       }
-//     })
-//     .catch((error) => {
-//       if (error.status == 401) {
-//         authontication.cleanCredencials;
-//         router.replace({ name: "login" });
-//       }
-//     });
-// });
+onBeforeMount(() => {
+  if (authontication.authontication == false) {
+    authontication.restoreAuthonticationDataToPinia();
+    authontication.redirectToLogin();
+  }
+  axios
+    .get(`${import.meta.env.VITE_url}/shopdetails`, {
+      headers: {
+        Authorization: "Bearer " + authontication.authcookie,
+      },
+    })
+    .then((response) => {
+      if (response.status == 200) {
+        let APIdata = response.data;
+        shop.open_time = APIdata.open_time;
+        shop.close_time = APIdata.close_time;
+        shop.shutdown = APIdata.shutdown;
+        shop.breakfast = APIdata.breakfast;
+        shop.lunch = APIdata.lunch;
+        shop.dinner = APIdata.dinner;
+      }
+    })
+    .catch((error) => {
+      if (error.response.status == 401) {
+        router.replace({ name: "login" });
+      }
+    });
+});
 
 function openPasswordResetWindow() {
   // function : send email with 'secreate_code' to admin and open passwordChangeWindow
@@ -281,13 +270,7 @@ const shutdownAction = () => {
 .switch input {
   position: absolute;
   opacity: 0;
-  /* display: none; */
 }
-
-/**
-* 1. Adjust this to size
- */
-
 .switch {
   display: inline-block;
   font-size: 20px; /* 1 */

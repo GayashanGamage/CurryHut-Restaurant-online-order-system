@@ -11,6 +11,7 @@
     <Logout v-if="uistore.logoutPopupWindow"></Logout>
     <Passwordchange v-if="uistore.PasswordChangeWindow"></Passwordchange>
     <Timechange v-if="uistore.TimeChangeWindow"></Timechange>
+    <Newcategory v-if="uistore.NewCategoryWindow"></Newcategory>
   </div>
 </template>
 
@@ -20,6 +21,7 @@ import Logout from "@/components/Logout.vue";
 import { useUiStore } from "@/stores/ui";
 import Passwordchange from "@/components/Passwordchange.vue";
 import Timechange from "@/components/Timechange.vue";
+import Newcategory from "@/components/Newcategory.vue";
 
 const uistore = useUiStore();
 </script>

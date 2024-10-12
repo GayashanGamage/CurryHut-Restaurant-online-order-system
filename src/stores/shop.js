@@ -76,10 +76,6 @@ export const useShopStore = defineStore("shop", () => {
     breakfast,
     lunch,
     dinner,
-
-    time_now,
-    shop_status,
-
     // Timechange component
     hours,
     minutes,

@@ -43,6 +43,7 @@ client = MongoClient(os.getenv('mongodb'))
 db = client['curryhut']
 user = db['User']
 shop = db['Shop']
+category = db['Category']
 
 # brevo mail server
 configuration = sib_api_v3_sdk.Configuration()
@@ -99,6 +100,13 @@ class Code(MailVerification):
 
 class Password(MailVerification):
     password : str
+
+class Category(BaseModel):
+    name : str
+    aded_date : datetime = None
+    last_modify_date : datetime = None
+    item_count : int = Field(default=0)
+
 
 
 @app.post('/createAdminAccount')
@@ -325,3 +333,26 @@ async def shopDetials(data = Depends(authVerification)):
     }
     b = jsonable_encoder(data)
     return JSONResponse(status_code=200, content=b)
+
+@app.post('/addcategory', tags=['category'])
+async def addCategory(categoryData : Category, data  = Depends(authVerification)):
+    # send error message if not authonticated
+    if data == False or data['role'] != 'admin':
+        return JSONResponse(status_code=401, content='unathorized')
+    # find dubplicate category
+    duplicateCategory = category.find({'name' : categoryData.name}, {'_id' : 0, 'aded_date' : 0, 'last_modify_date' : 0, 'item_count' : 0})
+    itemCount = 0
+    for item in duplicateCategory:
+        itemCount += 1
+    print(itemCount)
+    # if there, then send error message
+    if itemCount >= 1:
+        return JSONResponse(status_code=400, content='duplicate category')
+    else:
+        # insert in to database
+        dataPoints = category.insert_one(categoryData.dict())
+        # send success message
+        if dataPoints.acknowledged  == True:
+            return JSONResponse(status_code=200, content='successfull')
+        else:
+            return JSONResponse(status_code=500, content='something go wrong')

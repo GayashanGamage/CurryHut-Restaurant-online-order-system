@@ -7,7 +7,7 @@ import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 import os 
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, root_validator
 from datetime import datetime
 from jose import jwt, JWTError
 from passlib.hash import pbkdf2_sha256
@@ -19,6 +19,11 @@ from bson.objectid import ObjectId
 
 load_dotenv()
 security = HTTPBearer()
+
+# global value variable for application
+unDeletable = ['uncategorize', 'curry', 'pilaw rice', 'drinks', 'deserts']
+
+
 app = FastAPI()
 
 # CORS midleware
@@ -107,10 +112,20 @@ class Category(BaseModel):
     aded_date : datetime = None
     last_modify_date : datetime = None
     item_count : int = Field(default=0)
+    deletable : bool = Field(default=True)
 
     @validator('name', pre=True)
     def lowercase_name(cls, name):
         return name.lower()
+
+    @root_validator(pre=True)
+    def set_undeletable(cls, value ):
+        name = value.get('name')
+        
+        if name in unDeletable:
+            value['deletable'] = False
+
+        return value
 
 
 
@@ -369,15 +384,24 @@ async def editCategory(id : str, categoryName : str,data  = Depends(authVerifica
     # if not authonticate, then send error message
     if data == False or data['role'] != 'admin':
         return JSONResponse( status_code=401, content='unathorized')
+    updatedData = category.find_one({'_id' : ObjectId(id)}, {'_id' : 0, 'deletable' : 1 })
     # find dubplicated category name from dategory collection
-    duplicateCategory = category.find({'name' : categoryName.lower()}, {'_id' : 0, 'aded_date' : 0, 'last_modify_date' : 0, 'item_count' : 0})
-    itemCount = 0
-    for item in duplicateCategory:
-        itemCount += 1
+    duplicateCategory = list(category.find({'name' : categoryName.lower()}, {'_id' : 0, 'aded_date' : 0, 'last_modify_date' : 0, 'item_count' : 0}))
     # if there, then send error message
-    if itemCount >= 1:
-        return JSONResponse(status_code=400, content='duplicate category')
+    if len(duplicateCategory) >= 1:
+        return JSONResponse(status_code=400, content='cannot duplicate category')
+    # check updated id is a unDeletable category
+    if updatedData == None:
+        return JSONResponse(status_code=404, content="selected category is unvailable")
+    elif updatedData['deletable'] == False or updatedData['deletable'] in unDeletable:
+        return JSONResponse(status_code=404, content="this category cannot updated")
+    # check reseved category name
+    elif categoryName in unDeletable:
+        return JSONResponse(status_code=404, content=f"{categoryName} is an invalied category name.")
     # otherwise update usin _id field 
     updatedData = category.update_one({'_id' : ObjectId(id)}, { '$set' : {'name' : categoryName.lower()}})
-    if updatedData.acknowledged == True:
+    if updatedData.modified_count == 1:
         return JSONResponse(status_code=200, content='successfull')
+    else:
+        return JSONResponse(status_code=500, content='something go wrong. try again later')
+        

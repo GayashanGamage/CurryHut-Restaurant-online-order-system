@@ -405,3 +405,26 @@ async def editCategory(id : str, categoryName : str,data  = Depends(authVerifica
     else:
         return JSONResponse(status_code=500, content='something go wrong. try again later')
         
+
+@app.delete('/deletecategory/{categoryId}', tags=['category'])
+async def deleteCategory(categoryId : str, data = Depends(authVerification)):
+    pass
+    # check authontication validation
+    if data == False or data['role'] != 'admin':
+        return JSONResponse( status_code=401, content='unathorized')
+    # get category
+    selectedCategory = category.find_one({'_id' : ObjectId(categoryId)})
+    # if not available send error
+    if selectedCategory == None:
+        return JSONResponse(status_code=404, content="selected category is not available")
+    # check selected category is unDeletable
+    elif selectedCategory['deletable'] == False:
+        return JSONResponse(status_code=404,content="this category cannot delete")
+    # otherwise deleted and send success message
+    else:
+        deletedCategory = category.delete_one({'_id' : ObjectId(categoryId)})
+        if deletedCategory.deleted_count == 1:
+            return JSONResponse(status_code=200, content="successfull")
+        else:
+            return JSONResponse(status_code=500, content="something go wrong try latter")
+            

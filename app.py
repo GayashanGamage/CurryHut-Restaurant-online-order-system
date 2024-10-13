@@ -7,7 +7,7 @@ import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 import os 
 from dotenv import load_dotenv
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator
 from datetime import datetime
 from jose import jwt, JWTError
 from passlib.hash import pbkdf2_sha256
@@ -15,6 +15,7 @@ from random import randint
 from datetime import datetime
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from bson.objectid import ObjectId
 
 load_dotenv()
 security = HTTPBearer()
@@ -106,6 +107,10 @@ class Category(BaseModel):
     aded_date : datetime = None
     last_modify_date : datetime = None
     item_count : int = Field(default=0)
+
+    @validator('name', pre=True)
+    def lowercase_name(cls, name):
+        return name.lower()
 
 
 
@@ -356,3 +361,23 @@ async def addCategory(categoryData : Category, data  = Depends(authVerification)
             return JSONResponse(status_code=200, content='successfull')
         else:
             return JSONResponse(status_code=500, content='something go wrong')
+        
+
+@app.patch('/editcategory', tags=['category'])
+async def editCategory(id : str, categoryName : str,data  = Depends(authVerification)):
+    pass
+    # if not authonticate, then send error message
+    if data == False or data['role'] != 'admin':
+        return JSONResponse( status_code=401, content='unathorized')
+    # find dubplicated category name from dategory collection
+    duplicateCategory = category.find({'name' : categoryName.lower()}, {'_id' : 0, 'aded_date' : 0, 'last_modify_date' : 0, 'item_count' : 0})
+    itemCount = 0
+    for item in duplicateCategory:
+        itemCount += 1
+    # if there, then send error message
+    if itemCount >= 1:
+        return JSONResponse(status_code=400, content='duplicate category')
+    # otherwise update usin _id field 
+    updatedData = category.update_one({'_id' : ObjectId(id)}, { '$set' : {'name' : categoryName.lower()}})
+    if updatedData.acknowledged == True:
+        return JSONResponse(status_code=200, content='successfull')

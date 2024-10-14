@@ -110,8 +110,8 @@ class Password(MailVerification):
 
 class Category(BaseModel):
     name : str
-    aded_date : datetime = None
-    last_modify_date : datetime = None
+    aded_date : datetime = Field(default = datetime.now())
+    last_modify_date : datetime = Field(default = datetime.now())
     item_count : int = Field(default=0)
     deletable : bool = Field(default=True)
 

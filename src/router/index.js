@@ -7,6 +7,7 @@ import Verification from "@/views/Authontication/Verification.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import Setting from "@/views/Subpages/Setting.vue";
 import Category from "@/views/Subpages/Category.vue";
+import Food from "@/views/Subpages/Food.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -61,6 +62,11 @@ const router = createRouter({
           path: "catagory",
           component: Category,
           name: "category",
+        },
+        {
+          path: "food",
+          component: Food,
+          name: "food",
         },
       ],
     },

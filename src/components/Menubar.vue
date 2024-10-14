@@ -18,7 +18,7 @@
     <div
       class="menu-item"
       id="menu-three"
-      @click="changePage('menu-three', 'select-text-three')"
+      @click="changePage('menu-three', 'select-text-three', 'food')"
     >
       <p class="menu-text" id="select-text-three">Food item</p>
     </div>

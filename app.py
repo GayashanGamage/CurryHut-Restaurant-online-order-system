@@ -16,6 +16,7 @@ from datetime import datetime
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from bson.objectid import ObjectId
+from typing import List
 
 load_dotenv()
 security = HTTPBearer()
@@ -126,6 +127,8 @@ class Category(BaseModel):
             value['deletable'] = False
 
         return value
+
+
 
 
 
@@ -428,3 +431,21 @@ async def deleteCategory(categoryId : str, data = Depends(authVerification)):
         else:
             return JSONResponse(status_code=500, content="something go wrong try latter")
             
+
+@app.get('/getcategories', tags=['category'], response_model=List[Category])
+async def getCategories(data = Depends(authVerification)):
+    pass
+    # authontication validation
+    if data == False or data['role'] != 'admin':
+        return JSONResponse( status_code=401, content='unathorized')
+    # get all data
+    allCategoryDetails = list(category.find({}))
+    # send 
+    if len(allCategoryDetails) == 0:
+        return JSONResponse(status_code=404, content='categories not available')
+    else:
+        # convert objectId to string
+        for item in allCategoryDetails:
+            item['_id'] = str(item['_id'])
+
+        return JSONResponse(status_code=200, content=jsonable_encoder(allCategoryDetails))

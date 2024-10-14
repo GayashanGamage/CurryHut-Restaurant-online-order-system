@@ -1,10 +1,12 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import { useShopStore } from "./shop";
+import { useShowCase } from "./showcase";
 
 export const useUiStore = defineStore("ui", () => {
   // other pinia stors
   const shopStore = useShopStore();
+  const showCase = useShowCase();
 
   // Passwordchange component
   const logoutPopupWindow = ref(false);
@@ -81,27 +83,29 @@ export const useUiStore = defineStore("ui", () => {
 
   function closeNewCategoryWindow() {
     // console.log("new category window close");
+    showCase.getCategoryDetails();
+    showCase.processingCategory = null;
     NewCategoryWindow.value = false;
   }
 
-  function openDeleteCategoryWindow() {
-    // console.log("new category window open");
+  function openDeleteCategoryWindow(id, name) {
+    showCase.processingCategory = { _id: id, name: name };
     DeleteCategoryWindow.value = true;
   }
 
   function closeDeleteCategoryWindow() {
-    // console.log("new category window close");
+    showCase.processingCategory = null;
     DeleteCategoryWindow.value = false;
   }
 
-  function openEditCategoryWindow() {
+  function openEditCategoryWindow(item_id) {
     // console.log("new category window open");
-    console.log("edit button clicked");
+    showCase.processingCategory = item_id;
     EditCategoryWindow.value = true;
   }
 
   function closeEditCategoryWindow() {
-    // console.log("new category window close");
+    showCase.processingCategory = null;
     EditCategoryWindow.value = false;
   }
 

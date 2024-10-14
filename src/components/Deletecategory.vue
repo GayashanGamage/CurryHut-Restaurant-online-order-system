@@ -20,7 +20,7 @@
           <button
             id="confirm-button"
             class="action-button"
-            @click="uistore.closeDeleteCategoryWindow()"
+            @click="deleteAction"
           >
             Confirm
           </button>
@@ -31,9 +31,48 @@
 </template>
 
 <script setup>
+import { useAuthonticationStore } from "@/stores/authontication";
+import { useShowCase } from "@/stores/showcase";
 import { useUiStore } from "@/stores/ui";
+import axios from "axios";
+import { useToast } from "vue-toast-notification";
 
+// toast notification
+const toast = useToast();
+
+// pinia store reference
 const uistore = useUiStore();
+const authontication = useAuthonticationStore();
+const showcase = useShowCase();
+
+const deleteAction = () => {
+  // check unDeletable categories
+  if (showcase.unDeletable.includes(showcase.processingCategory["name"])) {
+    toast.error("you cannot remove reserved categories !");
+  } else {
+    axios
+      .delete(
+        `${import.meta.env.VITE_url}/deletecategory/${
+          showcase.processingCategory["_id"]
+        }`,
+        {
+          headers: {
+            Authorization: "Bearer " + authontication.authcookie,
+          },
+        }
+      )
+      .then((response) => {
+        if (response.status == 200) {
+          toast.success("delete selecte category successfully");
+          showcase.getCategoryDetails();
+          uistore.closeDeleteCategoryWindow();
+        }
+      })
+      .catch((response) => {
+        toast.error(response.data);
+      });
+  }
+};
 </script>
 
 <style scoped>

@@ -2,7 +2,10 @@
   <div class="s-level-one-container">
     <div class="page-title-section">
       <h2 class="page-title">Category</h2>
-      <button class="action-button" @click="uistore.openNewCategoryWindow">
+      <button
+        class="action-button add-new-button"
+        @click="uistore.openNewCategoryWindow"
+      >
         Add new
       </button>
     </div>
@@ -13,18 +16,54 @@
             <tr class="table-title-row">
               <th class="table-row-title code">Code</th>
               <th class="table-row-title name">Name</th>
-              <th class="table-row-title count">Item count</th>
+              <th class="table-row-title count center-text">Item count</th>
+              <th class="table-row-title added center-text">Aded date</th>
+              <th class="table-row-title edited center-text">Last modified</th>
+              <th class="table-row-title edited"></th>
+              <th class="table-row-title edited"></th>
             </tr>
           </thead>
           <tbody>
-            <tr class="table-row">
-              <td class="table-row-data">FR001</td>
-              <td class="table-row-data">Fried Rice</td>
-              <td class="table-row-data">07</td>
+            <!-- this include all category data -->
+            <tr
+              class="table-row"
+              v-for="item in showcase.categoryList"
+              :key="item['_id']"
+            >
+              <td class="table-row-data">
+                {{ item["_id"].slice(-4, item["_id"].length) }}
+              </td>
+              <td class="table-row-data">{{ item["name"] }}</td>
+              <td class="table-row-data center-text">
+                {{ item["item_count"] }}
+              </td>
+              <td class="table-row-data center-text">
+                {{
+                  `${new Date(item["aded_date"]).getFullYear()}-${new Date(
+                    item["aded_date"]
+                  ).getMonth()}-${new Date(item["aded_date"]).getDate()}`
+                }}
+              </td>
+              <td class="table-row-data center-text">
+                {{
+                  `${new Date(
+                    item["last_modify_date"]
+                  ).getFullYear()}-${new Date(
+                    item["last_modify_date"]
+                  ).getMonth()}-${new Date(item["last_modify_date"]).getDate()}`
+                }}
+              </td>
               <td class="table-row-data table-row-data-button">
                 <button
                   class="action-button table-button"
-                  @click="uistore.openEditCategoryWindow"
+                  v-if="item['deletable']"
+                  @click="
+                    uistore.openEditCategoryWindow({
+                      id: item['_id'],
+                      current_name: item['name'],
+                      categoryName: null,
+                    })
+                  "
                 >
                   Edit
                 </button>
@@ -32,7 +71,10 @@
               <td class="table-row-data table-row-data-button">
                 <button
                   class="action-button table-button delete-button"
-                  @click="uistore.openDeleteCategoryWindow"
+                  v-if="item['deletable']"
+                  @click="
+                    uistore.openDeleteCategoryWindow(item['_id'], item['name'])
+                  "
                 >
                   Delete
                 </button>
@@ -46,7 +88,45 @@
 </template>
 
 <script setup>
+import { useAuthonticationStore } from "@/stores/authontication";
+import { useShowCase } from "@/stores/showcase";
 import { useUiStore } from "@/stores/ui";
+import axios from "axios";
+import { onBeforeMount } from "vue";
+import { useToast } from "vue-toast-notification";
+
+// toast notification
+const toast = useToast();
+
+// pinia stores
+const showcase = useShowCase();
+const authontication = useAuthonticationStore();
+
+onBeforeMount(() => {
+  // check authontication
+  authontication.restoreAuthonticationDataToPinia();
+  authontication.redirectToLogin();
+  // check data is available in pinia store
+  if (showcase.categoryList == null) {
+    // else send API request and store data in pinia store
+    axios
+      .get(`${import.meta.env.VITE_url}/getcategories`, {
+        headers: {
+          Authorization: "Bearer " + authontication.authcookie,
+        },
+      })
+      .then((response) => {
+        showcase.categoryList = response.data;
+      })
+      .catch((response) => {
+        if (response.status == 404) {
+          toast.error("sorry ! there is no any caterogy in your shop");
+        } else if (response.status == 4) {
+          authontication.logoutAction();
+        }
+      });
+  }
+});
 
 const uistore = useUiStore();
 </script>
@@ -56,12 +136,6 @@ const uistore = useUiStore();
   display: flex;
   justify-content: space-between;
 }
-.action-button {
-  margin: 47px 21px 0px 0px;
-}
-/* .s-level-one-container {
-  padding-bottom: 1px;
-} */
 .s-level-three-container {
   display: flex;
   justify-content: center;
@@ -72,13 +146,12 @@ const uistore = useUiStore();
   width: 96%;
 }
 .code {
-  width: 150px;
+  width: 100px;
 }
 .name {
-  width: 600px;
+  width: 250px;
 }
 .table-title-row {
-  /* background-color: yellow; */
   text-align: left;
 }
 .table-row-title {
@@ -88,18 +161,6 @@ const uistore = useUiStore();
   font-style: normal;
   font-weight: 400;
   line-height: normal;
-}
-.table-row-data {
-  color: #000;
-  font-family: "Space Grotesk";
-  font-size: 18px;
-  font-weight: 400;
-  border-top: 1px solid #7ac89a;
-}
-.table-row-data-button {
-  border: 0px;
-  float: right;
-  margin: 10px 0px 10px 10px;
 }
 .delete-button {
   border: 1px solid #ff204e;
@@ -111,7 +172,17 @@ const uistore = useUiStore();
   background: #ff204e;
   color: #fff;
 }
-.table-button {
-  margin: 0px;
+.table-row-data {
+  font-size: 17px;
+  padding: 17px 0px;
+  font-family: "Space Grotesk";
+  color: #000;
+  border-top: 1px solid #7ac89a;
+}
+.add-new-button {
+  margin: 54px 12px 0px 0px;
+}
+.center-text {
+  text-align: center;
 }
 </style>

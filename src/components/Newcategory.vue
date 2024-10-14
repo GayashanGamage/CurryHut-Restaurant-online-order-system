@@ -6,7 +6,12 @@
       </div>
       <div class="c-level-three-container window-content">
         <P class="info">Type prefered category name</P>
-        <input type="text" class="user-input" placeholder="Ex : Fried Rice" />
+        <input
+          type="text"
+          class="user-input"
+          placeholder="Ex : Fried Rice"
+          v-model="showcase.processingCategory"
+        />
         <div class="button-container">
           <button
             id="cancel-button"
@@ -18,7 +23,7 @@
           <button
             id="confirm-button"
             class="action-button"
-            @click="uistore.closeNewCategoryWindow()"
+            @click="addNewCategory"
           >
             Confirm
           </button>
@@ -29,9 +34,62 @@
 </template>
 
 <script setup>
+import { useAuthonticationStore } from "@/stores/authontication";
+import { useShowCase } from "@/stores/showcase";
 import { useUiStore } from "@/stores/ui";
+import axios from "axios";
+import { useToast } from "vue-toast-notification";
+
+const toast = useToast();
 
 const uistore = useUiStore();
+const showcase = useShowCase();
+const authontication = useAuthonticationStore();
+
+const exsistingCategoryList = [];
+
+for (let i = 0; i < showcase.categoryList.length; i++) {
+  exsistingCategoryList.push(showcase.categoryList[i]["name"]);
+}
+
+const addNewCategory = () => {
+  // remove prefix & postfix space
+  let userInput = showcase.processingCategory.trim();
+  // check the user input - empty
+  if (!userInput || userInput.length == 0) {
+    toast.error("you cannot add empty string as a category !");
+  }
+  // check unDeletable values
+  else if (showcase.unDeletable.includes(userInput.toLowerCase())) {
+    toast.error("you cannot enter reserved categories !");
+  }
+  // check existing category name to duplicate
+  else if (exsistingCategoryList.includes(userInput.toLowerCase())) {
+    toast.error("you cannot insert existing categories !");
+  } else {
+    axios
+      .post(
+        `${import.meta.env.VITE_url}/addcategory`,
+        {
+          name: userInput,
+        },
+        {
+          headers: {
+            Authorization: "Bearer " + authontication.authcookie,
+          },
+        }
+      )
+      .then((response) => {
+        if (response.status == 200) {
+          toast.success(`successfully added ${userInput} as a newcategory`);
+          uistore.closeNewCategoryWindow();
+        }
+      })
+      .catch((error) => {
+        toast.error(error.response.data);
+      });
+  }
+};
 </script>
 
 <style scoped>

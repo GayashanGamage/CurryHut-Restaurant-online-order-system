@@ -19,6 +19,9 @@ export const useUiStore = defineStore("ui", () => {
   const timeDescription = ref(null); // meal-time : breakfast, lunch, dinner, shop-time : open_time, close_time
   const mealtimeOrShoptime = ref(true); // true = mealtime, false = shoptime
 
+  // food component
+  const AddFoodWindow = ref(false);
+
   // category page
   const NewCategoryWindow = ref(false);
   const DeleteCategoryWindow = ref(false);
@@ -109,6 +112,14 @@ export const useUiStore = defineStore("ui", () => {
     EditCategoryWindow.value = false;
   }
 
+  function openAddFoodWindow() {
+    AddFoodWindow.value = true;
+  }
+
+  function closeAddFoodWindow() {
+    AddFoodWindow.value = false;
+  }
+
   return {
     // component visibility
     logoutPopupWindow,
@@ -125,6 +136,9 @@ export const useUiStore = defineStore("ui", () => {
     DeleteCategoryWindow,
     EditCategoryWindow,
 
+    // food page
+    AddFoodWindow,
+
     // funciton
     openLogoutPopup,
     closeLogoutPopup,
@@ -137,5 +151,7 @@ export const useUiStore = defineStore("ui", () => {
     closeDeleteCategoryWindow,
     openEditCategoryWindow,
     closeEditCategoryWindow,
+    openAddFoodWindow,
+    closeAddFoodWindow,
   };
 });

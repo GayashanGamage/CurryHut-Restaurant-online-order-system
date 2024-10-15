@@ -14,6 +14,7 @@
     <Newcategory v-if="uistore.NewCategoryWindow"></Newcategory>
     <Deletecategory v-if="uistore.DeleteCategoryWindow"></Deletecategory>
     <Editcategory v-if="uistore.EditCategoryWindow"></Editcategory>
+    <Newfooditem v-if="uistore.AddFoodWindow"></Newfooditem>
   </div>
 </template>
 
@@ -26,6 +27,7 @@ import Timechange from "@/components/Timechange.vue";
 import Newcategory from "@/components/Newcategory.vue";
 import Deletecategory from "@/components/Deletecategory.vue";
 import Editcategory from "@/components/Editcategory.vue";
+import Newfooditem from "@/components/Newfooditem.vue";
 
 const uistore = useUiStore();
 </script>

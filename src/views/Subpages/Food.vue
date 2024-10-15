@@ -2,7 +2,12 @@
   <div class="s-level-one-container">
     <div class="page-title-section">
       <h2 class="page-title">Food Items</h2>
-      <button class="action-button add-new-button">Add new</button>
+      <button
+        class="action-button add-new-button"
+        @click="uistore.openAddFoodWindow"
+      >
+        Add new
+      </button>
     </div>
     <div class="s-level-two-container">
       <div class="s-level-three-container">
@@ -36,7 +41,11 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { useUiStore } from "@/stores/ui";
+
+const uistore = useUiStore();
+</script>
 
 <style scoped>
 .page-title-section {

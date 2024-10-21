@@ -21,6 +21,7 @@ export const useUiStore = defineStore("ui", () => {
 
   // food component
   const AddFoodWindow = ref(false);
+  const FoodView = ref(false);
 
   // category page
   const NewCategoryWindow = ref(false);
@@ -120,6 +121,14 @@ export const useUiStore = defineStore("ui", () => {
     AddFoodWindow.value = false;
   }
 
+  function foodViewOpen() {
+    FoodView.value = true;
+  }
+
+  function foodViewClose() {
+    FoodView.value = false;
+  }
+
   return {
     // component visibility
     logoutPopupWindow,
@@ -138,6 +147,7 @@ export const useUiStore = defineStore("ui", () => {
 
     // food page
     AddFoodWindow,
+    FoodView,
 
     // funciton
     openLogoutPopup,
@@ -153,5 +163,7 @@ export const useUiStore = defineStore("ui", () => {
     closeEditCategoryWindow,
     openAddFoodWindow,
     closeAddFoodWindow,
+    foodViewOpen,
+    foodViewClose,
   };
 });

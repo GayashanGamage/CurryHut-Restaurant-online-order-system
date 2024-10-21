@@ -31,7 +31,12 @@
               <td class="table-row-data center-text">2024-10-12</td>
               <td class="table-row-data center-text">2024-10-17</td>
               <td class="table-row-data table-row-data-button">
-                <button class="action-button table-button">View</button>
+                <button
+                  class="action-button table-button"
+                  @click="uistore.foodViewOpen"
+                >
+                  View
+                </button>
               </td>
             </tr>
           </tbody>

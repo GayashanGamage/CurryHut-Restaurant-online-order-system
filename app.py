@@ -51,6 +51,7 @@ db = client['curryhut']
 user = db['User']
 shop = db['Shop']
 category = db['Category']
+food = db['Food']
 
 # brevo mail server
 configuration = sib_api_v3_sdk.Configuration()
@@ -108,6 +109,7 @@ class Code(MailVerification):
 class Password(MailVerification):
     password : str
 
+
 class Category(BaseModel):
     name : str
     aded_date : datetime = Field(default = datetime.now())
@@ -127,7 +129,22 @@ class Category(BaseModel):
             value['deletable'] = False
 
         return value
+class FoodDataPrice(BaseModel):
+    name : str
+    price : int
+    portion : int
 
+class FoodData(BaseModel):
+    category_id : str
+    name : str
+    description : str
+    price : list[FoodDataPrice]
+    added_data : datetime = Field(default=datetime.now())
+    modified_data : datetime = Field(default=datetime.now())
+
+    @validator('category_id', pre=False)
+    def convertCategoryId(cls, value):
+        return ObjectId(value)
 
 
 
@@ -449,3 +466,38 @@ async def getCategories(data = Depends(authVerification)):
             item['_id'] = str(item['_id'])
 
         return JSONResponse(status_code=200, content=jsonable_encoder(allCategoryDetails))
+    
+@app.post('/addfooditem', tags=['food'])
+async def addFoodItem(foodData : FoodData, data = Depends(authVerification)):
+    # check authontication
+    if data == False or data['role'] != 'admin':
+        return JSONResponse( status_code=401, content='unathorized')
+    # check dubplicate food item name and category id
+    findCategory = category.find_one({'_id' : ObjectId(foodData.category_id)})
+    dubplicateItem = list(food.find({'name' : foodData.name}))
+    # if dubplicate name, then send error message
+    if findCategory == None:
+        return JSONResponse(status_code=409, content="category not found")
+    elif len(dubplicateItem) >= 1:
+        return JSONResponse(status_code=409, content="dubplicate food name")    
+    # else create new food item
+    else:
+        insertData = food.insert_one(foodData.dict())
+        if insertData.acknowledged == True:
+            return JSONResponse(status_code=200, content='successfull')
+        else:
+            return JSONResponse(status_code=400, content='someting whent wrong')
+            
+@app.get('/getallfood', tags=['food'])
+async def getAllFood(data = Depends(authVerification)):
+    # check authontication
+    if data == False or data['role'] != 'admin':
+        return JSONResponse( status_code=401, content='unathorized')
+    # send all food 
+    allFoodItems = list(food.find({}))
+    for item in allFoodItems:
+        item['_id'] = str(item['_id'])
+        item['category_id'] = str(item['category_id'])
+
+    return JSONResponse(status_code=200, content=jsonable_encoder(allFoodItems))
+

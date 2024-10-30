@@ -534,3 +534,17 @@ async def editFoof(editfood : EditFood, data = Depends(authVerification)):
             return JSONResponse(status_code=500, content='something went wrong')
 
 
+@app.delete('/deletefood/{foodId}', tags=['food'])
+async def deleteFood( foodId : str, data = Depends(authVerification)):
+    # check authontication 
+    if data == False or data['role'] != 'admin':
+        return JSONResponse( status_code=401, content='unathorized')
+    # try to delete food 
+    deletedFood = food.delete_one({'_id' : ObjectId(foodId)})
+    # if success, then send success messege
+    if deletedFood.deleted_count == 1:
+        return JSONResponse(status_code=200, content='successfull')
+    # else, send error message
+    else:
+        return JSONResponse(status_code=404, content='something go wrong')
+        

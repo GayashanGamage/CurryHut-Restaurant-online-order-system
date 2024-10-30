@@ -7,7 +7,7 @@ import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 import os 
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field, validator, root_validator
+from pydantic import BaseModel, Field, validator, root_validator, field_validator
 from datetime import datetime
 from jose import jwt, JWTError
 from passlib.hash import pbkdf2_sha256
@@ -146,8 +146,21 @@ class FoodData(BaseModel):
     def convertCategoryId(cls, value):
         return ObjectId(value)
 
+class EditFood(BaseModel):
+    id : str = Field(alias='_id')
+    category_id : str
+    name : str
+    description : str
+    price : list[FoodDataPrice]
+    modified_data : datetime = Field(default=datetime.now())
 
+    @field_validator('id', check_fields=False)
+    def convertToId(cls, value):
+        return ObjectId(value)
 
+    @field_validator('category_id', check_fields=False)
+    def convertToCategoryId(cls, value):
+        return ObjectId(value)
 
 @app.post('/createAdminAccount')
 async def createAdminUserAccount(userdetials : UserDetails ):
@@ -500,4 +513,24 @@ async def getAllFood(data = Depends(authVerification)):
         item['category_id'] = str(item['category_id'])
 
     return JSONResponse(status_code=200, content=jsonable_encoder(allFoodItems))
+
+@app.patch('/editfood', tags=['food'])
+async def editFoof(editfood : EditFood, data = Depends(authVerification)):
+    # check authontication
+    if data == False or data['role'] != 'admin':
+        return JSONResponse( status_code=401, content='unathorized')
+    # check if _id is exist
+    print(editfood.id)
+    checkFoodId = food.find_one({"_id" : editfood.id})
+    checkCategoryId = category.find_one({"_id" : editfood.category_id})
+    if checkFoodId == None or checkCategoryId == None:
+        return JSONResponse(status_code=404, content='cannot find food item or category')
+    else:
+        # update food item
+        update_item = food.update_one({'_id' : editfood.id}, {'$set' : editfood.dict(exclude={'id'})})
+        if update_item.modified_count == 1:
+            return JSONResponse(status_code=200, content='successfull')
+        else:
+            return JSONResponse(status_code=500, content='something went wrong')
+
 

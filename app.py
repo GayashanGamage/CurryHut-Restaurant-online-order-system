@@ -16,7 +16,7 @@ from datetime import datetime
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from bson.objectid import ObjectId
-from typing import List
+from typing import List, Optional
 
 load_dotenv()
 security = HTTPBearer()
@@ -152,7 +152,7 @@ class EditFood(BaseModel):
     name : str
     description : str
     price : list[FoodDataPrice]
-    modified_data : datetime = Field(default=datetime.now())
+    modified_data : Optional[datetime] = Field(default=datetime.now())
 
     @field_validator('id', check_fields=False)
     def convertToId(cls, value):
@@ -520,7 +520,6 @@ async def editFoof(editfood : EditFood, data = Depends(authVerification)):
     if data == False or data['role'] != 'admin':
         return JSONResponse( status_code=401, content='unathorized')
     # check if _id is exist
-    print(editfood.id)
     checkFoodId = food.find_one({"_id" : editfood.id})
     checkCategoryId = category.find_one({"_id" : editfood.category_id})
     if checkFoodId == None or checkCategoryId == None:

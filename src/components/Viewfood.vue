@@ -8,16 +8,37 @@
         <div class="content-section details">
           <div id="image"></div>
           <div id="name">
-            <input type="text" class="user-input" />
+            <input
+              type="text"
+              class="user-input"
+              v-model="showcase.processingFoodItem['name']"
+            />
           </div>
           <div id="category">
-            <select name="" id="" class="category-input">
-              <option value="" class="category-item">ojewofiow</option>
-              <option value="" class="category-item">ojewofiow</option>
+            <select name="" id="categoryList" class="category-input">
+              <option
+                v-for="item in showcase.categoryList"
+                class="category-item"
+                :value="item.name"
+                :key="item._id"
+                @click="changeCategory(item._id)"
+              >
+                {{ item.name }}
+              </option>
             </select>
           </div>
           <div id="code">
-            <input type="text" class="user-input" />
+            <input
+              type="text"
+              class="user-input"
+              disabled
+              :value="
+                showcase.processingFoodItem['_id'].slice(
+                  -4,
+                  showcase.processingFoodItem._id.lenth
+                )
+              "
+            />
           </div>
           <div id="description">
             <textarea
@@ -25,8 +46,16 @@
               cols="30"
               rows="10"
               id="item-description"
+              :maxlength="textAreaMaxLength"
+              v-model="showcase.processingFoodItem['description']"
             ></textarea>
-            <p id="descrioption-info">300 charactor</p>
+            <p id="descrioption-info">
+              {{
+                textAreaMaxLength -
+                showcase.processingFoodItem.description.length
+              }}
+              letters left
+            </p>
           </div>
         </div>
         <div class="content-section price">
@@ -42,43 +71,29 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
+                <tr
+                  v-for="item in showcase.processingFoodItem.price"
+                  :key="item"
+                >
                   <td>
                     <input
                       type="text"
                       class="table-data name-column name-column-data"
+                      v-model="item.name"
                     />
                   </td>
                   <td>
                     <input
                       type="number"
                       class="table-data potion-column potion-column-data"
+                      v-model="item.portion"
                     />
                   </td>
                   <td>
                     <input
                       type="text"
                       class="table-data price-column price-column-data"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <input
-                      type="text"
-                      class="table-data name-column name-column-data"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      class="table-data potion-column potion-column-data"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      class="table-data price-column price-column-data"
+                      v-model="item.price"
                     />
                   </td>
                 </tr>
@@ -90,8 +105,10 @@
           <button class="action-button" @click="uistore.foodViewClose">
             Close
           </button>
-          <button class="action-button delete">Delete</button>
-          <button class="action-button">Save</button>
+          <button class="action-button delete" @click="deleteItem">
+            Delete
+          </button>
+          <button class="action-button" @click="updateItem">Save</button>
         </div>
       </div>
     </div>
@@ -99,9 +116,96 @@
 </template>
 
 <script setup>
+import { useAuthonticationStore } from "@/stores/authontication";
+import { useShowCase } from "@/stores/showcase";
 import { useUiStore } from "@/stores/ui";
+import axios from "axios";
+import { onMounted, ref, watch } from "vue";
+import { useToast } from "vue-toast-notification";
+
+const toast = useToast();
 
 const uistore = useUiStore();
+const showcase = useShowCase();
+const textAreaMaxLength = 300;
+const authontication = useAuthonticationStore();
+
+onMounted(() => {
+  for (let i = 0; i < showcase.categoryList.length; i++) {
+    if (
+      showcase.categoryList[i]._id == showcase.processingFoodItem.category_id
+    ) {
+      document.getElementById("categoryList").value =
+        showcase.categoryList[i].name;
+    }
+  }
+});
+
+function changeCategory(value) {
+  // let a = document.getElementById("categoryList").value;
+  showcase.processingFoodItem.category_id = value;
+}
+
+const deleteItem = () => {
+  axios
+    .delete(
+      `${import.meta.env.VITE_url}/deletefood/${
+        showcase.processingFoodItem._id
+      }`,
+      {
+        headers: {
+          Authorization: "Bearer " + authontication.authcookie,
+        },
+      }
+    )
+    .then((response) => {
+      if (response.status == 200) {
+        toast.success("select item delete successfuly");
+        showcase.processingFoodItem = null;
+        showcase.getAllFoods();
+        uistore.foodViewClose();
+      }
+    })
+    .catch((response) => {
+      showcase.processingFoodItem = null;
+      toast.error("something go wrong. try again");
+      uistore.foodViewClose();
+    });
+};
+
+const updateItem = () => {
+  axios
+    .patch(
+      `${import.meta.env.VITE_url}/editfood`,
+      {
+        _id: showcase.processingFoodItem._id,
+        category_id: showcase.processingFoodItem.category_id,
+        name: showcase.processingFoodItem.name,
+        description: showcase.processingFoodItem.description,
+        price: [
+          {
+            name: showcase.processingFoodItem.price[0].name,
+            price: showcase.processingFoodItem.price[0].price,
+            portion: showcase.processingFoodItem.price[0].portion,
+          },
+        ],
+      },
+      {
+        headers: {
+          Authorization: "Bearer " + authontication.authcookie,
+        },
+      }
+    )
+    .then(() => {
+      toast.success("selected item update successfully");
+      showcase.getAllFoods();
+      uistore.foodViewClose();
+    })
+    .catch(() => {
+      toast.error("something go wrong. try again later");
+      uistore.foodViewClose();
+    });
+};
 </script>
 
 <style scoped>

@@ -8,14 +8,23 @@
         <div class="field-section">
           <p class="field-name">Category :</p>
           <select class="user-input">
-            <option value="1">Fried Rice</option>
-            <option value="2">Noodles</option>
-            <option value="3">Curry</option>
+            <option
+              v-for="item in showcase.categoryList"
+              :key="item._id"
+              :value="item._id"
+              @click="showcase.processingFoodItem.category_id = item._id"
+            >
+              {{ item.name }}
+            </option>
           </select>
         </div>
         <div class="field-section">
           <p class="field-name">Name :</p>
-          <input type="text" id="name-input" />
+          <input
+            type="text"
+            id="name-input"
+            v-model="showcase.processingFoodItem.name"
+          />
         </div>
         <div class="field-section">
           <p class="field-name">Image :</p>
@@ -30,8 +39,12 @@
               rows="10"
               id="description-input"
               maxlength="300"
+              v-model="showcase.processingFoodItem.description"
             ></textarea>
-            <p class="info">300 characters</p>
+            <p class="info">
+              {{ 300 - showcase.processingFoodItem.description.length }}
+              characters
+            </p>
           </div>
         </div>
         <div class="section-divider">
@@ -53,38 +66,21 @@
                   <input
                     type="text"
                     class="table-data name-column name-column-data"
+                    v-model="showcase.processingFoodItem.price[0].name"
                   />
                 </td>
                 <td>
                   <input
                     type="number"
                     class="table-data potion-column potion-column-data"
+                    v-model="showcase.processingFoodItem.price[0].price"
                   />
                 </td>
                 <td>
                   <input
                     type="text"
                     class="table-data price-column price-column-data"
-                  />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input
-                    type="text"
-                    class="table-data name-column name-column-data"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    class="table-data potion-column potion-column-data"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    class="table-data price-column price-column-data"
+                    v-model="showcase.processingFoodItem.price[0].portion"
                   />
                 </td>
               </tr>
@@ -98,9 +94,7 @@
           >
             Cancel
           </button>
-          <button class="action-button" @click="uistore.closeAddFoodWindow()">
-            Save
-          </button>
+          <button class="action-button" @click="addNewFood">Save</button>
         </div>
       </div>
     </div>
@@ -110,12 +104,17 @@
 <script setup>
 import router from "@/router";
 import { useAuthonticationStore } from "@/stores/authontication";
+import { useShowCase } from "@/stores/showcase";
 import { useUiStore } from "@/stores/ui";
+import axios from "axios";
 import { onBeforeUnmount } from "vue";
+import { useToast } from "vue-toast-notification";
 
 // pinia stores
 const uistore = useUiStore();
 const authontication = useAuthonticationStore();
+const toast = useToast();
+const showcase = useShowCase();
 
 const logout = () => {
   uistore.logoutPopupWindow = false;
@@ -127,6 +126,33 @@ onBeforeUnmount(() => {
     uistore.logoutPopupWindow = false;
   }
 });
+
+// add new items request
+const addNewFood = () => {
+  axios
+    .post(
+      `${import.meta.env.VITE_url}/addfooditem`,
+      showcase.processingFoodItem,
+      {
+        headers: {
+          Authorization: "Bearer " + authontication.authcookie,
+        },
+      }
+    )
+    .then((response) => {
+      if (response.status == 200) {
+        showcase.processingFoodItem = null;
+        showcase.getAllFoods();
+        toast.success("new item added successfully");
+        uistore.closeAddFoodWindow();
+      }
+    })
+    .catch((response) => {
+      showcase.processingFoodItem = null;
+      uistore.closeAddFoodWindow();
+      toast.error("something go wrong. try again.");
+    });
+};
 </script>
 
 <style scoped>

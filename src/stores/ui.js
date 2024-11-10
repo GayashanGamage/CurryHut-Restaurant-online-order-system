@@ -114,6 +114,18 @@ export const useUiStore = defineStore("ui", () => {
   }
 
   function openAddFoodWindow() {
+    showCase.processingFoodItem = {
+      category_id: "",
+      name: "",
+      description: "",
+      price: [
+        {
+          name: "",
+          price: 0,
+          portion: 0,
+        },
+      ],
+    };
     AddFoodWindow.value = true;
   }
 
@@ -121,11 +133,17 @@ export const useUiStore = defineStore("ui", () => {
     AddFoodWindow.value = false;
   }
 
-  function foodViewOpen() {
+  function foodViewOpen(value) {
+    for (let i = 0; i < showCase.foodItemList.length; i++) {
+      if (showCase.foodItemList[i]._id == value) {
+        showCase.processingFoodItem = showCase.foodItemList[i];
+      }
+    }
     FoodView.value = true;
   }
 
   function foodViewClose() {
+    showCase.processingFoodItem = null;
     FoodView.value = false;
   }
 

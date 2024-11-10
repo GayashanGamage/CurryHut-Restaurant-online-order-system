@@ -1,3 +1,4 @@
+// this is only store store related data
 import { ref, computed, watch } from "vue";
 import { defineStore } from "pinia";
 

@@ -24,16 +24,36 @@
           </thead>
           <tbody>
             <!-- this include all category data -->
-            <tr class="table-row">
-              <td class="table-row-data">2A34</td>
-              <td class="table-row-data">Chicken Fired Rice</td>
-              <td class="table-row-data center-text">Fried Rice</td>
-              <td class="table-row-data center-text">2024-10-12</td>
-              <td class="table-row-data center-text">2024-10-17</td>
-              <td class="table-row-data table-row-data-button">
+            <tr
+              class="table-row"
+              v-for="item in showcase.foodItemList"
+              :key="item._id"
+            >
+              <td class="table-row-data">
+                {{ item._id.slice(-4, item["_id"].length) }}
+              </td>
+              <td class="table-row-data">{{ item.name }}</td>
+              <td class="table-row-data center-text">
+                {{ item.category_id.slice(-4, item.category_id.lenth) }}
+              </td>
+              <td class="table-row-data center-text">
+                {{
+                  `${new Date(item["added_data"]).getFullYear()}-${new Date(
+                    item["added_data"]
+                  ).getMonth()}-${new Date(item["added_data"]).getDate()}`
+                }}
+              </td>
+              <td class="table-row-data center-text">
+                {{
+                  `${new Date(item["modified_data"]).getFullYear()}-${new Date(
+                    item["modified_data"]
+                  ).getMonth()}-${new Date(item["modified_data"]).getDate()}`
+                }}
+              </td>
+              <td c lass="table-row-data table-row-data-button">
                 <button
                   class="action-button table-button"
-                  @click="uistore.foodViewOpen"
+                  @click="uistore.foodViewOpen(item._id)"
                 >
                   View
                 </button>
@@ -47,9 +67,57 @@
 </template>
 
 <script setup>
+import { useAuthonticationStore } from "@/stores/authontication";
+import { useShowCase } from "@/stores/showcase";
 import { useUiStore } from "@/stores/ui";
-
+import axios from "axios";
+import { onBeforeMount } from "vue";
+import { useToast } from "vue-toast-notification";
 const uistore = useUiStore();
+
+const toast = useToast();
+
+const authontication = useAuthonticationStore();
+const showcase = useShowCase();
+
+onBeforeMount(() => {
+  authontication.restoreAuthonticationDataToPinia();
+  authontication.redirectToLogin();
+
+  if (showcase.foodItemList === null) {
+    axios
+      .get(`${import.meta.env.VITE_url}/getallfood`, {
+        headers: {
+          Authorization: "Bearer " + authontication.authcookie,
+        },
+      })
+      .then((response) => {
+        showcase.foodItemList = response.data;
+      })
+      .catch((response) => {
+        toast.error("something go wrong");
+      });
+  }
+  if (showcase.categoryList == null) {
+    // else send API request and store data in pinia store
+    axios
+      .get(`${import.meta.env.VITE_url}/getcategories`, {
+        headers: {
+          Authorization: "Bearer " + authontication.authcookie,
+        },
+      })
+      .then((response) => {
+        showcase.categoryList = response.data;
+      })
+      .catch((response) => {
+        if (response.status == 404) {
+          toast.error("sorry ! there is no any caterogy in your shop");
+        } else if (response.status == 4) {
+          authontication.logoutAction();
+        }
+      });
+  }
+});
 </script>
 
 <style scoped>

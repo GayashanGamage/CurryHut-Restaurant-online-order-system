@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { defineStore } from "pinia";
 import axios from "axios";
 import { useAuthonticationStore } from "./authontication";
@@ -17,8 +17,9 @@ export const useShowCase = defineStore("showcase", () => {
   const categoryList = ref(null);
   const processingCategory = ref(null); //this is for edit, new-adds and delete perpose
 
-  const foodItemList = ref();
-  const selectedFoodItem = ref();
+  const foodItemList = ref(null);
+  const processingFoodItem = ref(null); //this is for edit, new-adds and delete perpose
+  // const selectedFoodItem = ref();
 
   function getCategoryDetails() {
     axios
@@ -32,13 +33,33 @@ export const useShowCase = defineStore("showcase", () => {
       });
   }
 
+  // get all foods
+  const getAllFoods = () => {
+    axios
+      .get(`${import.meta.env.VITE_url}/getallfood`, {
+        headers: {
+          Authorization: "Bearer " + authontication.authcookie,
+        },
+      })
+      .then((response) => {
+        if (response.status == 200) {
+          foodItemList.value = response.data;
+        }
+      })
+      .catch((response) => {
+        toast.error("something go wrong. refresh manualy");
+      });
+  };
+
   return {
     unDeletable,
     categoryList,
     foodItemList,
     processingCategory,
-    selectedFoodItem,
+    processingFoodItem,
+    // selectedFoodItem,
 
     getCategoryDetails,
+    getAllFoods,
   };
 });

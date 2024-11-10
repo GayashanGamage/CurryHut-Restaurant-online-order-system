@@ -4,16 +4,16 @@
     <div
       class="menu-item select"
       id="menu-one"
-      @click="changePage('menu-one', 'select-text-one')"
+      @click="changePage('menu-one', 'select-text-one', 'orders')"
     >
       <p class="menu-text select-text" id="select-text-one">Orders</p>
     </div>
     <div
       class="menu-item"
       id="menu-two"
-      @click="changePage('menu-two', 'select-text-two')"
+      @click="changePage('menu-two', 'select-text-two', 'menu')"
     >
-      <p class="menu-text" id="select-text-tow">Menu</p>
+      <p class="menu-text" id="select-text-two">Menu</p>
     </div>
     <div
       class="menu-item"
@@ -32,7 +32,7 @@
     <div
       class="menu-item"
       id="menu-five"
-      @click="changePage('menu-five', 'select-text-five')"
+      @click="changePage('menu-five', 'select-text-five', 'statistics')"
     >
       <p class="menu-text" id="select-text-five">Statistics</p>
     </div>
@@ -54,11 +54,56 @@
 import router from "@/router";
 import { useShopStore } from "@/stores/shop";
 import { useUiStore } from "@/stores/ui";
+import { onMounted, ref } from "vue";
 
 const uistore = useUiStore();
 const shopstore = useShopStore();
 
+// menu initiating - for initial loding
+const menuList = ref([
+  { divElementID: "menu-one", textElementID: "select-text-one", url: "orders" }, // order
+  { divElementID: "menu-two", textElementID: "select-text-two", url: "menu" }, // menu
+  {
+    divElementID: "menu-three",
+    textElementID: "select-text-three",
+    url: "food",
+  }, // food item
+  {
+    divElementID: "menu-four",
+    textElementID: "select-text-four",
+    url: "category",
+  }, // category
+  {
+    divElementID: "menu-five",
+    textElementID: "select-text-five",
+    url: "statistics",
+  }, // statistics
+  {
+    divElementID: "menu-six",
+    textElementID: "select-text-six",
+    url: "setting",
+  }, // site setting
+]);
+
+onMounted(() => {
+  let selectTab = useUiStore().currentTab;
+  for (let i = 0; i < menuList.value.length; i++) {
+    // console.log(menuList.value[i].url, selectTab);
+    if (menuList.value[i].url === selectTab) {
+      changeTab(
+        menuList.value[i].divElementID,
+        menuList.value[i].textElementID
+      );
+    }
+  }
+});
+
 const changePage = (divElementID, textElementID, url) => {
+  changeTab(divElementID, textElementID);
+  router.push({ name: url });
+};
+
+const changeTab = (divElementID, textElementID) => {
   // select all list from menu
   var all = document.getElementsByClassName("menu-item");
   var alltext = document.getElementsByClassName("menu-text");
@@ -75,9 +120,6 @@ const changePage = (divElementID, textElementID, url) => {
   // add style to newly selected items
   document.getElementById(divElementID).classList.add("select");
   document.getElementById(textElementID).classList.add("select-text");
-
-  // load sub-page
-  router.push({ name: url });
 };
 </script>
 

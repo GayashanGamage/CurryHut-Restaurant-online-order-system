@@ -8,6 +8,10 @@ import { createRouter, createWebHistory } from "vue-router";
 import Setting from "@/views/Subpages/Setting.vue";
 import Category from "@/views/Subpages/Category.vue";
 import Food from "@/views/Subpages/Food.vue";
+import { useUiStore } from "@/stores/ui";
+import Orders from "@/views/Subpages/Orders.vue";
+import Menu from "@/views/Subpages/Menu.vue";
+import Statistics from "@/views/Subpages/Statistics.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -68,12 +72,29 @@ const router = createRouter({
           component: Food,
           name: "food",
         },
+        {
+          path: "orders",
+          component: Orders,
+          name: "orders",
+        },
+        {
+          path: "menu",
+          component: Menu,
+          name: "menu",
+        },
+        {
+          path: "statistics",
+          component: Statistics,
+          name: "statistics",
+        },
       ],
     },
   ],
 });
 
 router.beforeEach((to, from, next) => {
+  useUiStore().currentTab = to.name;
+
   // foword guard
   if (
     from.name !== "login" &&

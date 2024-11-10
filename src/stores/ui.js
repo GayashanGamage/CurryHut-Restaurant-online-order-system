@@ -28,6 +28,9 @@ export const useUiStore = defineStore("ui", () => {
   const DeleteCategoryWindow = ref(false);
   const EditCategoryWindow = ref(false);
 
+  // side menu bar
+  const currentTab = ref("");
+
   function openLogoutPopup() {
     logoutPopupWindow.value = true;
   }
@@ -166,6 +169,9 @@ export const useUiStore = defineStore("ui", () => {
     // food page
     AddFoodWindow,
     FoodView,
+
+    // menu bar
+    currentTab,
 
     // funciton
     openLogoutPopup,

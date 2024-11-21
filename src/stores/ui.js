@@ -31,6 +31,10 @@ export const useUiStore = defineStore("ui", () => {
   // side menu bar
   const currentTab = ref("");
 
+  // food available time - edit-menu page
+  const foodAvailableTime = ref(false);
+  const addNewAvailableFood = ref(false);
+
   function openLogoutPopup() {
     logoutPopupWindow.value = true;
   }
@@ -150,6 +154,22 @@ export const useUiStore = defineStore("ui", () => {
     FoodView.value = false;
   }
 
+  // edit-menu page
+  function openEditFoodTime() {
+    foodAvailableTime.value = true;
+  }
+
+  function closeEditFoodTime() {
+    foodAvailableTime.value = false;
+  }
+
+  function openAddNewAvailableFood() {
+    addNewAvailableFood.value = true;
+  }
+  function closeAddNewAvailableFood() {
+    addNewAvailableFood.value = false;
+  }
+
   return {
     // component visibility
     logoutPopupWindow,
@@ -173,6 +193,10 @@ export const useUiStore = defineStore("ui", () => {
     // menu bar
     currentTab,
 
+    // menu page
+    foodAvailableTime,
+    addNewAvailableFood,
+
     // funciton
     openLogoutPopup,
     closeLogoutPopup,
@@ -189,5 +213,9 @@ export const useUiStore = defineStore("ui", () => {
     closeAddFoodWindow,
     foodViewOpen,
     foodViewClose,
+    openEditFoodTime,
+    closeEditFoodTime,
+    openAddNewAvailableFood,
+    closeAddNewAvailableFood,
   };
 });

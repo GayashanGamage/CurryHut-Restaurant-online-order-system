@@ -33,7 +33,7 @@ origins = [
     "http://localhost",
     "https://localhost",
     "http://localhost",
-    "https://admin-curryhut.gamage.me",
+    "https://admin.gamage.me",
     "curryhut-admin.netlify.app",
     "https://curryhut-admin.netlify.app",
 ]

@@ -88,6 +88,7 @@
 </template>
 
 <script setup>
+import router from "@/router";
 import { useAuthonticationStore } from "@/stores/authontication";
 import { useShowCase } from "@/stores/showcase";
 import { useUiStore } from "@/stores/ui";
@@ -103,29 +104,23 @@ const showcase = useShowCase();
 const authontication = useAuthonticationStore();
 
 onBeforeMount(() => {
-  // check authontication
-  authontication.restoreAuthonticationDataToPinia();
-  authontication.redirectToLogin();
-  // check data is available in pinia store
-  if (showcase.categoryList == null) {
-    // else send API request and store data in pinia store
-    axios
-      .get(`${import.meta.env.VITE_url}/getcategories`, {
-        headers: {
-          Authorization: "Bearer " + authontication.authcookie,
-        },
-      })
-      .then((response) => {
-        showcase.categoryList = response.data;
-      })
-      .catch((response) => {
-        if (response.status == 404) {
-          toast.error("sorry ! there is no any caterogy in your shop");
-        } else if (response.status == 4) {
-          authontication.logoutAction();
-        }
-      });
-  }
+  axios
+    .get(`${import.meta.env.VITE_url}/getcategories`, {
+      headers: {
+        Authorization: "Bearer " + authontication.cookies_token,
+      },
+    })
+    .then((response) => {
+      showcase.categoryList = response.data;
+    })
+    .catch((response) => {
+      if (response.status == 404) {
+        toast.error("sorry ! there is no any caterogy in your shop");
+      } else if (response.status == 401) {
+        authontication.removeCredentials();
+        router.push({ name: "login" });
+      }
+    });
 });
 
 const uistore = useUiStore();

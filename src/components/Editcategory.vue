@@ -79,7 +79,7 @@ const editeCategory = () => {
     axios
       .patch(`${import.meta.env.VITE_url}/editcategory`, null, {
         headers: {
-          Authorization: "Bearer " + authontication.authcookie,
+          Authorization: "Bearer " + authontication.cookies_token,
         },
         params: {
           id: showcase.processingCategory["id"],

@@ -57,7 +57,7 @@ const deleteAction = () => {
         }`,
         {
           headers: {
-            Authorization: "Bearer " + authontication.authcookie,
+            Authorization: "Bearer " + authontication.cookies_token,
           },
         }
       )

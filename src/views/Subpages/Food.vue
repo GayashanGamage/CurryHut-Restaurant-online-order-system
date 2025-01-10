@@ -71,7 +71,7 @@ import { useAuthonticationStore } from "@/stores/authontication";
 import { useShowCase } from "@/stores/showcase";
 import { useUiStore } from "@/stores/ui";
 import axios from "axios";
-import { onBeforeMount } from "vue";
+import { onBeforeMount, onMounted } from "vue";
 import { useToast } from "vue-toast-notification";
 const uistore = useUiStore();
 
@@ -81,39 +81,54 @@ const authontication = useAuthonticationStore();
 const showcase = useShowCase();
 
 onBeforeMount(() => {
-  authontication.restoreAuthonticationDataToPinia();
-  authontication.redirectToLogin();
-
-  if (showcase.foodItemList === null) {
-    axios
-      .get(`${import.meta.env.VITE_url}/getallfood`, {
-        headers: {
-          Authorization: "Bearer " + authontication.authcookie,
-        },
-      })
-      .then((response) => {
-        showcase.foodItemList = response.data;
-      })
-      .catch((response) => {
-        toast.error("something go wrong");
-      });
+  if (
+    authontication.cookies_token == null ||
+    authontication.local_storage_email == null
+  ) {
+    const credencial = authontication.restoreCredentials();
+    if (credencial == false) {
+      router.replace({ name: "login" });
+    } else if (credencial == true) {
+      axios
+        .get(`${import.meta.env.VITE_url}/getallfood`, {
+          headers: {
+            Authorization: "Bearer " + authontication.cookies_token,
+          },
+        })
+        .then((response) => {
+          showcase.foodItemList = response.data;
+        })
+        .catch((response) => {
+          if (response.status == 401) {
+            authontication.removeCredentials();
+            router.replace({ name: "login" });
+          } else {
+            toast.error("something go wrong");
+          }
+        });
+    }
   }
-  if (showcase.categoryList == null) {
-    // else send API request and store data in pinia store
+});
+
+onMounted(() => {
+  if (showcase.categoryList === null) {
     axios
       .get(`${import.meta.env.VITE_url}/getcategories`, {
         headers: {
-          Authorization: "Bearer " + authontication.authcookie,
+          Authorization: "Bearer " + authontication.cookies_token,
         },
       })
       .then((response) => {
-        showcase.categoryList = response.data;
+        if (response.status == 200) {
+          showcase.categoryList = response.data;
+        }
       })
-      .catch((response) => {
-        if (response.status == 404) {
-          toast.error("sorry ! there is no any caterogy in your shop");
-        } else if (response.status == 4) {
-          authontication.logoutAction();
+      .catch((error) => {
+        if (error.status == 401) {
+          authontication.removeCredentials();
+          router.replace({ name: "login" });
+        } else {
+          toast.error("something go wrong");
         }
       });
   }

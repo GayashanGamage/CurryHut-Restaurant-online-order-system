@@ -116,11 +116,6 @@ const authontication = useAuthonticationStore();
 const toast = useToast();
 const showcase = useShowCase();
 
-const logout = () => {
-  uistore.logoutPopupWindow = false;
-  authontication.logoutAction();
-};
-
 onBeforeUnmount(() => {
   if (uistore.logoutPopupWindow === true) {
     uistore.logoutPopupWindow = false;
@@ -135,7 +130,7 @@ const addNewFood = () => {
       showcase.processingFoodItem,
       {
         headers: {
-          Authorization: "Bearer " + authontication.authcookie,
+          Authorization: "Bearer " + authontication.cookies_token,
         },
       }
     )

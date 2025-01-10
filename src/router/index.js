@@ -1,4 +1,3 @@
-import { useAuthonticationStore } from "@/stores/authontication";
 import Home from "@/views/Home.vue";
 import Email from "@/views/Authontication/Email.vue";
 import Login from "@/views/Authontication/Login.vue";
@@ -26,11 +25,6 @@ const router = createRouter({
       path: "/email",
       component: Email,
       name: "email",
-      beforeEnter: (to, from) => {
-        if (from.name == "login") {
-          useAuthonticationStore().fromLogintoEmailDataClearing();
-        }
-      },
     },
     {
       path: "/verification",
@@ -40,22 +34,12 @@ const router = createRouter({
     {
       path: "/passwordreset",
       component: PasswordReset,
-      beforeEnter: (to, from) => {
-        if (from.name == "verification") {
-          useAuthonticationStore().fromVerificationtoPasswordresetDataCleaning();
-        }
-      },
       name: "passwordreset",
     },
     {
       path: "/",
       component: Home,
       name: "home",
-      beforeEnter: (to, from) => {
-        if (from.name == "login") {
-          useAuthonticationStore().fromLogintoHomeDataClearing();
-        }
-      },
       redirect: "setting",
       children: [
         {
@@ -102,19 +86,10 @@ router.beforeEach((to, from, next) => {
   useUiStore().currentTab = to.name;
 
   // foword guard
-  if (
-    from.name !== "login" &&
-    to.name === "email" &&
-    useAuthonticationStore().email_page === false
-  )
-    next({ name: "login" });
+  if (from.name !== "login" && to.name === "email") next({ name: "login" });
 
   // foword guard
-  if (
-    from.name !== "email" &&
-    to.name === "verification" &&
-    useAuthonticationStore().verification_page === false
-  )
+  if (from.name !== "email" && to.name === "verification")
     next({ name: "login" });
 
   // if press back button then direct to login page - backword
@@ -122,22 +97,12 @@ router.beforeEach((to, from, next) => {
     next({ name: "login" });
 
   // forword guard
-  if (
-    from.name !== "verification" &&
-    to.name === "passwordreset" &&
-    useAuthonticationStore().passwordRest_page === false
-  )
+  if (from.name !== "verification" && to.name === "passwordreset")
     next({ name: "login" });
 
   // if press back button then direct to login page - backword
   if (from.name === "passwordreset" && to.name === "verification")
     next({ name: "login" });
-  // subpage of the admin page
-  // if (
-  //   useAuthonticationStore().authontication === false &&
-  //   to.name === "setting"
-  // )
-  // next({ name: "login" });
   else next();
 });
 

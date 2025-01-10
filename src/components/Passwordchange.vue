@@ -10,7 +10,7 @@
           type="text"
           class="user-input"
           placeholder="Code"
-          v-model="authontication.secrete_code"
+          v-model="authontication.secreate_code"
         />
         <button id="login-button" @click="verifyCode">VERIFY</button>
       </div>

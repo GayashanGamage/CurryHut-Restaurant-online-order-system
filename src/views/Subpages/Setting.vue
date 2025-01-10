@@ -113,32 +113,38 @@ const shop = useShopStore();
 const uistore = useUiStore();
 
 onBeforeMount(() => {
-  if (authontication.authontication == false) {
-    authontication.restoreAuthonticationDataToPinia();
-    authontication.redirectToLogin();
+  if (
+    authontication.cookies_token == null ||
+    authontication.cookies_email == null
+  ) {
+    const credencials = authontication.restoreCredentials();
+    if (credencials == false) {
+      router.replace({ name: "login" });
+    } else if (credencials == true) {
+      axios
+        .get(`${import.meta.env.VITE_url}/shopdetails`, {
+          headers: {
+            Authorization: "Bearer " + authontication.cookies_token,
+          },
+        })
+        .then((response) => {
+          if (response.status == 200) {
+            let APIdata = response.data;
+            shop.open_time = APIdata.open_time;
+            shop.close_time = APIdata.close_time;
+            shop.shutdown = APIdata.shutdown;
+            shop.breakfast = APIdata.breakfast;
+            shop.lunch = APIdata.lunch;
+            shop.dinner = APIdata.dinner;
+          }
+        })
+        .catch((error) => {
+          if (error.response.status == 401) {
+            router.replace({ name: "login" });
+          }
+        });
+    }
   }
-  axios
-    .get(`${import.meta.env.VITE_url}/shopdetails`, {
-      headers: {
-        Authorization: "Bearer " + authontication.authcookie,
-      },
-    })
-    .then((response) => {
-      if (response.status == 200) {
-        let APIdata = response.data;
-        shop.open_time = APIdata.open_time;
-        shop.close_time = APIdata.close_time;
-        shop.shutdown = APIdata.shutdown;
-        shop.breakfast = APIdata.breakfast;
-        shop.lunch = APIdata.lunch;
-        shop.dinner = APIdata.dinner;
-      }
-    })
-    .catch((error) => {
-      if (error.response.status == 401) {
-        router.replace({ name: "login" });
-      }
-    });
 });
 
 function openPasswordResetWindow() {

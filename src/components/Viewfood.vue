@@ -146,6 +146,26 @@ function changeCategory(value) {
   showcase.processingFoodItem.category_id = value;
 }
 
+const getAllFood = () => {
+  axios
+    .get(`${import.meta.env.VITE_url}/getallfood`, {
+      headers: {
+        Authorization: "Bearer " + authontication.cookies_token,
+      },
+    })
+    .then((response) => {
+      showcase.foodItemList = response.data;
+    })
+    .catch((error) => {
+      if (error.status == 401) {
+        authontication.removeCredentials();
+        router.replace({ name: "login" });
+      } else {
+        toast.error("something go wrong");
+      }
+    });
+};
+
 const deleteItem = () => {
   axios
     .delete(
@@ -154,7 +174,7 @@ const deleteItem = () => {
       }`,
       {
         headers: {
-          Authorization: "Bearer " + authontication.authcookie,
+          Authorization: "Bearer " + authontication.cookies_token,
         },
       }
     )
@@ -192,16 +212,18 @@ const updateItem = () => {
       },
       {
         headers: {
-          Authorization: "Bearer " + authontication.authcookie,
+          Authorization: "Bearer " + authontication.cookies_token,
         },
       }
     )
-    .then(() => {
+    .then((response) => {
+      console.log(response);
       toast.success("selected item update successfully");
-      showcase.getAllFoods();
+      getAllFood();
       uistore.foodViewClose();
     })
-    .catch(() => {
+    .catch((error) => {
+      console.log(error);
       toast.error("something go wrong. try again later");
       uistore.foodViewClose();
     });

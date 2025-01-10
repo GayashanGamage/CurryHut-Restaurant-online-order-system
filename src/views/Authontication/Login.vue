@@ -10,15 +10,17 @@
             type="text"
             class="user-input"
             placeholder="E mail"
-            v-model="authontication.email"
+            v-model="authontication.login_email"
           />
           <input
             type="password"
             class="user-input"
             placeholder="Password"
-            v-model="authontication.passsword"
+            v-model="authontication.login_password"
           />
-          <p id="password-text" @click="goToEmailPage()">Forget Password ?</p>
+          <p id="password-text" @click="router.push({ name: 'email' })">
+            Forget Password ?
+          </p>
           <button id="login-button" @click="login">LOGIN</button>
         </div>
       </div>
@@ -36,22 +38,31 @@ const authontication = useAuthonticationStore();
 
 const tost = useToast();
 
+const clearLoginData = () => {
+  authontication.login_email = null;
+  authontication.login_password = null;
+};
+
 function login() {
   axios
     .post(`${import.meta.env.VITE_url}/login`, {
-      email: authontication.email,
-      password: authontication.passsword,
+      email: authontication.login_email,
+      password: authontication.login_password,
       role: "admin",
     })
     .then((response) => {
       if (response.status == 200) {
-        authontication.value = true;
-        localStorage.setItem("email", authontication.email);
-        document.cookie = `user=${response.data.jwt_token}; expires=Thu, 18 Dec 2024 12:00:00 UTC`;
+        console.log(response.data);
+        authontication.storeCredencial(
+          authontication.login_email,
+          response.data.jwt_token
+        );
+        clearLoginData();
         router.push({ name: "home" });
       }
     })
     .catch((error) => {
+      clearLoginData();
       if (error.status == 406) {
         tost.error("incorect password.");
       } else if (error.status == 404) {
@@ -60,14 +71,18 @@ function login() {
     });
 }
 
-const goToEmailPage = () => {
-  router.push({ name: "email" });
-};
-
+// check credentials once we landing on login page and perform auto loging
 onBeforeMount(() => {
-  authontication.restoreAuthonticationDataToPinia();
-  if (authontication.authontication == true) {
-    router.replace({ name: "home" });
+  if (
+    authontication.cookies_token == null ||
+    authontication.local_storage_email == null
+  ) {
+    const credencials = authontication.restoreCredentials();
+    if (credencials == true) {
+      login();
+    } else if (authontication.restoreCredentials() == false) {
+      router.push({ name: "login" });
+    }
   }
 });
 </script>

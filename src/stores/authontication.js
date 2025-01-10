@@ -1,140 +1,98 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
-import router from "@/router";
 import "vue-toast-notification/dist/theme-sugar.css";
 
 export const useAuthonticationStore = defineStore("authontication", () => {
-  const email = ref(null);
-  const authcookie = ref(null);
-  const authontication = ref(false);
+  // cookies data
+  const cookies_token = ref(null);
 
-  const reset_email = ref(undefined);
-  const passsword = ref(undefined); //this is for login password
-  const role = ref(undefined);
-  const secrete_code = ref(undefined);
+  // local storage
+  const local_storage_email = ref(null);
 
-  // router protection variables
-  const email_page = ref(false);
-  const verification_page = ref(false);
-  const passwordRest_page = ref(false);
+  // session storage - this is only use for password reset matter
+  const session_storage_email = ref(null);
 
-  // this is for change password
-  const change_password1 = ref(null);
-  const change_password2 = ref(null);
+  // login data
+  const login_email = ref(null);
+  const login_password = ref(null);
 
-  // authontication related functions ------------------------------------------------
-  function restoreAuthonticationDataToPinia() {
-    // functionality : check the availability of the token in cookies store and email, then store in pinia store
-    email.value = localStorage.getItem("email");
-    let allCookei = document.cookie.split("; ");
-    for (let i = 0; i < allCookei.length; i++) {
-      if (allCookei[i].startsWith("user")) {
-        authontication.value = true;
-        authcookie.value = allCookei[i].slice(5);
-        break;
-      }
-    }
-    if (authontication.value == false) {
-      email.value = null;
-      authcookie.value = null;
-    }
-  }
+  // change password data
+  const secreate_code = ref(null);
 
-  function checkAuthontication() {
-    // functionality : this is mainly for check all authontication details (email, token) and directed to login page
-    if (
-      email.value === null ||
-      authcookie.value === null ||
-      authontication.value === false
-    ) {
-      restoreAuthonticationDataToPinia();
-    }
-  }
+  // loging functions
+  const storeJTW = (token) => {
+    /* store jwt token in local storage and pinia store */
+    document.cookie = `token=${token}; expires=Thu, 18 Dec 2026 12:00:00 UTC`;
+    cookies_token.value = token;
+  };
 
-  function deleteCookie() {
-    // functionality : remove cookies from cookies store and pinia store
-    // 1. get all cookes
-    // 2. select authontication tokon cookie using 'user'
-    // 3. assign previous day and expire cookie
-    let allCookei = document.cookie.split("; ");
-    for (let i = 0; i < allCookei.length; i++) {
-      if (allCookei[i].startsWith("user")) {
-        document.cookie = `${allCookei[i]}; expires=Thu, 18 Dec 2000 12:00:00 UTC;`;
-        authcookie.value = null;
-        break;
-      }
-    }
-  }
+  const removeJTW = () => {
+    /* remove jwt token from local storage and pinia store */
+    document.cookie = `token=; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+    cookies_token.value = null;
+  };
 
-  function logoutAction() {
-    deleteCookie();
-    authontication.value = false;
+  const storeEmail = (email) => {
+    /* store email in local storage and pinia store */
+    localStorage.setItem("email", email);
+    local_storage_email.value = email;
+  };
+
+  const removeEmail = () => {
+    /* remove email from local storage and pinia store */
     localStorage.removeItem("email");
-    email.value = null;
-    router.push({ name: "login" });
-  }
+    local_storage_email.value = null;
+  };
 
-  function redirectToLogin() {
-    if (authontication.value === false) {
-      logoutAction();
+  const restoreCredentials = () => {
+    /* restore credentials from cookies store and local storage to pinia store 
+      if credentials are availabe - return true
+      else - return false
+    */
+
+    // get all cookies and find the 'token' from that and restore to pinia
+    const cookies = document.cookie.split("; ");
+    for (const cookie of cookies) {
+      const [key, value] = cookie.split("=");
+      if (key === "token") {
+        cookies_token.value = value;
+      }
     }
-  }
 
-  // variables data crearing from page changing - from_to_DataCleaign ---------------
-  function fromEmailtoLoginDataClearing() {
-    reset_email.value = undefined;
-  }
+    // restore email from local storage to pinia
+    local_storage_email.value = localStorage.getItem("email");
 
-  function fromLogintoEmailDataClearing() {
-    email.value = null;
-    passsword.value = null;
-  }
+    // if one of the data is not available then remove all from local store, cookies and pinia store
+    if (cookies_token.value == null || local_storage_email.value == null) {
+      removeJTW();
+      removeEmail();
+      return false;
+    } else {
+      return true;
+    }
+  };
 
-  function fromLogintoHomeDataClearing() {
-    passsword.value = undefined;
-  }
+  const storeCredencial = (email, token) => {
+    /* store email and token in local storage and cookies */
+    storeEmail(email);
+    storeJTW(token);
+  };
 
-  function fromVerificationtoPasswordresetDataCleaning() {
-    secrete_code.value = undefined;
-  }
-
-  function fromPasswordresettoLoginDataCleaning() {
-    change_password1.value = null;
-    change_password2.value = null;
-  }
+  const removeCredentials = () => {
+    /* remove credentials from cookies store, local storage and pinia store */
+    removeJTW();
+    removeEmail();
+  };
 
   return {
-    // all variables
-    email,
-    reset_email,
-    passsword,
-    authontication,
-    role,
-    secrete_code,
-    change_password1,
-    change_password2,
-
-    // page direct validation
-    email_page,
-    verification_page,
-    passwordRest_page,
-
-    // HTTPS request
-    // codeVerification,
-
-    // cookies
-    restoreAuthonticationDataToPinia,
-    redirectToLogin,
-    authcookie,
-    deleteCookie,
-    checkAuthontication,
-    logoutAction,
-
-    // variables data crearing from page changing
-    fromEmailtoLoginDataClearing,
-    fromLogintoEmailDataClearing,
-    fromLogintoHomeDataClearing,
-    fromVerificationtoPasswordresetDataCleaning,
-    fromPasswordresettoLoginDataCleaning,
+    cookies_token,
+    local_storage_email,
+    session_storage_email,
+    login_email,
+    login_password,
+    secreate_code,
+    storeCredencial,
+    restoreCredentials,
+    removeCredentials,
   };
 });

@@ -75,7 +75,7 @@ const addNewCategory = () => {
         },
         {
           headers: {
-            Authorization: "Bearer " + authontication.authcookie,
+            Authorization: "Bearer " + authontication.cookies_token,
           },
         }
       )

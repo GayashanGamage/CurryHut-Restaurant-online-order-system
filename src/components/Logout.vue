@@ -18,7 +18,6 @@
 import router from "@/router";
 import { useAuthonticationStore } from "@/stores/authontication";
 import { useUiStore } from "@/stores/ui";
-import { onBeforeUnmount } from "vue";
 
 // pinia stores
 const uistore = useUiStore();
@@ -26,14 +25,9 @@ const authontication = useAuthonticationStore();
 
 const logout = () => {
   uistore.logoutPopupWindow = false;
-  authontication.logoutAction();
+  authontication.removeCredentials();
+  router.push({ name: "login" });
 };
-
-onBeforeUnmount(() => {
-  if (uistore.logoutPopupWindow === true) {
-    uistore.logoutPopupWindow = false;
-  }
-});
 </script>
 
 <style scoped>

@@ -35,6 +35,9 @@ export const useUiStore = defineStore("ui", () => {
   const foodAvailableTime = ref(false);
   const addNewAvailableFood = ref(false);
 
+  // delivery place related popup window
+  const addDeliveryPopup = ref(false);
+
   function openLogoutPopup() {
     logoutPopupWindow.value = true;
   }
@@ -196,6 +199,9 @@ export const useUiStore = defineStore("ui", () => {
     // menu page
     foodAvailableTime,
     addNewAvailableFood,
+
+    // delivery place related popup window
+    addDeliveryPopup,
 
     // funciton
     openLogoutPopup,

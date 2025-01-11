@@ -16,6 +16,7 @@
     <Editcategory v-if="uistore.EditCategoryWindow"></Editcategory>
     <Newfooditem v-if="uistore.AddFoodWindow"></Newfooditem>
     <Viewfood v-if="uistore.FoodView"></Viewfood>
+    <AddDelivery v-if="uistore.addDeliveryPopup"></AddDelivery>
   </div>
 </template>
 
@@ -30,6 +31,7 @@ import Deletecategory from "@/components/Deletecategory.vue";
 import Editcategory from "@/components/Editcategory.vue";
 import Newfooditem from "@/components/Newfooditem.vue";
 import Viewfood from "@/components/Viewfood.vue";
+import AddDelivery from "@/components/popups/addDelivery.vue";
 
 const uistore = useUiStore();
 </script>

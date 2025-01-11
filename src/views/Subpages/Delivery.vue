@@ -4,7 +4,7 @@
       <h2 class="page-title">Delivery</h2>
       <button
         class="action-button add-new-button"
-        @click="uistore.openNewCategoryWindow"
+        @click="openAddDeliveryPopup"
       >
         Add new
       </button>
@@ -35,7 +35,7 @@
           <div class="table-column-content">
             <p class="column-text" id="column1">Nawala</p>
             <p class="column-text" id="column2">100</p>
-            <button class="not-available" id="column3">Available</button>
+            <button class="not-available" id="column3">Notavailable</button>
             <div class="button-container" id="column4">
               <button class="action-button-edit">Edit</button>
               <button class="action-button-delete">Delete</button>
@@ -48,7 +48,14 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { useUiStore } from "@/stores/ui";
+const uiStore = useUiStore();
+
+const openAddDeliveryPopup = () => {
+  uiStore.addDeliveryPopup = true;
+};
+</script>
 
 <style scoped>
 .page-title-section {
@@ -164,7 +171,7 @@
 }
 .action-button-edit {
   width: 50%;
-  padding: 5px 18px;
+  padding: 4px 18px;
   border-radius: 4px;
   border: 1px solid #41b06e;
   background: #fff;
@@ -186,7 +193,7 @@
 
 .action-button-delete {
   width: 50%;
-  padding: 5px 18px;
+  padding: 4px 18px;
   border-radius: 4px;
   border: 1px solid #ff204e;
   background: #fff;

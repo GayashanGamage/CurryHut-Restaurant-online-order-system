@@ -17,6 +17,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from bson.objectid import ObjectId
 from typing import List, Optional
+from Router import delivery #import delivery router 
+
 
 load_dotenv()
 security = HTTPBearer()
@@ -26,6 +28,10 @@ unDeletable = ['uncategorize', 'curry', 'pilaw rice', 'drinks', 'deserts']
 
 
 app = FastAPI()
+
+# register routers
+app.include_router(delivery.route)
+
 
 # CORS midleware
 origins = [

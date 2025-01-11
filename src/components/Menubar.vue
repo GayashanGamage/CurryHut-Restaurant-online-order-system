@@ -29,19 +29,27 @@
     >
       <p class="menu-text" id="select-text-four">Category</p>
     </div>
+    <!-- delivery section -->
     <div
       class="menu-item"
       id="menu-five"
-      @click="changePage('menu-five', 'select-text-five', 'statistics')"
+      @click="changePage('menu-five', 'select-text-five', 'delivery')"
     >
-      <p class="menu-text" id="select-text-five">Statistics</p>
+      <p class="menu-text" id="select-text-five">Delivery</p>
     </div>
     <div
       class="menu-item"
       id="menu-six"
-      @click="changePage('menu-six', 'select-text-six', 'setting')"
+      @click="changePage('menu-six', 'select-text-six', 'statistics')"
     >
-      <p class="menu-text" id="select-text-six">Site setting</p>
+      <p class="menu-text" id="select-text-six">Statistics</p>
+    </div>
+    <div
+      class="menu-item"
+      id="menu-seven"
+      @click="changePage('menu-seven', 'select-text-seven', 'setting')"
+    >
+      <p class="menu-text" id="select-text-seven">Site setting</p>
     </div>
     <p class="logout" @click="uistore.openLogoutPopup">Sign out</p>
     <div class="message-container" v-if="shopstore.shutdown">
@@ -81,6 +89,11 @@ const menuList = ref([
   {
     divElementID: "menu-six",
     textElementID: "select-text-six",
+    url: "delivery",
+  }, // delivery places
+  {
+    divElementID: "menu-seven",
+    textElementID: "select-text-seven",
     url: "setting",
   }, // site setting
 ]);

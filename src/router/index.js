@@ -12,6 +12,7 @@ import Orders from "@/views/Subpages/Orders.vue";
 import Menu from "@/views/Subpages/Menu.vue";
 import Statistics from "@/views/Subpages/Statistics.vue";
 import Editmenu from "@/views/Subpages/Editmenu.vue";
+import Delivery from "@/views/Subpages/Delivery.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,6 +47,11 @@ const router = createRouter({
           path: "setting",
           component: Setting,
           name: "setting",
+        },
+        {
+          path: "delivery",
+          component: Delivery,
+          name: "delivery",
         },
         {
           path: "catagory",

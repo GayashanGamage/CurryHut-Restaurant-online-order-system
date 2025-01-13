@@ -37,6 +37,9 @@ export const useUiStore = defineStore("ui", () => {
 
   // delivery place related popup window
   const addDeliveryPopup = ref(false);
+  const editDeliveryPopup = ref(false);
+  const removeDeliveryPopup = ref(false);
+  const deliveryChange = ref(false);
 
   function openLogoutPopup() {
     logoutPopupWindow.value = true;
@@ -202,6 +205,9 @@ export const useUiStore = defineStore("ui", () => {
 
     // delivery place related popup window
     addDeliveryPopup,
+    editDeliveryPopup,
+    removeDeliveryPopup,
+    deliveryChange, // this is give a signal to the delivery component to update the delivery list
 
     // funciton
     openLogoutPopup,

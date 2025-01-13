@@ -2,37 +2,67 @@
   <div class="c-level-one-container">
     <div class="c-level-two-container" ref="addDeliveryWindow">
       <div class="c-level-three-container window-header">
-        <h3 class="window-title">Add new Delivery location</h3>
+        <h3 class="window-title">{{ title }}</h3>
       </div>
       <div class="c-level-three-container window-content">
         <div class="user-input-section">
           <div class="user-input-column">
             <p class="info">Delivery place</p>
-            <input type="text" class="user-input" placeholder="Nawal" />
+            <input
+              type="text"
+              class="user-input"
+              :placeholder="place"
+              id="userInput-place"
+              v-model="showCase.processingDeliveryLocation.place"
+            />
           </div>
           <div class="user-input-column">
             <p class="info">Price</p>
-            <input type="text" class="user-input" placeholder="100.00" />
+            <input
+              type="text"
+              class="user-input"
+              :placeholder="price"
+              id="userInput-cost"
+              v-model="showCase.processingDeliveryLocation.cost"
+            />
           </div>
           <div class="button-container">
-            <button class="action-btn">Confirm</button>
+            <button class="action-btn" @click="userAction()">
+              {{ buttonText }}
+            </button>
           </div>
         </div>
       </div>
     </div>
+    o
   </div>
 </template>
 
 <script setup>
+import { useShowCase } from "@/stores/showcase";
 import { useUiStore } from "@/stores/ui";
 import { onClickOutside } from "@vueuse/core";
 import { ref } from "vue";
+
 const uiStore = useUiStore();
+const showCase = useShowCase();
 
 const addDeliveryWindow = ref(null);
 
+// define props
+const porps = defineProps(["title", "place", "price", "buttonText", "action"]);
+
+// define emits
+const emit = defineEmits("userAction");
+
+const userAction = () => {
+  emit("userAction");
+};
+
+// close popup when clicked outside
 onClickOutside(addDeliveryWindow, () => {
   uiStore.addDeliveryPopup = false;
+  uiStore.editDeliveryPopup = false;
 });
 </script>
 

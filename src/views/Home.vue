@@ -17,6 +17,27 @@
     <Newfooditem v-if="uistore.AddFoodWindow"></Newfooditem>
     <Viewfood v-if="uistore.FoodView"></Viewfood>
     <AddDelivery v-if="uistore.addDeliveryPopup"></AddDelivery>
+    <Delivery
+      v-if="uistore.addDeliveryPopup"
+      title="Add delivery location"
+      place="Nawala"
+      price="100"
+      buttonText="Confirm"
+      action="add"
+      @userAction="addDelivery"
+    ></Delivery>
+    <Delivery
+      v-if="uistore.editDeliveryPopup"
+      title="Edit delivery location"
+      :place="showCase.processingDeliveryLocation.place"
+      :price="showCase.processingDeliveryLocation.cost"
+      buttonText="Update"
+      action="edit"
+      @userAction="editDelivery"
+    ></Delivery>
+    <RemoveDeliveryPlace
+      v-if="uistore.removeDeliveryPopup"
+    ></RemoveDeliveryPlace>
   </div>
 </template>
 
@@ -31,9 +52,60 @@ import Deletecategory from "@/components/Deletecategory.vue";
 import Editcategory from "@/components/Editcategory.vue";
 import Newfooditem from "@/components/Newfooditem.vue";
 import Viewfood from "@/components/Viewfood.vue";
-import AddDelivery from "@/components/popups/addDelivery.vue";
+import Delivery from "@/components/popups/DeliveryCommon.vue";
+import RemoveDeliveryPlace from "@/components/popups/RemoveDeliveryPlace.vue";
+import { useShowCase } from "@/stores/showcase";
+import axios from "axios";
+import { useToast } from "vue-toast-notification";
 
+// use pinia stores
 const uistore = useUiStore();
+const showCase = useShowCase();
+
+// use floating notifications
+const notification = useToast();
+
+// emit function - Delivery compoent - edit delivery details
+const editDelivery = () => {
+  axios
+    .put(`${import.meta.env.VITE_url}/delivery/update`, {
+      _id: showCase.processingDeliveryLocation.id,
+      place: showCase.processingDeliveryLocation.place,
+      cost: parseInt(showCase.processingDeliveryLocation.cost),
+    })
+    .then((response) => {
+      if (response.status == 200) {
+        uistore.deliveryChange = true; // this is give a signal to the delivery component to update the delivery list
+        uistore.editDeliveryPopup = false;
+        notification.success("Delivery location updated successfully");
+        showCase.processingDeliveryLocation = null;
+      }
+    })
+    .catch((error) => {
+      notification.error("Failed to update delivery location");
+    });
+};
+
+// emit function - Delivery compoent - add delivery details
+const addDelivery = () => {
+  axios
+    .post(`${import.meta.env.VITE_url}/delivery/create`, {
+      place: showCase.processingDeliveryLocation.place,
+      stuatus: true,
+      cost: parseInt(showCase.processingDeliveryLocation.cost),
+    })
+    .then((response) => {
+      if (response.status == 200) {
+        uistore.deliveryChange = true; // this is give a signal to the delivery component to update the delivery list
+        uistore.addDeliveryPopup = false;
+        notification.success("Delivery location added successfully");
+        showCase.processingDeliveryLocation = null;
+      }
+    })
+    .catch((error) => {
+      notification.error("Failed to add delivery location");
+    });
+};
 </script>
 
 <style scoped>

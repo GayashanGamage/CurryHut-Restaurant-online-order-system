@@ -2,7 +2,7 @@
   <div class="c-level-one-container">
     <div class="c-level-two-container">
       <div class="c-level-three-container window-header">
-        <p class="window-title">change time - {{ uiStore.timeDescription }}</p>
+        <p class="window-title">{{ uiStore.windowTitle }}</p>
       </div>
       <div class="c-level-three-container time-setter">
         <div class="watch hour" id="hour">
@@ -73,6 +73,7 @@
 </template>
 
 <script setup>
+import router from "@/router";
 import { useAuthonticationStore } from "@/stores/authontication";
 import { useShopStore } from "@/stores/shop";
 import { useUiStore } from "@/stores/ui";
@@ -94,7 +95,22 @@ const saveChangeTime = () => {
   // 4. send API request
   // 5. if successfull then show successfull message and close timechangwindow
   // 6. otherwise show error message and close timechangewindow
-  authontication.checkAuthontication();
+
+  // check authontication
+  if (
+    authontication.cookies_token == null ||
+    authontication.local_storage_email == null
+  ) {
+    const credencials = authontication.restoreCredentials();
+    if (credencials == false) {
+      router.replace({ name: "login" });
+    }
+  } else {
+    sendRequest();
+  }
+};
+
+const sendRequest = () => {
   if (
     uiStore.timeDescription == "breakfast" ||
     uiStore.timeDescription == "lunch" ||
@@ -102,17 +118,18 @@ const saveChangeTime = () => {
   ) {
     axios
       .patch(`${import.meta.env.VITE_url}/changeMealTime`, null, {
-        headers: {
-          Authorization: "Bearer " + authontication.authcookie,
-        },
         params: {
           mealTime: uiStore.timeDescription,
           h: shop.hours,
           m: shop.minutes,
         },
+        headers: {
+          Authorization: "Bearer " + authontication.cookies_token,
+        },
       })
       .then((responce) => {
         if (responce.status == 200) {
+          uiStore.refresh = true;
           toast.success(`${uiStore.timeDescription} updated successfully`);
           uiStore.closeTimeChangeWindow();
         }
@@ -128,17 +145,19 @@ const saveChangeTime = () => {
   ) {
     axios
       .patch(`${import.meta.env.VITE_url}/changeShopTime`, null, {
-        headers: {
-          Authorization: "Bearer " + authontication.authcookie,
-        },
         params: {
           shopTime: uiStore.timeDescription,
-          h: shop.hours,
-          m: shop.minutes,
+          h: parseInt(shop.hours),
+          m: parseInt(shop.minutes),
+        },
+
+        headers: {
+          Authorization: "Bearer " + authontication.cookies_token,
         },
       })
       .then((responce) => {
         if (responce.status == 200) {
+          uiStore.refresh = true;
           toast.success(`${uiStore.timeDescription} update successfully`);
           uiStore.closeTimeChangeWindow();
         }

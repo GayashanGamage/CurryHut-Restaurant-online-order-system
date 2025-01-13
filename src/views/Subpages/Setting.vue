@@ -1,6 +1,8 @@
 <template>
   <div class="s-level-one-container">
-    <h3 class="page-title">Site setting</h3>
+    <h3 class="page-title">
+      Site setting <span v-if="uistore.refresh"></span>
+    </h3>
     <div class="s-level-two-container">
       <div class="s-level-three-container">
         <h4 class="sub-title">Account credencials</h4>
@@ -26,32 +28,31 @@
           <button
             class="action-button cell"
             id="shop3"
-            @click="uistore.openTimeChangeWindow('open_time')"
+            @click="setTime('open_time')"
           >
             Edit
           </button>
+
           <p class="cell" id="shop4">Regular closing time :</p>
           <p class="cell" id="shop5">{{ shop.close_time }}</p>
           <button
             class="action-button cell"
             id="shop6"
-            @click="uistore.openTimeChangeWindow('close_time')"
+            @click="setTime('close_time')"
           >
             Edit
           </button>
+
           <p class="cell" id="shop7">Operation status :</p>
           <!-- <button class="action-button cell" id="shop8">Pause</button> -->
           <div class="cell" id="shop8">
-            <!-- <label class="switch">
-              <input type="checkbox" />
-              <span class="slider"></span> -->
             <p class="shutdown-text">Open</p>
             <label class="switch"
               ><input
                 type="checkbox"
-                @click="shutdownAction(a)"
                 id="checkbox"
-                checked="true"
+                @click="setShopStatuts"
+                :checked="shop.shutdown"
               />
               <div></div>
             </label>
@@ -67,7 +68,7 @@
           <button
             class="cell action-button"
             id="meal3"
-            @click="uistore.openTimeChangeWindow('breakfast')"
+            @click="setTime('breakfast')"
           >
             Edit
           </button>
@@ -76,7 +77,7 @@
           <button
             class="cell action-button"
             id="meal6"
-            @click="uistore.openTimeChangeWindow('lunch')"
+            @click="setTime('lunch')"
           >
             Edit
           </button>
@@ -85,7 +86,7 @@
           <button
             class="cell action-button"
             id="meal9"
-            @click="uistore.openTimeChangeWindow('dinner')"
+            @click="setTime('dinner')"
           >
             Edit
           </button>
@@ -98,7 +99,7 @@
 <script setup>
 import axios from "axios";
 import { useAuthonticationStore } from "@/stores/authontication";
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, onMounted, onUpdated, ref, watch } from "vue";
 import { useShopStore } from "@/stores/shop";
 import router from "@/router";
 import { useUiStore } from "@/stores/ui";
@@ -107,11 +108,40 @@ import { useToast } from "vue-toast-notification";
 // toast messages initiating
 const toast = useToast();
 
+// pinia stores
+const shopStore = useShopStore();
+
 // import all pinia stores
 const authontication = useAuthonticationStore();
 const shop = useShopStore();
 const uistore = useUiStore();
 
+const requestData = () => {
+  axios
+    .get(`${import.meta.env.VITE_url}/shopdetails`, {
+      headers: {
+        Authorization: "Bearer " + authontication.cookies_token,
+      },
+    })
+    .then((response) => {
+      if (response.status == 200) {
+        let APIdata = response.data;
+        shop.open_time = APIdata.open_time;
+        shop.close_time = APIdata.close_time;
+        shop.shutdown = APIdata.shutdown;
+        shop.breakfast = APIdata.breakfast;
+        shop.lunch = APIdata.lunch;
+        shop.dinner = APIdata.dinner;
+      }
+    })
+    .catch((error) => {
+      if (error.response.status == 401) {
+        router.replace({ name: "login" });
+      }
+    });
+};
+
+//  load shop details
 onBeforeMount(() => {
   if (
     authontication.cookies_token == null ||
@@ -121,28 +151,7 @@ onBeforeMount(() => {
     if (credencials == false) {
       router.replace({ name: "login" });
     } else if (credencials == true) {
-      axios
-        .get(`${import.meta.env.VITE_url}/shopdetails`, {
-          headers: {
-            Authorization: "Bearer " + authontication.cookies_token,
-          },
-        })
-        .then((response) => {
-          if (response.status == 200) {
-            let APIdata = response.data;
-            shop.open_time = APIdata.open_time;
-            shop.close_time = APIdata.close_time;
-            shop.shutdown = APIdata.shutdown;
-            shop.breakfast = APIdata.breakfast;
-            shop.lunch = APIdata.lunch;
-            shop.dinner = APIdata.dinner;
-          }
-        })
-        .catch((error) => {
-          if (error.response.status == 401) {
-            router.replace({ name: "login" });
-          }
-        });
+      requestData();
     }
   }
 });
@@ -174,32 +183,81 @@ function openPasswordResetWindow() {
     });
 }
 
-const shutdownAction = () => {
-  // function : sudden shutdown and open action for shop
-  // 1. get checkbox status
-  // 2. send API request
-  // 3. if successfull then show successfull message
-  // 4. else get acction accordingly
+// exrtact hours and minutes from selected time
+const extractTime = (selecteTime) => {
+  shopStore.hours = parseInt(selecteTime.split(":")[0]);
+  shopStore.minutes = parseInt(selecteTime.split(":")[1]);
+};
 
-  let checkboxAction = document.getElementById("checkbox");
+// open time chage window - common for all windows ---------
+const setTime = (time_arg) => {
+  uistore.timeDescription = time_arg;
+  uistore.timeWindow = true;
+
+  if (time_arg == "open_time") {
+    extractTime(shopStore.open_time);
+    uistore.windowTitle = "Open time";
+  } else if (time_arg == "close_time") {
+    extractTime(shopStore.close_time);
+    uistore.windowTitle = "Close time";
+  } else if (time_arg == "breakfast") {
+    extractTime(shopStore.breakfast);
+    uistore.windowTitle = "breakfast time";
+  } else if (time_arg == "lunch") {
+    extractTime(shopStore.lunch);
+    uistore.windowTitle = "lunch time";
+  } else if (time_arg == "dinner") {
+    extractTime(shopStore.dinner);
+    uistore.windowTitle = "dinner time";
+  }
+};
+
+// page refresh and get new data
+onUpdated(() => {
+  if (uistore.refresh == true) {
+    requestData();
+    uistore.refresh = false;
+  }
+});
+
+// came from - setShopStatus()
+const requestShopStatus = () => {
   axios
     .patch(`${import.meta.env.VITE_url}/operationhold`, null, {
       headers: {
-        Authorization: `Bearer ${authontication.authcookie}`,
+        Authorization: "Bearer " + authontication.cookies_token,
       },
     })
-    .then((response) => {
-      shop.shutdown = !shop.shutdown;
-      toast.success(response.data);
+    .then((responce) => {
+      if (responce.status == 200) {
+        if (responce.data == "successfuly open") {
+          toast.success("Shop open successfully");
+        } else if (responce.data == "successfuly close") {
+          toast.warning("Shop close successfully");
+        }
+        uistore.refresh = true;
+      }
     })
     .catch((error) => {
-      if (error.status == 401) {
-        authontication.checkAuthontication();
-      } else if (error.status == 400) {
-        toast.error(error.response.data);
-        checkboxAction.checked = false;
-      }
+      console.log(error);
     });
+};
+
+// set shop status - open or close
+const setShopStatuts = () => {
+  if (
+    authontication.cookies_token == null ||
+    authontication.local_storage_email == null
+  ) {
+    const credencials = authontication.restoreCredentials();
+    if (credencials == false) {
+      router.replace({ name: "login" });
+    } else {
+      requestShopStatus();
+    }
+  } else {
+    requestShopStatus();
+  }
 };
 </script>
 

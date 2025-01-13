@@ -10,7 +10,10 @@
     </div>
     <Logout v-if="uistore.logoutPopupWindow"></Logout>
     <Passwordchange v-if="uistore.PasswordChangeWindow"></Passwordchange>
-    <Timechange v-if="uistore.TimeChangeWindow"></Timechange>
+
+    <!-- open time window -->
+    <Timechange v-if="uistore.timeWindow"></Timechange>
+
     <Newcategory v-if="uistore.NewCategoryWindow"></Newcategory>
     <Deletecategory v-if="uistore.DeleteCategoryWindow"></Deletecategory>
     <Editcategory v-if="uistore.EditCategoryWindow"></Editcategory>

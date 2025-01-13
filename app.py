@@ -36,12 +36,14 @@ app.include_router(delivery.route)
 # CORS midleware
 origins = [
     "http://localhost:5173",
+    "http://localhost:5174",
     "http://localhost",
     "https://localhost",
     "http://localhost",
     "https://admin.gamage.me",
     "curryhut-admin.netlify.app",
     "https://curryhut-admin.netlify.app",
+    "https://curryhut.gamage.me/",
 ]
 app.add_middleware(
     CORSMiddleware,

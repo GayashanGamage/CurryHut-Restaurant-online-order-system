@@ -23,7 +23,7 @@ class DataBase:
             return False
         
     def get_delivery_place(self):
-        data = list(self.delivery.find({"status" : True}))
+        data = list(self.delivery.find({}))
         if len(data) > 0:
             delivery_data = [
                 model.get_delivery(id = str(delivery['_id']), place = delivery['place'], status = delivery['status'], cost = delivery['cost']).dict() for delivery in data

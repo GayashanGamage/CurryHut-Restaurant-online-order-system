@@ -43,7 +43,7 @@ origins = [
     "https://admin.gamage.me",
     "curryhut-admin.netlify.app",
     "https://curryhut-admin.netlify.app",
-    "https://curryhut.gamage.me/",
+    "https://curryhut.gamage.me",
 ]
 app.add_middleware(
     CORSMiddleware,

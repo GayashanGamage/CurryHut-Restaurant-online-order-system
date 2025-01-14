@@ -3,6 +3,8 @@ from . import model
 from bson.objectid import ObjectId
 import os
 from dotenv import load_dotenv
+from datetime import datetime
+from fastapi.encoders import jsonable_encoder
 
 class DataBase:
 
@@ -14,6 +16,7 @@ class DataBase:
         self.db = self.client['curryhut']
         self.user = self.db['test']
         self.delivery = self.db['Delivery']
+        self.shop = self.db['Shop']
         
     def insert_delivery_place(self, details : model.Delivery):
         store_data = self.delivery.insert_one(details.dict())
@@ -52,6 +55,11 @@ class DataBase:
             return True
         else:
             return False
+
+
+    def get_shop_details(self, id):
+        data = self.shop.find_one({'_id' : ObjectId(id)})
+        return data
 
 
 def get_database():

@@ -17,7 +17,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from bson.objectid import ObjectId
 from typing import List, Optional
-from Router import delivery #import delivery router 
+from Router import delivery, customer #import delivery router 
 
 
 load_dotenv()
@@ -31,6 +31,7 @@ app = FastAPI()
 
 # register routers
 app.include_router(delivery.route)
+app.include_router(customer.router)
 
 
 # CORS midleware

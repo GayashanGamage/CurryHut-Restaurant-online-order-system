@@ -48,6 +48,3 @@ async def delete_delivery(id : str):
     else:
         return JSONResponse(content={"status" : "Failed"}, status_code=400)
     
-@route.get("/getme/")
-async def sample():
-    return JSONResponse(content={"status" : "Success"}, status_code=200)

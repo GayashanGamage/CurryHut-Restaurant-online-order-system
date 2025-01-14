@@ -36,3 +36,7 @@ class delivery_status(BaseModel):
     @field_validator("id")
     def validate_id(cls, value):
         return ObjectId(value)
+    
+class shop_time(BaseModel):
+    open_time : datetime
+    close_time : datetime

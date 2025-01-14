@@ -40,3 +40,4 @@ class delivery_status(BaseModel):
 class shop_time(BaseModel):
     open_time : datetime
     close_time : datetime
+    shutdown : bool 

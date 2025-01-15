@@ -1,7 +1,7 @@
 from pydantic import BaseModel, field_validator, Field
 from datetime import datetime
 from bson.objectid import ObjectId
-from typing import Optional
+from typing import Optional, List
 
 
 class get_delivery(BaseModel):
@@ -41,3 +41,21 @@ class shop_time(BaseModel):
     open_time : datetime
     close_time : datetime
     shutdown : bool 
+
+class get_categories_customer(BaseModel):
+    id : str
+    name : str
+    deletable : bool
+
+
+class get_price(BaseModel):
+    price : int
+    name : str
+    portion : int
+
+class get_foods (BaseModel):
+    id : str
+    name : str
+    category_id : str 
+    description : str 
+    price : List[get_price]

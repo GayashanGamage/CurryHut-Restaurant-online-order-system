@@ -17,6 +17,8 @@ class DataBase:
         self.user = self.db['test']
         self.delivery = self.db['Delivery']
         self.shop = self.db['Shop']
+        self.category = self.db['Category']
+        self.food = self.db['Food']
         
     def insert_delivery_place(self, details : model.Delivery):
         store_data = self.delivery.insert_one(details.dict())
@@ -61,6 +63,38 @@ class DataBase:
         data = self.shop.find_one({'_id' : ObjectId(id)})
         return data
 
+
+    def get_categories_customer(self):
+        data = list(self.category.find({'deletable' : True}, {"aded_date" : 0, "last_modify_date" : 0, "item_count" : 0}))
+        if len(data) > 0:
+            categories = [
+                model.get_categories_customer(id = str(category['_id']), name = category['name'], deletable = category['deletable']).dict() for category in data
+            ]
+            return jsonable_encoder(categories)
+        else:
+            return data 
+        
+    def get_foods(self):
+        data = list(self.food.find({}))
+        if len(data) > 0:
+            serialized = [
+                model.get_foods(
+                    id = str(food['_id']),
+                    name = food['name'],
+                    category_id = str(food['category_id']),
+                    description = food['description'],
+                    price = [
+                        model.get_price(
+                            price = price['price'],
+                            name = price['name'],
+                            portion = price['portion']
+                        ).dict() for price in food['price']
+                    ]
+                ).dict() for food in data
+            ]
+            return {'availability' : True, 'data' : jsonable_encoder(serialized)}
+        else:
+            return {'availability' : False, 'data' : []}
 
 def get_database():
     return DataBase()

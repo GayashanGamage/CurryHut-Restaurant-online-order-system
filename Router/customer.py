@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 # from datetime import datetime
 # from fastapi.encoders import jsonable_encoder
 from Dependencies.shop import doesShopOpen
+from datetime import datetime
 
 router = APIRouter(prefix="/customer" , tags=["customer"])
 db = get_database()
@@ -40,7 +41,8 @@ async def getCategories():
             return JSONResponse(content = shopStatus['data'], status_code = 403)
 
 
-
-
-
+@router.get('/time')
+async def getShopTime():
+    time = datetime.now()
+    return JSONResponse(content = {'time' : str(time)}, status_code = 200)
 

@@ -3,12 +3,14 @@ from . import model
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from datetime import datetime
+import pytz
 
 db = database.get_database()
 
 def doesShopOpen():
     data = db.get_shop_details('66ff86b140ba8d2eaa1eb88a')
-    currentTime = datetime.now().time()
+    timeZoon = pytz.timezone('Asia/Colombo')
+    currentTime = datetime.now(timeZoon).time()
     if data['open_time'].time() < currentTime < data['close_time'].time() and data['shutdown'] == False:
         return {'status' : True}
     

@@ -40,9 +40,3 @@ async def getCategories():
         elif shopStatus['type'] == 'shutdown':
             return JSONResponse(content = shopStatus['data'], status_code = 403)
 
-
-@router.get('/time')
-async def getShopTime():
-    time = datetime.now()
-    return JSONResponse(content = {'time' : str(time)}, status_code = 200)
-

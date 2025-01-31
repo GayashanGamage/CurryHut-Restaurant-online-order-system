@@ -17,7 +17,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from bson.objectid import ObjectId
 from typing import List, Optional
-from Router import delivery, customer #import delivery router 
+# import routers
+from Router import delivery, customer, category, food
 
 
 load_dotenv()
@@ -32,6 +33,8 @@ app = FastAPI()
 # register routers
 app.include_router(delivery.route)
 app.include_router(customer.router)
+app.include_router(category.route)
+app.include_router(food.route)
 
 
 # CORS midleware
@@ -138,38 +141,6 @@ class Category(BaseModel):
             value['deletable'] = False
 
         return value
-class FoodDataPrice(BaseModel):
-    name : str
-    price : int
-    portion : int
-
-class FoodData(BaseModel):
-    category_id : str
-    name : str
-    description : str
-    price : list[FoodDataPrice]
-    added_data : datetime = Field(default=datetime.now())
-    modified_data : datetime = Field(default=datetime.now())
-
-    @validator('category_id', pre=False)
-    def convertCategoryId(cls, value):
-        return ObjectId(value)
-
-class EditFood(BaseModel):
-    id : str = Field(alias='_id')
-    category_id : str
-    name : str
-    description : str
-    price : list[FoodDataPrice]
-    modified_data : Optional[datetime] = Field(default=datetime.now())
-
-    @field_validator('id', check_fields=False)
-    def convertToId(cls, value):
-        return ObjectId(value)
-
-    @field_validator('category_id', check_fields=False)
-    def convertToCategoryId(cls, value):
-        return ObjectId(value)
 
 @app.post('/createAdminAccount')
 async def createAdminUserAccount(userdetials : UserDetails ):
@@ -396,163 +367,3 @@ async def shopDetials(data = Depends(authVerification)):
     b = jsonable_encoder(data)
     return JSONResponse(status_code=200, content=b)
 
-@app.post('/addcategory', tags=['category'])
-async def addCategory(categoryData : Category, data  = Depends(authVerification)):
-    # send error message if not authonticated
-    if data == False or data['role'] != 'admin':
-        return JSONResponse(status_code=401, content='unathorized')
-    # find dubplicate category
-    duplicateCategory = category.find({'name' : categoryData.name}, {'_id' : 0, 'aded_date' : 0, 'last_modify_date' : 0, 'item_count' : 0})
-    itemCount = 0
-    for item in duplicateCategory:
-        itemCount += 1
-    print(itemCount)
-    # if there, then send error message
-    if itemCount >= 1:
-        return JSONResponse(status_code=400, content='duplicate category')
-    else:
-        # insert in to database
-        dataPoints = category.insert_one(categoryData.dict())
-        # send success message
-        if dataPoints.acknowledged  == True:
-            return JSONResponse(status_code=200, content='successfull')
-        else:
-            return JSONResponse(status_code=500, content='something go wrong')
-        
-
-@app.patch('/editcategory', tags=['category'])
-async def editCategory(id : str, categoryName : str,data  = Depends(authVerification)):
-    pass
-    # if not authonticate, then send error message
-    if data == False or data['role'] != 'admin':
-        return JSONResponse( status_code=401, content='unathorized')
-    updatedData = category.find_one({'_id' : ObjectId(id)}, {'_id' : 0, 'deletable' : 1 })
-    # find dubplicated category name from dategory collection
-    duplicateCategory = list(category.find({'name' : categoryName.lower()}, {'_id' : 0, 'aded_date' : 0, 'last_modify_date' : 0, 'item_count' : 0}))
-    # if there, then send error message
-    if len(duplicateCategory) >= 1:
-        return JSONResponse(status_code=400, content='cannot duplicate category')
-    # check updated id is a unDeletable category
-    if updatedData == None:
-        return JSONResponse(status_code=404, content="selected category is unvailable")
-    elif updatedData['deletable'] == False or updatedData['deletable'] in unDeletable:
-        return JSONResponse(status_code=404, content="this category cannot updated")
-    # check reseved category name
-    elif categoryName in unDeletable:
-        return JSONResponse(status_code=404, content=f"{categoryName} is an invalied category name.")
-    # otherwise update usin _id field 
-    updatedData = category.update_one({'_id' : ObjectId(id)}, { '$set' : {'name' : categoryName.lower()}})
-    if updatedData.modified_count == 1:
-        return JSONResponse(status_code=200, content='successfull')
-    else:
-        return JSONResponse(status_code=500, content='something go wrong. try again later')
-        
-
-@app.delete('/deletecategory/{categoryId}', tags=['category'])
-async def deleteCategory(categoryId : str, data = Depends(authVerification)):
-    pass
-    # check authontication validation
-    if data == False or data['role'] != 'admin':
-        return JSONResponse( status_code=401, content='unathorized')
-    # get category
-    selectedCategory = category.find_one({'_id' : ObjectId(categoryId)})
-    # if not available send error
-    if selectedCategory == None:
-        return JSONResponse(status_code=404, content="selected category is not available")
-    # check selected category is unDeletable
-    elif selectedCategory['deletable'] == False:
-        return JSONResponse(status_code=404,content="this category cannot delete")
-    # otherwise deleted and send success message
-    else:
-        deletedCategory = category.delete_one({'_id' : ObjectId(categoryId)})
-        if deletedCategory.deleted_count == 1:
-            return JSONResponse(status_code=200, content="successfull")
-        else:
-            return JSONResponse(status_code=500, content="something go wrong try latter")
-            
-
-@app.get('/getcategories', tags=['category'], response_model=List[Category])
-async def getCategories(data = Depends(authVerification)):
-    pass
-    # authontication validation
-    if data == False or data['role'] != 'admin':
-        return JSONResponse( status_code=401, content='unathorized')
-    # get all data
-    allCategoryDetails = list(category.find({}))
-    # send 
-    if len(allCategoryDetails) == 0:
-        return JSONResponse(status_code=404, content='categories not available')
-    else:
-        # convert objectId to string
-        for item in allCategoryDetails:
-            item['_id'] = str(item['_id'])
-
-        return JSONResponse(status_code=200, content=jsonable_encoder(allCategoryDetails))
-    
-@app.post('/addfooditem', tags=['food'])
-async def addFoodItem(foodData : FoodData, data = Depends(authVerification)):
-    # check authontication
-    if data == False or data['role'] != 'admin':
-        return JSONResponse( status_code=401, content='unathorized')
-    # check dubplicate food item name and category id
-    findCategory = category.find_one({'_id' : ObjectId(foodData.category_id)})
-    dubplicateItem = list(food.find({'name' : foodData.name}))
-    # if dubplicate name, then send error message
-    if findCategory == None:
-        return JSONResponse(status_code=409, content="category not found")
-    elif len(dubplicateItem) >= 1:
-        return JSONResponse(status_code=409, content="dubplicate food name")    
-    # else create new food item
-    else:
-        insertData = food.insert_one(foodData.dict())
-        if insertData.acknowledged == True:
-            return JSONResponse(status_code=200, content='successfull')
-        else:
-            return JSONResponse(status_code=400, content='someting whent wrong')
-            
-@app.get('/getallfood', tags=['food'])
-async def getAllFood(data = Depends(authVerification)):
-    # check authontication
-    if data == False or data['role'] != 'admin':
-        return JSONResponse( status_code=401, content='unathorized')
-    # send all food 
-    allFoodItems = list(food.find({}))
-    for item in allFoodItems:
-        item['_id'] = str(item['_id'])
-        item['category_id'] = str(item['category_id'])
-
-    return JSONResponse(status_code=200, content=jsonable_encoder(allFoodItems))
-
-@app.patch('/editfood', tags=['food'])
-async def editFoof(editfood : EditFood, data = Depends(authVerification)):
-    # check authontication
-    if data == False or data['role'] != 'admin':
-        return JSONResponse( status_code=401, content='unathorized')
-    # check if _id is exist
-    checkFoodId = food.find_one({"_id" : editfood.id})
-    checkCategoryId = category.find_one({"_id" : editfood.category_id})
-    if checkFoodId == None or checkCategoryId == None:
-        return JSONResponse(status_code=404, content='cannot find food item or category')
-    else:
-        # update food item
-        update_item = food.update_one({'_id' : editfood.id}, {'$set' : editfood.dict(exclude={'id'})})
-        if update_item.modified_count == 1:
-            return JSONResponse(status_code=200, content='successfull')
-        else:
-            return JSONResponse(status_code=500, content='something went wrong')
-
-
-@app.delete('/deletefood/{foodId}', tags=['food'])
-async def deleteFood( foodId : str, data = Depends(authVerification)):
-    # check authontication 
-    if data == False or data['role'] != 'admin':
-        return JSONResponse( status_code=401, content='unathorized')
-    # try to delete food 
-    deletedFood = food.delete_one({'_id' : ObjectId(foodId)})
-    # if success, then send success messege
-    if deletedFood.deleted_count == 1:
-        return JSONResponse(status_code=200, content='successfull')
-    # else, send error message
-    else:
-        return JSONResponse(status_code=404, content='something go wrong')
-        

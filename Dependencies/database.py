@@ -96,5 +96,126 @@ class DataBase:
         else:
             return {'availability' : False, 'data' : []}
 
+
+    def check_dubplicate_categories(self, categoryName):
+        # perpose : find dublicated category names
+        # result : True - duplicate, False - not duplicate
+        duplicateCategory = list(self.category.find({'name' : categoryName.lower()}, {'_id' : 0, 'aded_date' : 0, 'last_modify_date' : 0, 'item_count' : 0}))
+        if len(duplicateCategory) > 0:
+            return True
+        else: 
+            return False
+
+    def insert_category(self, categoryData):
+        # perpose : insert new category in to the database
+        # result : True - success, False - failed
+        store_data = self.category.insert_one(categoryData.dict())
+        if store_data.acknowledged:
+            return True
+        else:
+            return False
+        
+    def update_category(self, id, newName):
+        # perpose : get category by id
+        # result : false : category is not available, true : category updated successfully
+        data = self.category.find_one_and_update({'_id' : ObjectId(id)}, { '$set' : {'name' : newName}} )
+        if data == None:
+            return False
+        else:
+            return True
+
+    def delete_category(self, id):
+        # perspose : delete category by id
+        # result : true : seccussfull, false : unsuccessfull
+        data = self.category.delete_one({'_id' : ObjectId(id)})
+        if data.deleted_count == 1:
+            return True
+        else:
+            return False
+
+    def get_categories(self):
+        # perpose : get all categories
+        # result : false : empty list || all categories list
+        data = list(self.category.find({}))
+        if len(data) > 0:
+            categories = [
+                model.Category(
+                    id = str(category['_id']),
+                    name = category['name'],
+                    aded_date = category['aded_date'],
+                    last_modify_date = category['last_modify_date'],
+                    item_count = category['item_count'],
+                    deletable = category['deletable']
+                ).dict() for category in data
+            ]
+            return jsonable_encoder(categories)
+        else:
+            return False
+        
+    def check_dubplicate_food(self, foodName):
+        print('try to excute this')
+        # perpose : check duplicate food item
+        # result : true : duplicate, false : not duplicate
+        data = list(self.food.find({'name' : foodName.lower()}, {'_id' : 0, 'category_id' : 0, 'description' : 0, 'price' : 0, 'added_data' : 0, 'modified_data' : 0}))
+        if len(data) >= 1:
+            return True
+        else:
+            return False
+        
+    def insert_food(self, foodData):
+        # perpose : insert food item
+        # result : true : success, false : failed
+        data = self.food.insert_one(foodData.dict())
+        if data.acknowledged:
+            return True
+        else:
+            return False
+        
+    def get_food(self):
+        # perpose : get all food items
+        # result : false : empty list || all food items
+        data = list(self.food.find({}))
+        if len(data) >= 1:
+            foods = [
+                model.getFood(
+                    id  = str(food['_id']),
+                    category_id = str(food['category_id']),
+                    name = food['name'],
+                    description= food['description'],
+                    added_data = food['added_data'],
+                    modified_data = food['modified_data'],
+                    price = [
+                        model.FoodDataPrice(
+                            name = price['name'],
+                            price = price['price'],
+                            portion = price['portion']
+                        ) for price in food['price']
+                    ]                   
+                ).dict() for food in data
+            ]
+            return jsonable_encoder(foods)
+        else:
+            return False
+
+    def edit_food(self, foodData):
+        # perpose : update food items
+        # result : true : successfull || false : failed
+        data = self.food.update_one({"_id" : foodData.id}, {"$set" : foodData.dict(exclude={"id"})})
+        if data.acknowledged:
+            return True
+        else:
+            return False
+
+    def remove_food(self, foodId):
+        # perpose : delete food item
+        # result : true : successfull || false : failed
+        data = self.food.delete_one({"_id" : ObjectId(foodId)})
+        if data.deleted_count == 1:
+            return True
+        else:
+            return False
+
+
 def get_database():
     return DataBase()
+

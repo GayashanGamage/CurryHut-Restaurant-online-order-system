@@ -274,11 +274,89 @@ class DataBase:
             return False
 
     def change_password(self, email, encoded_password):
+        # perposer : change password
+        # result : true : successfull, false : failed
         data = self.user.update_one({'email' : email}, {'$set' : {'password' : encoded_password, 'password_change' : False}})
         if data.modified_count == 1:
             return True
         else:
             return False
+        
+    def change_meal_time(self, mealTime, h, m):
+        # perpose : udpate meal time
+        # result : true : successfull, false : failed
+        shopUpdate = self.shop.update_one({}, {'$set' : {mealTime : datetime(year=1970, month=1, day=1, hour=h, minute=m)}})
+        if shopUpdate.modified_count == 1:
+            return True
+        else:
+            return False
+        
+        
+    def check_meal_time(self, mealTime, h, m):
+        # perpose : check other meal time with new meal time
+        # related function : change_meal_time()
+        # special : if checkMealTime is false then directly raise a error
+        timeData = self.shop.find_one({})
+        # time comparison with other meal times
+        if(mealTime == 'breakfast'):
+            comparison = datetime(year=1970, month=1, day=1, hour=4, minute=00).time() < datetime(year=1970, month=1, day=1, hour=h, minute=m).time() < timeData['lunch'].time()
+            if comparison == False:
+                return JSONResponse(status_code=400, content=f'enter time between 4:00 am and {timeData["lunch"].time()} -1 ')
+            else:
+                return self.change_meal_time(mealTime, h, m)
+        elif(mealTime == 'lunch'):
+            comparison = timeData['breakfast'].time() < datetime(year=1970, month=1, day=1, hour=h, minute=m).time() < timeData['dinner'].time()
+            if comparison == False:
+                 return JSONResponse(status_code=400, content=f'enter time between {timeData["breakfast"].time()}am and {timeData["dinner"].time()}pm -2')
+            else:
+                return self.change_meal_time(mealTime, h, m)
+        elif(mealTime == 'dinner'):  
+            comparison = timeData['lunch'].time() < datetime(year=1970, month=1, day=1, hour=h, minute=m).time() < datetime(year=1970, month=1, day=1, hour=23, minute=59).time()
+            if comparison == False:
+                return JSONResponse(status_code=400, content=f'enter time between {timeData["lunch"].time()}pm and 00:00 -3')
+            else:
+                return self.change_meal_time(mealTime, h, m)
+
+    def get_shopdetails_row(self):
+        # get all shop details - non-formated for output
+        shopData = self.shop.find_one({}, {'_id' : 0})
+        if shopData != None:
+            return shopData
+        else:
+            return False
+
+    def get_shopdetails(self):
+        # get all shop details - formated for output
+        shopData = self.shop.find_one({},{'_id' : 0})
+        a = jsonable_encoder(shopData)
+        data = {
+            'open_time' : datetime.fromisoformat(a['open_time']).time(),
+            'close_time' : datetime.fromisoformat(a['close_time']).time(),
+            'breakfast' : datetime.fromisoformat(a['breakfast']).time(),
+            'lunch' : datetime.fromisoformat(a['lunch']).time(),
+            'dinner' : datetime.fromisoformat(a['dinner']).time(),
+            'shutdown' : a['shutdown']
+        }
+        return jsonable_encoder(data)
+
+    def update_shop_status(self, current_status):
+        # perpose : update the current status of the shop
+        # result : true : status updated , false : status update failed 
+        data = self.shop.update_one({}, {'$set' : {'shutdown' : not current_status}})
+        if data.modified_count == 1:
+            return True
+        elif data.modified_count == 0:
+            return False
+            
+    def update_shop_time(self, shopTime, h, m):
+        # perpose : update shop time ( opening time and closing time)
+        # result : true : successfull, false : failed
+        shopUpdate = self.shop.update_one({}, {'$set' : {shopTime : datetime(year=1970, month=1, day=1, hour=h, minute=m)}})
+        if shopUpdate.modified_count == 1:
+            return True
+        else:
+            return False
+
 
 def get_database():
     return DataBase()

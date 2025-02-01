@@ -19,6 +19,7 @@ def sendEmailResults(rslt):
 def sendEmail(Subject, To, Template_id, code = None):
     # perpose : send email 
     # response : true : successfull || false : failed
+    # linked functions : sendEmailResults()
     subject = Subject
     sender = {"name":"Administration account creation","email":"gayashan.randimagamage@gmail.com"}
     to = [{"email": To ,"name": 'dummy name'}]

@@ -131,3 +131,25 @@ class EditFood(BaseModel):
     @field_validator('category_id', check_fields=False)
     def convertToCategoryId(cls, value):
         return ObjectId(value)
+    
+class userCredencials(BaseModel):
+    email : str
+    password : str
+    role : str
+
+class UserDetails(userCredencials):
+    first_name : str
+    last_name : str
+    created : datetime = None
+    send_time : None
+    secreate_code : None
+    password_change : bool = False
+    
+class MailVerification(BaseModel):
+    email : str
+
+class Code(MailVerification):
+    code : int
+
+class Password(MailVerification):
+    password : str

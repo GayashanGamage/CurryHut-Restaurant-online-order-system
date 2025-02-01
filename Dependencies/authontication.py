@@ -24,8 +24,8 @@ def decodeToken(token):
 
 
 # encode password 
-def encodePassword(palinPassword):
-    encriptPassword = pbkdf2_sha256.hash(palinPassword)    
+def encodePassword(plainPassword):
+    encriptPassword = pbkdf2_sha256.hash(plainPassword)    
     return encriptPassword
 
 # decode password

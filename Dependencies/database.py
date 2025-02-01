@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 from fastapi.encoders import jsonable_encoder
+from random import randint
 
 class DataBase:
 
@@ -14,7 +15,7 @@ class DataBase:
     def __init__(self):
         self.client = MongoClient(os.getenv("mongodb"))
         self.db = self.client['curryhut']
-        self.user = self.db['test']
+        self.user = self.db['User']
         self.delivery = self.db['Delivery']
         self.shop = self.db['Shop']
         self.category = self.db['Category']
@@ -214,7 +215,70 @@ class DataBase:
             return True
         else:
             return False
+        
+        
+    def check_duplicate_admin_user(self, user):
+        # perpose : check duplicate admin user
+        # result : true : duplicate, false : not duplicate
+        data = self.user.find_one({'email' : user.email, 'role' : user.role})
+        if data == None:
+            return False
+        else:
+            return True
 
+    def insert_admin_user(self, user):
+        # perpose : create new admin user
+        # result : true : successfull, false : failed
+        data = self.user.insert_one(user.dict())
+        if data.acknowledged:
+            return True
+        else:
+            return False
+        
+    def update_secreate_code(self, email):
+        # perpose : update secreate code
+        # result : status.True : successfull, status.False : failed
+        secreate_code = randint(1000, 9999)
+        code = self.user.update_one({'email' : email}, {'$set' : {'secreate_code' : secreate_code, 'send_time' : datetime.now(), 'password_change' : True}})
+        if code.modified_count == 1:
+            return {'status' : True, 'code' : secreate_code}
+        else:
+            return {'status' : False}
+
+    def get_credencials(self, usercredencial):
+        # perpose : get user credencials
+        # result : false : user not found || found : data
+        data = self.user.find_one({'email' : usercredencial.email, 'role'  : usercredencial.role})
+        if data != None:
+            return data
+        else:
+            return False
+        
+    def check_secreate_code(self, code):
+        # perpose : check secreate code
+        # result : true : match email and secreate code, false : email or secreate code not matched
+        data = self.user.find_one({'email' : code.email})
+        if(data['password_change'] == True and data['secreate_code'] == code.code):
+            self.user.update_one({'email' : code.email}, {'$set' : {'secreate_code' : None, 'send_time' : None}})
+            return True
+        else:
+            return False
+        
+    def check_password_change(self, password):
+        # perpose : check whether request password change or not
+        # result : true : password change requested, false : not requested
+        data = self.user.find_one({'email' : password.email})
+        if data['password_change'] == True:
+            return True
+        else:
+            return False
+
+    def change_password(self, email, encoded_password):
+        data = self.user.update_one({'email' : email}, {'$set' : {'password' : encoded_password, 'password_change' : False}})
+        if data.modified_count == 1:
+            return True
+        else:
+            return False
 
 def get_database():
     return DataBase()

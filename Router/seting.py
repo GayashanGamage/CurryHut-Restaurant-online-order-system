@@ -13,14 +13,30 @@ async def changeMealTime(mealTime : str, h : int, m : int, data = Depends(authon
     if data == False or data['role'] != 'admin':
         return JSONResponse(status_code=401, content='unathorized')
     # check mealtime and update acordingly
-    if mealTime == 'breakfast' or mealTime =='lunch' or mealTime == 'dinner':
-        change_meal_time = db.check_meal_time(mealTime, h, m)
-        if change_meal_time == True:
+    if mealTime == 'breakfast' or mealTime =='lunch' or mealTime == 'dinner' and 0 <= h <= 23 and 0 <= m <= 59:
+        check_meal_time = db.check_meal_time(mealTime, h, m)
+        if check_meal_time['status'] == True:
             return JSONResponse(status_code=200, content='successfull')
-        elif change_meal_time == False:
-            return JSONResponse(status_code=500, content='something went wrong')
+        
+        # return invalied meal time ( compare with the open, close and other meal time )
+        elif check_meal_time['code'] == 450:
+            return JSONResponse(status_code=400, content='invalied breakfast time')
+        elif check_meal_time['code'] == 451:
+            return JSONResponse(status_code=400, content='invalied lunch time')
+        elif check_meal_time['code'] == 452:
+            return JSONResponse(status_code=400, content='invalied dinner time')
+        
+        # unprocessable error ( server error )
+        elif check_meal_time['code'] == 500:
+            return JSONResponse(status_code=500, content='something went wrong - server')
+    
+    # invalied meal time name
+    elif mealTime != 'breakfast' or mealTime != 'lunch' or mealTime != 'dinner':
+        return JSONResponse(status_code=404, content='invalied meal-name')
+    
+    # invalied time
     else:
-        return JSONResponse(status_code=404, content='meal time not found')
+        return JSONResponse(status_code=400, content='invalid time')
   
 @route.get('/shopdetails')
 async def shopDetials(data = Depends(authontication.authVerification)):
@@ -80,4 +96,4 @@ async def changeShopTime(shopTime : str, h : int, m : int, data = Depends(authon
         else:
             return JSONResponse(status_code=500, content='something went wrong - server')
     else:
-        return JSONResponse(status_code=404, content='selected time not fond')
+        return JSONResponse(status_code=404, content='selected shop time name is not fond')

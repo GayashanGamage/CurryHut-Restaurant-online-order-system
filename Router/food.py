@@ -13,15 +13,21 @@ async def addFoodItem(foodData : model.FoodData, data = Depends(authontication.a
     # check authontication
     if data == False or data['role'] != 'admin':
         return JSONResponse( status_code=401, content='unathorized')
+    
     # check dubplicate food item name and category id
-    if db.check_dubplicate_food(foodData.name) == False:
+    duplicate_food = db.check_dubplicate_food(foodData.name)
+    check_category = db.check_category_id(foodData.category_id)
+    
+    if duplicate_food == False and check_category == True:
         # insert food item
         food_data = db.insert_food(foodData)
         if food_data == True:
             return JSONResponse(status_code=200, content='successfull')
         else:
-            return JSONResponse(status_code=400, content='something went wrong')
-    else:
+            return JSONResponse(status_code=500, content='something went wrong')
+    elif check_category == False:
+        return JSONResponse(status_code=404, content='category id not found')
+    elif duplicate_food == True:
         return JSONResponse(status_code=400, content='duplicate food item')
         
     
@@ -47,7 +53,7 @@ async def editFoof(editfood : model.EditFood, data = Depends(authontication.auth
     else:
         food_data = db.edit_food(editfood)
         if food_data == False:
-            return JSONResponse(status_code=404, content='item connot found')
+            return JSONResponse(status_code=500, content='something went wrong - server')
         elif food_data == True:
             return JSONResponse(status_code=200, content='successfull')
 

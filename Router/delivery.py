@@ -12,11 +12,17 @@ db = database.get_database()
 
 @route.post("/create")
 async def set_delivery(details : Delivery):
-    store_data = db.insert_delivery_place(details)
-    if store_data:
-        return JSONResponse(content={"status" : "Success"}, status_code=200)
+    # check duplicated names
+    places = db.check_delivery_duplicate(details.place)
+    if places['status'] == True:
+        return JSONResponse(content={"status" : "Failed", "message" : "Place already exist"}, status_code=400)
     else:
-        return JSONResponse(content={"status" : "Failed"}, status_code=400)
+        # insert new place
+        store_data = db.insert_delivery_place(details)
+        if store_data:
+            return JSONResponse(content={"status" : "Success"}, status_code=200)
+        else:
+            return JSONResponse(content={"status" : "Failed"}, status_code=400)
     
 @route.get("/get")
 async def get_delivery():
@@ -25,11 +31,18 @@ async def get_delivery():
 
 @route.put("/update")
 async def update_delivery(details : delivery_update):
-    store_data = db.update_delivery_details(details)
-    if store_data:
-        return JSONResponse(content={"status" : "Success"}, status_code=200)
+    # get duplicate delivery places
+    places = db.check_delivery_duplicate(details.place)
+    if places['status'] == True:
+        # check if the place is the same as the one being updated
+        if places['data'][0]['_id'] != details.id:
+            return JSONResponse(content={"status" : "Failed", "message" : "Place already exist"}, status_code=400)
     else:
-        return JSONResponse(content={"status" : "Failed"}, status_code=400)
+        store_data = db.update_delivery_details(details)
+        if store_data:
+            return JSONResponse(content={"status" : "Success"}, status_code=200)
+        else:
+            return JSONResponse(content={"status" : "Failed"}, status_code=500)
 
 @route.post('/set-status')
 async def deliver_status( details : delivery_status):

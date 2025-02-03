@@ -18,15 +18,17 @@ async def createAdminUserAccount(userdetials : model.UserDetails ):
         userdetials.password = authontication.encodePassword(userdetials.password)
         # insert inew user data
         data = db.insert_admin_user(userdetials)
-        if data == True:
+        if data['status'] == True:
             # send eamil - regardin to creation of new eamil
             emailData = email.sendEmail('Create new admin account', userdetials.email, 6)
             if emailData == True:
                 return JSONResponse(status_code=200, content="successfull")
             elif emailData == False:
                 return JSONResponse(status_code=500, content="email cannot send")
-        elif data == False:
-            return JSONResponse(status_code=422, content="something go wrong")    
+        elif data['code'] == 500:
+            return JSONResponse(status_code=500, content="something go wrong")
+        elif data['code'] == 401:
+            return JSONResponse(status_code=401, content="invalied role")    
         
 
 
@@ -48,7 +50,7 @@ async def createSereateCode(email_address : str):
 async def login(usercredencial : model.userCredencials):
     # get user data from database
     userDetails = db.get_credencials(usercredencial)
-    # validate password
+    # check user entered data with database data
     if userDetails != False:
         # decode password
         decoded = authontication.decodePasword(usercredencial.password, userDetails['password'])
@@ -62,16 +64,18 @@ async def login(usercredencial : model.userCredencials):
             return JSONResponse(status_code=406, content='password incorect')
     # email not found error
     elif userDetails == False:
-        return JSONResponse(status_code=404, content='email not found')
+        return JSONResponse(status_code=404, content='Credencials not valied')
     
 @route.post('/codeverification')
 async def codeverification(code : model.Code):
     # check user's secreate code and auto generate code are same or not
     data = db.check_secreate_code(code)
-    if data == True:
+    if data['status'] == True:
         return JSONResponse(status_code=200, content='successfull')
-    else:
-        return JSONResponse(status_code=404, content='incorect secrete code')
+    elif data['code'] == 401:
+        return JSONResponse(status_code=401, content='unauthorized')
+    elif data['code'] == 404:
+        return JSONResponse(status_code=404, content='email not found')
       
 @route.post('/resetpassword')
 async def resetpassword(password : model.Password):

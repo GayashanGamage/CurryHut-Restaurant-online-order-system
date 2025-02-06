@@ -108,6 +108,9 @@ class Category(BaseModel):
 
         return value
 
+class getCategories(Category):
+    id : str
+
 # food section
 
 

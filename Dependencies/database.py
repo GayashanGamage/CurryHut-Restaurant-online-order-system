@@ -183,7 +183,7 @@ class DataBase:
         data = list(self.category.find({}))
         if len(data) > 0:
             categories = [
-                model.Category(
+                model.getCategories(
                     id=str(category['_id']),
                     name=category['name'],
                     aded_date=category['aded_date'],

@@ -22,6 +22,7 @@ class DataBase:
         self.shop = self.db['Shop']
         self.category = self.db['Category']
         self.food = self.db['Food']
+        self.rider = self.db['Rider']
 
     def insert_delivery_place(self, details):
         # perpose : insert delivery place
@@ -451,17 +452,14 @@ class DataBase:
 
     def get_shopdetails(self):
         # get all shop details - formated for output
+        # return : dataset : successfull, false : cannot find related data
         shopData = self.shop.find_one({}, {'_id': 0})
-        a = jsonable_encoder(shopData)
-        data = {
-            'open_time': datetime.fromisoformat(a['open_time']).time(),
-            'close_time': datetime.fromisoformat(a['close_time']).time(),
-            'breakfast': datetime.fromisoformat(a['breakfast']).time(),
-            'lunch': datetime.fromisoformat(a['lunch']).time(),
-            'dinner': datetime.fromisoformat(a['dinner']).time(),
-            'shutdown': a['shutdown']
-        }
-        return jsonable_encoder(data)
+        if shopData == None:
+            return False
+        elif shopData != None:
+            # formating the data
+            data = model.shop_details(** shopData)
+            return jsonable_encoder(data)
 
     def update_shop_status(self, current_status):
         # perpose : update the current status of the shop
@@ -480,6 +478,117 @@ class DataBase:
             {}, {'$set': {shopTime: datetime(year=1970, month=1, day=1, hour=h, minute=m)}})
         if shopUpdate.modified_count == 1:
             return True
+        else:
+            return False
+
+    def check_duplicate_rider(self, rider):
+        # perpose : check duplicate rider
+        # result : true : duplicate, false : not duplicate
+        params = {'$or': [
+            {'driving_licens_number': rider.driving_licens_number},
+            {'vehicle_number': rider.vehicle_number},
+            {'nic_number': rider.nic_number},
+            {'mobile': rider.mobile},
+        ]}
+
+        data = list(self.rider.find(params))
+        if len(data) == 0:
+            return False
+        elif len(data) >= 1:
+            return True
+
+    def insert_rider(self, rider):
+        # perpose : insert new rider
+        # result : true : successfull, false : failed
+        data = self.rider.insert_one(rider.dict())
+        if data.acknowledged:
+            return True
+        else:
+            return False
+
+    def compleate_all_orders(self, id):
+        # perpose : check rider on the way to delivery or not
+        # result : true : completed, false : not completed
+        data = self.rider.find_one(
+            {'_id': ObjectId(id), 'available': True, 'order_count': 0})
+        if data != None:
+            return True
+        elif data == None:
+            return False
+
+    def remove_rider(self, id):
+        # perpose : remove rider
+        # result : true : successfull, false : failed
+        data = self.rider.delete_one({'_id': ObjectId(id)})
+        if data.deleted_count == 1:
+            return True
+        else:
+            return False
+
+    def store_secreate_code(self, details):
+        # perpose : store secreate code in the database
+        # result : True : successfull store, false : secrete code not store
+        data = self.rider.find_one_and_update({'mobile': details.mobile}, {
+            '$set': {'secreate_code': details.secreate_code, 'verification': False}})
+        if data != None:
+            return True
+        else:
+            return False
+
+    def update_rider_contact(self, details):
+        # perpose : update existing riders contact number
+        # result : true : successfull, false : failed
+        data = self.rider.find_one_and_update({'mobile': details.old_mobile, 'verification': False}, {
+                                              "$set": {"mobile": details.new_mobile, 'secreate_code': 0, 'verification': True, 'verified_at': datetime.now()}})
+        if data != None:
+            return True
+        elif data == None:
+            return False
+
+    def orders_compleated_and_return(self, id):
+        # perpose : check all oders compleated and return to the shop when log of (false) the rider
+        # result : true : successfull, false : failed
+        data = self.rider.find_one(
+            {'_id': ObjectId(id), 'order_count': 0, 'available': True})
+        if data != None:
+            return True
+        else:
+            return False
+
+    def switch_rider_log(self, id):
+        # perpose : switch the riders log status ( true or false)
+        # result : true : successfull, false : failed
+        data = self.rider.find_one_and_update({'_id': ObjectId(id)},
+                                              [{'$set': {'log': {'$not': '$log'}}}])
+        print(data)
+        if data != None:
+            return True
+        elif data == None:
+            return False
+
+    def get_all_riders(self):
+        # perpose : get all riders
+        # return : false : no any riders , data : all riders
+        data = list(self.rider.find({}))
+        if data != None:
+            all_riders = [
+                model.AllRiders(
+                    id=str(rider['_id']),
+                    mobile=rider['mobile'],
+                    verification=rider['verification'],
+                    first_name=rider['first_name'],
+                    last_name=rider['last_name'],
+                    nic_number=rider['nic_number'],
+                    driving_licens_number=rider['driving_licens_number'],
+                    vehicle_number=rider['vehicle_number'],
+                    log=rider['log'],
+                    order_count=rider['order_count'],
+                    available=rider['available'],
+                    # available : if rider lear for delivery set to false,  otherwise true
+                    created_at=rider['created_at'],
+                ) for rider in data
+            ]
+            return jsonable_encoder(all_riders)
         else:
             return False
 

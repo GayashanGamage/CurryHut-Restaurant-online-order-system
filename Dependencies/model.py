@@ -2,6 +2,9 @@ from pydantic import BaseModel, field_validator, Field, root_validator, validato
 from datetime import datetime
 from bson.objectid import ObjectId
 from typing import Optional, List
+from random import randint
+from typing import Optional
+from datetime import datetime
 
 unDeletable = ['uncategorize', 'curry', 'pilaw rice', 'drinks', 'deserts']
 
@@ -53,6 +56,15 @@ class delivery_status(BaseModel):
 class shop_time(BaseModel):
     open_time: datetime
     close_time: datetime
+    shutdown: bool
+
+
+class shop_details(BaseModel):
+    open_time: datetime
+    close_time: datetime
+    breakfast: datetime
+    lunch: datetime
+    dinner: datetime
     shutdown: bool
 
 
@@ -178,3 +190,69 @@ class Code(MailVerification):
 
 class Password(MailVerification):
     password: str
+
+
+class Rider(BaseModel):
+    mobile: int
+    verification: bool = Field(default=False)
+    secreate_code: Optional[int] = 0
+    first_name: str
+    last_name: str
+    nic_number: str
+    driving_licens_number: str
+    vehicle_number: str
+    log: bool = Field(default=False)
+    order_count: Optional[int] = 0
+    available: bool = Field(default=False)
+    created_at: datetime = Field(default=datetime.now())
+
+    @field_validator('secreate_code', check_fields=False)
+    def generateCode(cls, value):
+        value = randint(100000, 999999)
+        return value
+
+
+class AllRiders(Rider):
+    id: str
+    mobile: int
+    verification: bool
+    first_name: str
+    last_name: str
+    nic_number: str
+    driving_licens_number: str
+    vehicle_number: str
+    log: bool
+    order_count: int
+    available: bool
+    created_at: datetime
+    # verified_at: datetime
+
+    @field_validator('id', check_fields=False)
+    def convertId(cls, value):
+        return str(value)
+
+
+class RiderDeleteForce(BaseModel):
+    id: str = Field(..., alias="_id")
+    password: str
+
+    @field_validator('id', check_fields=False)
+    def convertToId(cls, value):
+        return ObjectId(value)
+
+
+class RiderVerification(BaseModel):
+    mobile: int
+    secreate_code: Optional[int] = 0
+    first_name: str
+
+    @field_validator('secreate_code', check_fields=False)
+    def generateCode(cls, value):
+        value = randint(100000, 999999)
+        return value
+
+
+class RiderContactUpdate(BaseModel):
+    new_mobile: int
+    old_mobile: int
+    secreate_code: int

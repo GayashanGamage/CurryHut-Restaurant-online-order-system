@@ -10,11 +10,16 @@ load_dotenv()
 security = HTTPBearer()
 
 # create JWT joken
+
+
 def encodeToken(email, password, role):
-    token = jwt.encode({'email' : email, 'password' : password, 'role' : role}, os.getenv('jwt_token'), algorithm='HS256')
+    token = jwt.encode({'email': email, 'password': password,
+                       'role': role}, os.getenv('jwt_token'), algorithm='HS256')
     return token
 
 # decode JWT token
+
+
 def decodeToken(token):
     try:
         data = jwt.decode(token, os.getenv('jwt_token'), algorithms=['HS256'])
@@ -23,16 +28,20 @@ def decodeToken(token):
         return False
 
 
-# encode password 
+# encode password
 def encodePassword(plainPassword):
-    encriptPassword = pbkdf2_sha256.hash(plainPassword)    
+    encriptPassword = pbkdf2_sha256.hash(plainPassword)
     return encriptPassword
 
 # decode password
+
+
 def decodePasword(palinPassword, encriptPassword):
     decriptedPassword = pbkdf2_sha256.verify(palinPassword, encriptPassword)
     return decriptedPassword
 
 # deal with barer token
-def authVerification(details : Annotated[HTTPAuthorizationCredentials, Depends(security)]):
+
+
+def authVerification(details: Annotated[HTTPAuthorizationCredentials, Depends(security)]):
     return decodeToken(details.credentials)

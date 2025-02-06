@@ -156,7 +156,7 @@ class DataBase:
             {'_id': ObjectId(id)}, {'$set': {'name': newName}})
         if data == None:
             return False
-        else:
+        elif data != None:
             return True
 
     def delete_category(self, id):

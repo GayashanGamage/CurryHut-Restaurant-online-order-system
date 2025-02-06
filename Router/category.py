@@ -1,33 +1,36 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query, Path
 from Dependencies.model import Category
 from Dependencies import authontication
 from fastapi.responses import JSONResponse
 from Dependencies import database
+from .docs.doc_category import doc
 
 route = APIRouter(prefix="/category", tags=["category"])
 db = database.get_database()
 
 
-@route.post('/addcategory')
+@route.post('/addcategory', **doc['addcategory'])
 async def addCategory(categoryData: Category, data=Depends(authontication.authVerification)):
     # send error message if not authonticated
     if data == False or data['role'] != 'admin':
         return JSONResponse(status_code=401, content='unathorized')
     # find dubplicate category
     check_duplication = db.check_dubplicate_categories(categoryData.name)
-    if check_duplication == False:
+    if check_duplication['status'] == False:
         # insert category data to the database
         insert_data = db.insert_category(categoryData)
         if insert_data == True:
-            return JSONResponse(status_code=200, content='successfull')
+            return JSONResponse(status_code=200, content={"message": 'successfull'})
         elif insert_data == False:
-            return JSONResponse(status_code=500, content='something go wrong')
-    elif check_duplication == True:
-        return JSONResponse(status_code=400, content='duplicate category')
+            return JSONResponse(status_code=500, content={"message": 'something go wrong'})
+    elif check_duplication['status'] == True:
+        return JSONResponse(status_code=400, content={"message": 'duplicate category'})
 
 
-@route.patch('/editcategory')
-async def editCategory(id: str, categoryName: str, data=Depends(authontication.authVerification)):
+@route.patch('/editcategory', **doc['editcategory'])
+async def editCategory(id: str = Query(description='category id'),
+                       categoryName: str = Query(description='category name'),
+                       data=Depends(authontication.authVerification)):
     # if not authonticate, then send error message
     if data == False or data['role'] != 'admin':
         return JSONResponse(status_code=401, content='unathorized')
@@ -35,22 +38,23 @@ async def editCategory(id: str, categoryName: str, data=Depends(authontication.a
         # check duplicate category name
         duplicated = db.check_dubplicate_categories(categoryName)
         if duplicated['status'] == True and str(duplicated['data'][0]['_id']) != id:
-            return JSONResponse(status_code=400, content='cannot duplicate category')
+            return JSONResponse(status_code=400, content={"message": 'cannot duplicate category'})
         # check category is deletable or not
         elif db.check_deletable_category(id) == False:
-            return JSONResponse(status_code=401, content='unEditable category')
+            return JSONResponse(status_code=403, content={"message": 'un-editable category'})
         else:
             # update category name
             updatedData = db.update_category(id, categoryName)
             # false : id not found
             if updatedData == False:
-                return JSONResponse(status_code=404, content="category not found")
+                return JSONResponse(status_code=404, content={"message": "category not found"})
             elif updatedData == True:
-                return JSONResponse(status_code=200, content='successfull')
+                return JSONResponse(status_code=200, content={"message": 'successfull'})
 
 
-@route.delete('/deletecategory/{categoryId}')
-async def deleteCategory(categoryId: str, data=Depends(authontication.authVerification)):
+@route.delete('/deletecategory/{categoryId}', **doc['deletecategory'])
+async def deleteCategory(categoryId: str = Path(description='category id'),
+                         data=Depends(authontication.authVerification)):
     # check authontication validation
     if data == False or data['role'] != 'admin':
         return JSONResponse(status_code=401, content='unathorized')
@@ -63,19 +67,19 @@ async def deleteCategory(categoryId: str, data=Depends(authontication.authVerifi
             update_foods = db.update_food_list(
                 categoryId, '670cbcf46e6b240be2d189e2')
             if update_foods == True:
-                return JSONResponse(status_code=200, content='successfull')
+                return JSONResponse(status_code=200, content={"message": 'successfull'})
             else:
-                return JSONResponse(status_code=500, content='something go wrong - server')
+                return JSONResponse(status_code=500, content={"message": 'something go wrong - server'})
 
         elif deleted_data['code'] == 401:
-            return JSONResponse(status_code=401, content='undeleteable category')
+            return JSONResponse(status_code=401, content={"message": 'undeleteable category'})
         elif deleted_data['code'] == 500:
-            return JSONResponse(status_code=500, content='something go wrong - server')
+            return JSONResponse(status_code=500, content={"message": 'something go wrong - server'})
         elif deleted_data['code'] == 404:
-            return JSONResponse(status_code=404, content='category not found')
+            return JSONResponse(status_code=404, content={"message": 'category not found'})
 
 
-@route.get('/getcategories')
+@route.get('/getcategories', **doc['getcategories'])
 async def getCategories(data=Depends(authontication.authVerification)):
     # authontication validation
     if data == False or data['role'] != 'admin':

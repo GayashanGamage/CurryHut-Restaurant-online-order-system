@@ -24,6 +24,41 @@ class DataBase:
         self.food = self.db['Food']
         self.rider = self.db['Rider']
 
+    def find_duplicate_location(self, location):
+        # perpose : find duplicate name available in the delivery collection - by name
+        # return : True : duplicated, False : not duplicated
+        data = self.delivery.find_one({'place': location})
+        if data != None:
+            return True
+        else:
+            return False
+
+    def find_duplication_location_for_update(self, place, id):
+        # perpose : find duplication for update existing delivery location - by name and ID
+        # return : True : duplicated, False : not duplicated
+        data = list(self.delivery.find({'place': place}))
+        if len(data) == 0:
+            return False
+        elif len(data) >= 1:
+            print('this point')
+            for item in data:
+                if item['_id'] != id:
+                    return True
+                else:
+                    return False
+        else:
+            return False
+
+    def update_delivery_location(self, cost, place, id, updated_at):
+        # perpose : udpate delivery location by id
+        # responce : True : successful , False : not updated
+        data = self.delivery.update_one({'_id': id}, {
+                                        '$set': {'cost': cost, 'place': place, 'updated_at': updated_at}})
+        if data.modified_count == 1:
+            return True
+        else:
+            return False
+
     def insert_delivery_place(self, details):
         # perpose : insert delivery place
         # result : true : successfull, false : failed
@@ -33,43 +68,30 @@ class DataBase:
         else:
             return False
 
-    def single_delivery_place(self, id):
-        # perpose : get single delivery place
-        # result : false : not available || data : available
-        data = self.delivery.find_one({'_id': ObjectId(id)})
-        if data != None:
-            return data
-        else:
-            return False
-
-    def check_delivery_duplicate(self, place):
-        # perpose : check duplicate delivery place
-        # result : true : duplicate, false : not duplicate
-        data = list(self.delivery.find({'place': place.lower()}))
-        if len(data) >= 1:
-            return {'status': True, 'data': data}
-        else:
-            return {'status': False}
-
     def get_delivery_place(self):
+        # perpose : get all delivery places
+        # result : false : empty list || all delivery places
         data = list(self.delivery.find({}))
         if len(data) > 0:
+            # delivery_data = [
+            #     model.get_delivery(id=str(delivery['_id']), place=delivery['place'], status=delivery['status'], cost=delivery['cost']).dict() for delivery in data
+            # ]
             delivery_data = [
-                model.get_delivery(id=str(delivery['_id']), place=delivery['place'], status=delivery['status'], cost=delivery['cost']).dict() for delivery in data
+                model.get_delivery_locations(
+                    id=str(location['_id']),
+                    place=location['place'],
+                    cost=location['cost'],
+                    status=location['status']
+                ).dict() for location in data
             ]
-            return delivery_data
-        else:
-            return data
 
-    def update_delivery_details(self, details: model.delivery_update):
-        store_data = self.delivery.update_one(
-            {"_id": details.id}, {"$set": details.dict(exclude={"id"})})
-        if store_data.modified_count == 1:
-            return True
+            return jsonable_encoder(delivery_data)
         else:
             return False
 
-    def update_delivery_status(self, details: model.delivery_status):
+    def update_delivery_status(self, details):
+        # perpose : update status of the delivery location
+        # return : True : successfull, False : not sucessfull
         store_data = self.delivery.update_one(
             {"_id": details.id}, {"$set": details.dict(exclude={"id"})})
         if store_data.modified_count == 1:
@@ -159,23 +181,23 @@ class DataBase:
         elif data != None:
             return True
 
+    def check_deletable_category(self, id):
+        # perpose : check category is deletable or not
+        # result : true : deletable, false : not deletable
+        data = self.category.find_one({'_id': ObjectId(id), "deletable": True})
+        if data != None:
+            return True
+        else:
+            return False
+
     def delete_category(self, id):
         # perspose : delete category by id
         # result : true : seccussfull, false : unsuccessfull
-
-        # check category is deletable or not
-        category = self.category.find_one({'_id': ObjectId(id)})
-        if category != None:
-            if category['deletable'] == False:
-                return {'status': False, 'code': 401}
-            else:
-                data = self.category.delete_one({'_id': ObjectId(id)})
-                if data.deleted_count == 1:
-                    return {'status': True, 'code': 200}
-                else:
-                    return {'status': False, 'code': 500}
+        data = self.category.delete_one({'_id': ObjectId(id)})
+        if data.deleted_count == 1:
+            return True
         else:
-            return {'status': False, 'code': 404}
+            return False
 
     def get_categories(self):
         # perpose : get all categories

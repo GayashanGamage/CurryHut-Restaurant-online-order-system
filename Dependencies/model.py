@@ -28,6 +28,13 @@ class Delivery(BaseModel):
         return place.lower()
 
 
+class get_delivery_locations(BaseModel):
+    id: str
+    place: str
+    cost: int
+    status: bool
+
+
 class delivery_update(BaseModel):
     id: str = Field(..., alias="_id")
     place: str
@@ -108,8 +115,9 @@ class Category(BaseModel):
 
         return value
 
+
 class getCategories(Category):
-    id : str
+    id: str
 
 # food section
 

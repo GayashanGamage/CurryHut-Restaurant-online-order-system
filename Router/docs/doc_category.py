@@ -79,19 +79,11 @@ doc = {
                            }
                        }
                   },
-            401: {"description": "this is a undeleteable category",
+            400: {"description": "un deletable category cannot delete",
                   "content":
                       {"application/json":
                           {"example":
-                              {"message": 'un-deleteable category'}
-                           }
-                       }
-                  },
-            404: {"description": "provided category id not found",
-                  "content":
-                      {"application/json":
-                          {"example":
-                              {"message": 'category not found'}
+                              {"message": 'un deletable category'}
                            }
                        }
                   },
@@ -99,7 +91,7 @@ doc = {
                   "content":
                       {"application/json":
                           {"example":
-                           {"message": "something went wrong - server"}
+                           {"message": 'something go wrong - server'}
                            }
                        }
                   },

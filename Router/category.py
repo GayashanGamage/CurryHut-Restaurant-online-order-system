@@ -59,24 +59,17 @@ async def deleteCategory(categoryId: str = Path(description='category id'),
     if data == False or data['role'] != 'admin':
         return JSONResponse(status_code=401, content='unathorized')
     else:
-        # delete category
-        deleted_data = db.delete_category(categoryId)
-        if deleted_data['status'] == True:
-            # update foods category to "uncategory"
-            # -> 670cbcf46e6b240be2d189e2 is the default "uncategory" id by default
-            update_foods = db.update_food_list(
-                categoryId, '670cbcf46e6b240be2d189e2')
-            if update_foods == True:
+        # check deletable or not
+        deletable = db.check_deletable_category(categoryId)
+        if deletable == True:
+            # delete category
+            delete_category = db.delete_category(categoryId)
+            if delete_category == True:
                 return JSONResponse(status_code=200, content={"message": 'successfull'})
             else:
                 return JSONResponse(status_code=500, content={"message": 'something go wrong - server'})
-
-        elif deleted_data['code'] == 401:
-            return JSONResponse(status_code=401, content={"message": 'undeleteable category'})
-        elif deleted_data['code'] == 500:
-            return JSONResponse(status_code=500, content={"message": 'something go wrong - server'})
-        elif deleted_data['code'] == 404:
-            return JSONResponse(status_code=404, content={"message": 'category not found'})
+        else:
+            return JSONResponse(status_code=400, content={"message": 'un deletable category'})
 
 
 @route.get('/getcategories', **doc['getcategories'])

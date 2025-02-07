@@ -238,7 +238,7 @@ class DataBase:
             return False
 
     def check_dubplicate_food(self, foodName):
-        # perpose : check duplicate food item
+        # perpose : check duplicate food item ( only check names. not idsz )
         # result : true : duplicate, false : not duplicate
         data = list(self.food.find({'name': foodName.lower()}, {
                     '_id': 0, 'category_id': 0, 'description': 0, 'price': 0, 'added_data': 0, 'modified_data': 0}))
@@ -247,7 +247,22 @@ class DataBase:
         else:
             return False
 
-    def set_category_item_count(self, id, action):  # action : + / -
+    def check_duplication_indetails(self, food_name, food_id):
+        # perpose : check duplicate food item ( check both food name and food id )
+        # result : true : duplicate, false : not duplicate
+        data = list(self.food.find({'name': food_name}, {
+                    '_id': 0, 'category_id': 0, 'description': 0, 'price': 0, 'added_data': 0, 'modified_data': 0}))
+        if len(data) >= 1:
+            for item in data:
+                if item['_id'] != food_id:
+                    return True
+            else:
+                return False
+        elif len(data) == 0:
+            return False
+
+    # action : + (add) / - (remove)
+    def set_category_item_count(self, id, action):
         # perpose : increase or decrease category item count according to the action
         # result : true : successfull, false : failed
         if action == '+':
@@ -301,14 +316,14 @@ class DataBase:
         else:
             return False
 
-    def get_food_non_formated(self, id):
-        # perpose : get all food items
-        # result : false : empty list || all food items
-        data = self.food.find_one({'_id': ObjectId(id)})
-        if len(data) >= 1:
-            return data
-        else:
-            return False
+    # def get_food_non_formated(self, id):
+    #     # perpose : get all food items
+    #     # result : false : empty list || all food items
+    #     data = self.food.find_one({'_id': ObjectId(id)})
+    #     if len(data) >= 1:
+    #         return data
+    #     else:
+    #         return False
 
     def edit_food(self, foodData):
         # perpose : update food items

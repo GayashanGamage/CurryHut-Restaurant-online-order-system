@@ -1,42 +1,43 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Path
 from Dependencies import database
 from Dependencies import model, authontication
 from fastapi.responses import JSONResponse
+from .docs.doc_food import doc
 
-route = APIRouter( tags=['food'])
+route = APIRouter(tags=['food'])
 
 db = database.get_database()
 
 
-@route.post('/addfooditem')
-async def addFoodItem(foodData : model.FoodData, data = Depends(authontication.authVerification)):
+@route.post('/addfooditem', **doc['addfooditem'])
+async def addFoodItem(foodData: model.FoodData, data=Depends(authontication.authVerification)):
     # check authontication
     if data == False or data['role'] != 'admin':
-        return JSONResponse( status_code=401, content='unathorized')
-    
+        return JSONResponse(status_code=401, content='unathorized')
+
     # check dubplicate food item name and category id
     duplicate_food = db.check_dubplicate_food(foodData.name)
     check_category = db.check_category_id(foodData.category_id)
-    
+
     if duplicate_food == False and check_category == True:
         # insert food item
         food_data = db.insert_food(foodData)
         if food_data == True:
-            return JSONResponse(status_code=200, content='successfull')
+            return JSONResponse(status_code=200, content={"messege": 'successfull'})
         else:
-            return JSONResponse(status_code=500, content='something went wrong')
+            return JSONResponse(status_code=500, content={"messege": 'something went wrong'})
     elif check_category == False:
-        return JSONResponse(status_code=404, content='category id not found')
+        return JSONResponse(status_code=404, content={"messege": 'category id not found'})
     elif duplicate_food == True:
-        return JSONResponse(status_code=400, content='duplicate food item')
-        
-    
-@route.get('/getallfood')
-async def getAllFood(data = Depends(authontication.authVerification)):
+        return JSONResponse(status_code=400, content={"messege": 'duplicate food item'})
+
+
+@route.get('/getallfood', **doc['getallfood'])
+async def getAllFood(data=Depends(authontication.authVerification)):
     # check authontication
     if data == False or data['role'] != 'admin':
-        return JSONResponse( status_code=401, content='unathorized')
-    # send all food 
+        return JSONResponse(status_code=401, content='unathorized')
+    # send all food
     else:
         food_data = db.get_food()
         if food_data == False:
@@ -44,29 +45,36 @@ async def getAllFood(data = Depends(authontication.authVerification)):
         else:
             return JSONResponse(status_code=200, content=food_data)
 
-@route.patch('/editfood')
-async def editFoof(editfood : model.EditFood, data = Depends(authontication.authVerification)):
+
+@route.patch('/editfood', **doc['editfood'])
+async def editFoof(editfood: model.EditFood, data=Depends(authontication.authVerification)):
     # check authontication
     if data == False or data['role'] != 'admin':
-        return JSONResponse( status_code=401, content='unathorized')
+        return JSONResponse(status_code=401, content='unathorized')
     # check if _id is exist
     else:
-        food_data = db.edit_food(editfood)
-        if food_data == False:
-            return JSONResponse(status_code=500, content='something went wrong - server')
-        elif food_data == True:
-            return JSONResponse(status_code=200, content='successfull')
+        # check duplications
+        duplicationn = db.check_duplication_indetails(editfood)
+        if duplicationn == True:
+            return JSONResponse(status_code=400, content={"message": "food items cannot duplicate"})
+        elif duplicationn == False:
+            food_data = db.edit_food(editfood)
+            if food_data == False:
+                return JSONResponse(status_code=500, content={"messege": 'something went wrong - server'})
+            elif food_data == True:
+                return JSONResponse(status_code=200, content={'messege': 'successfull'})
 
 
-@route.delete('/deletefood/{foodId}')
-async def deleteFood( foodId : str, data = Depends(authontication.authVerification)):
-    # check authontication 
+@route.delete('/deletefood/{foodId}', **doc['deletefood'])
+async def deleteFood(foodId: str = Path(description="food ID"),
+                     data=Depends(authontication.authVerification)):
+    # check authontication
     if data == False or data['role'] != 'admin':
-        return JSONResponse( status_code=401, content='unathorized')
-    # try to delete food 
+        return JSONResponse(status_code=401, content='unathorized')
+    # try to delete food
     else:
         food_data = db.remove_food(foodId)
         if food_data == False:
-            return JSONResponse(status_code=404, content='item connot found')
+            return JSONResponse(status_code=500, content={"messege": "cannot remove from database"})
         elif food_data == True:
-            return JSONResponse(status_code=200, content='successfull')
+            return JSONResponse(status_code=200, content={"messege": 'successfull'})

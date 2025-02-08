@@ -85,17 +85,15 @@ const editDelivery = () => {
         },
       })
     .then((response) => {
-      console.log('this is not an error')
       if (response.status == 200) {
         // uistore.deliveryChange = true;
         showCase.getAllDeliveryLocations();
-        uistore.editDeliveryPopup = false;
         notification.success("Delivery location updated successfully");
+        uistore.editDeliveryPopup = false;
         showCase.processingDeliveryLocation = null;
       }
     })
     .catch((error) => {
-      console.log('this is an error')
       if (error.status == 400){
         notification.error(error.data.message);
       }else if (error.status == 422){
@@ -105,7 +103,6 @@ const editDelivery = () => {
 
       }
     });
-    showCase.processingDeliveryLocation = null;
 };
 
 // emit function - Delivery compoent - add delivery details

@@ -53,16 +53,20 @@ async def editFoof(editfood: model.EditFood, data=Depends(authontication.authVer
         return JSONResponse(status_code=401, content='unathorized')
     # check if _id is exist
     else:
-        # check duplications
-        duplicationn = db.check_duplication_indetails(editfood)
-        if duplicationn == True:
+        # check current category id is available
+        check_category = db.check_category_id(editfood.category_id)
+        if check_category == False:
+            return JSONResponse(status_code=404, content={"messege": "category id not found"})
+        # check current name in other document in the collection
+        check_name = db.check_duplication_indetails(editfood.name, editfood.id)
+        if check_name == True:
             return JSONResponse(status_code=400, content={"message": "food items cannot duplicate"})
-        elif duplicationn == False:
-            food_data = db.edit_food(editfood)
-            if food_data == False:
-                return JSONResponse(status_code=500, content={"messege": 'something went wrong - server'})
-            elif food_data == True:
-                return JSONResponse(status_code=200, content={'messege': 'successfull'})
+        # update food item
+        update_food = db.edit_food(editfood)
+        if update_food == False:
+            return JSONResponse(status_code=500, content={"messege": 'something went wrong - server'})
+        else:
+            return JSONResponse(status_code=200, content={"messege": 'successfull'})
 
 
 @route.delete('/deletefood/{foodId}', **doc['deletefood'])

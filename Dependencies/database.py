@@ -181,6 +181,7 @@ class DataBase:
         elif data != None:
             return True
 
+    # this is duplicated function -------------------------------------------
     def check_deletable_category(self, id):
         # perpose : check category is deletable or not
         # result : true : deletable, false : not deletable
@@ -210,7 +211,7 @@ class DataBase:
                     name=category['name'],
                     aded_date=category['aded_date'],
                     last_modify_date=category['last_modify_date'],
-                    item_count=category['item_count'],
+                    # item_count=category['item_count'],
                     deletable=category['deletable']
                 ).dict() for category in data
             ]
@@ -251,42 +252,21 @@ class DataBase:
         # perpose : check duplicate food item ( check both food name and food id )
         # result : true : duplicate, false : not duplicate
         data = list(self.food.find({'name': food_name}, {
-                    '_id': 0, 'category_id': 0, 'description': 0, 'price': 0, 'added_data': 0, 'modified_data': 0}))
+                    'category_id': 0, 'description': 0, 'price': 0, 'added_data': 0, 'modified_data': 0}))
         if len(data) >= 1:
             for item in data:
-                if item['_id'] != food_id:
+                if item['_id'] != ObjectId(food_id) and food_name == item['name']:
                     return True
-            else:
-                return False
+            return False
         elif len(data) == 0:
             return False
 
-    # action : + (add) / - (remove)
-    def set_category_item_count(self, id, action):
-        # perpose : increase or decrease category item count according to the action
-        # result : true : successfull, false : failed
-        if action == '+':
-            data = self.category.update_one(
-                {'_id': ObjectId(id)}, {'$inc': {'item_count': 1}})
-            if data.modified_count == 1:
-                return True
-            else:
-                return False
-        elif action == '-':
-            data = self.category.update_one(
-                {'_id': ObjectId(id)}, {'$inc': {'item_count': -1}})
-            if data.modified_count == 1:
-                return True
-            else:
-                return False
-
     def insert_food(self, foodData):
         # perpose : insert food item
-        # related function : set_category_item_count()
         # result : true : success, false : failed
         data = self.food.insert_one(foodData.dict())
         if data.acknowledged:
-            return self.set_category_item_count(foodData.category_id, '+')
+            return True
         else:
             return False
 
@@ -316,49 +296,32 @@ class DataBase:
         else:
             return False
 
-    # def get_food_non_formated(self, id):
-    #     # perpose : get all food items
-    #     # result : false : empty list || all food items
-    #     data = self.food.find_one({'_id': ObjectId(id)})
-    #     if len(data) >= 1:
-    #         return data
-    #     else:
-    #         return False
+    def get_food_non_formated(self, id):
+        # perpose : get all food items
+        # result : false : empty list || all food items
+        data = self.food.find_one({'_id': ObjectId(id)})
+        if len(data) >= 1:
+            return data
+        else:
+            return False
 
     def edit_food(self, foodData):
         # perpose : update food items
         # result : true : successfull || false : failed
-
-        # past data of the category
-        pastData = self.get_food_non_formated(foodData.id)
-
-        print('try to excute')
-        # update the food item
         data = self.food.update_one({"_id": foodData.id}, {
-                                    "$set": foodData.dict(exclude={"id"})})
-        if data.acknowledged:
-            # update the current and past category item count
-            # if foodData['category_id'] != pastData['category_id']:
-            if foodData.category_id != pastData['category_id']:
-                update_category_new = self.set_category_item_count(
-                    foodData.category_id, '+')
-                update_category_old = self.set_category_item_count(
-                    pastData['category_id'], '-')
-                if update_category_new and update_category_old:
-                    return True
-                else:
-                    return False
+            "$set": foodData.dict(exclude={"id"})})
+        if data.modified_count == 1:
+            return True
         else:
             return False
 
     def remove_food(self, foodId):
         # perpose : delete food item
-        # associated function : set_category_item_count()
         # result : true : successfull || false : failed
         food_data = self.food.find_one({'_id': ObjectId(foodId)})
         data = self.food.delete_one({"_id": ObjectId(foodId)})
         if data.deleted_count == 1:
-            return self.set_category_item_count(food_data['category_id'], '-')
+            return True
         else:
             return False
 
@@ -390,7 +353,7 @@ class DataBase:
         # result : status.True : successfull, status.False : failed
         secreate_code = randint(1000, 9999)
         code = self.user.update_one({'email': email}, {'$set': {
-                                    'secreate_code': secreate_code, 'send_time': datetime.now(), 'password_change': True}})
+            'secreate_code': secreate_code, 'send_time': datetime.now(), 'password_change': True}})
         if code.modified_count == 1:
             return {'status': True, 'code': secreate_code}
         else:
@@ -434,7 +397,7 @@ class DataBase:
         # perposer : change password
         # result : true : successfull, false : failed
         data = self.user.update_one({'email': email}, {
-                                    '$set': {'password': encoded_password, 'password_change': False}})
+            '$set': {'password': encoded_password, 'password_change': False}})
         if data.modified_count == 1:
             return True
         else:
@@ -576,7 +539,7 @@ class DataBase:
         # perpose : update existing riders contact number
         # result : true : successfull, false : failed
         data = self.rider.find_one_and_update({'mobile': details.old_mobile, 'verification': False}, {
-                                              "$set": {"mobile": details.new_mobile, 'secreate_code': 0, 'verification': True, 'verified_at': datetime.now()}})
+            "$set": {"mobile": details.new_mobile, 'secreate_code': 0, 'verification': True, 'verified_at': datetime.now()}})
         if data != None:
             return True
         elif data == None:

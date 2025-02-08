@@ -92,6 +92,14 @@ doc = {
                            }
                        }
                   },
+            400: {"description": "category id cannot found in database",
+                  "content":
+                      {"application/json":
+                          {"example":
+                              {"messege": 'category id not found'}
+                           }
+                       }
+                  },
             500: {"description": "food item cannot update in database for some reason",
                   "content":
                       {"application/json":

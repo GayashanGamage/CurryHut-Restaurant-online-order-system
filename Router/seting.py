@@ -3,6 +3,7 @@ from Dependencies import database, authontication
 from fastapi.responses import JSONResponse
 from datetime import datetime
 from .docs.doc_setting import doc
+import pytz
 
 route = APIRouter(tags=['setting page'])
 db = database.get_database()
@@ -63,10 +64,13 @@ async def operationHold(data=Depends(authontication.authVerification)):
     # check authontication
     if data == False or data['role'] != 'admin':
         return JSONResponse(status_code=401, content='unauthorized')
+    # set current time
+    timeZoon = pytz.timezone('Asia/Colombo')
+    currentTime = datetime.now(timeZoon).time()
     # get shop details
     shopStatus = db.get_shopdetails_row()
     # check opening time and closing time
-    if shopStatus['open_time'].time() < datetime.now().time() < shopStatus['close_time'].time():
+    if shopStatus['open_time'].time() < currentTime < shopStatus['close_time'].time():
         # udpate shop status accordingly
         status_update = db.update_shop_status(shopStatus['shutdown'])
         if status_update == True and shopStatus['shutdown'] == False:

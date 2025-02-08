@@ -19,7 +19,7 @@ async def set_delivery(details: Delivery, data=Depends(authontication.authVerifi
     if data == False or data['role'] != 'admin':
         return JSONResponse(status_code=401, content='unathorized')
     # find duplicate by name
-    duplication = db.find_duplicate_location(details.name.lower())
+    duplication = db.find_duplicate_location(details.place.lower())
     # if available send error
     if duplication == True:
         return JSONResponse(content={"message": "Place already exist"}, status_code=400)

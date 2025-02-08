@@ -21,6 +21,7 @@
 </template>
 
 <script setup>
+import { useAuthonticationStore } from "@/stores/authontication";
 import { useShowCase } from "@/stores/showcase";
 import { useUiStore } from "@/stores/ui";
 import { onClickOutside } from "@vueuse/core";
@@ -29,8 +30,10 @@ import { ref } from "vue";
 import { useToast } from "vue-toast-notification";
 const notification = useToast();
 
+// pinia stores
 const uiStore = useUiStore();
 const showCase = useShowCase();
+const authontication = useAuthonticationStore();
 
 // click outside of the 'delete-window' to close itself
 const addDeliveryWindow = ref(null);
@@ -44,7 +47,12 @@ const deleteLocation = () => {
     .delete(
       `${import.meta.env.VITE_url}/delivery/delete/${
         showCase.processingDeliveryLocation.id
-      }`
+      }`, 
+      {
+        headers: {
+          Authorization: 'Bearer ' + authontication.cookies_token,
+        },
+      }
     )
     .then((response) => {
       if (response.status == 200) {

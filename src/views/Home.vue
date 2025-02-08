@@ -60,10 +60,12 @@ import RemoveDeliveryPlace from "@/components/popups/RemoveDeliveryPlace.vue";
 import { useShowCase } from "@/stores/showcase";
 import axios from "axios";
 import { useToast } from "vue-toast-notification";
+import { useAuthonticationStore } from "@/stores/authontication";
 
 // use pinia stores
 const uistore = useUiStore();
 const showCase = useShowCase();
+const authontication = useAuthonticationStore();
 
 // use floating notifications
 const notification = useToast();
@@ -71,22 +73,39 @@ const notification = useToast();
 // emit function - Delivery compoent - edit delivery details
 const editDelivery = () => {
   axios
-    .put(`${import.meta.env.VITE_url}/delivery/update`, {
+    .put(`${import.meta.env.VITE_url}/delivery/update`, 
+    {
       _id: showCase.processingDeliveryLocation.id,
       place: showCase.processingDeliveryLocation.place,
-      cost: parseInt(showCase.processingDeliveryLocation.cost),
-    })
+      cost: showCase.processingDeliveryLocation.cost,
+    },
+    {
+        headers: {
+          Authorization: "Bearer " + authontication.cookies_token,
+        },
+      })
     .then((response) => {
+      console.log('this is not an error')
       if (response.status == 200) {
-        uistore.deliveryChange = true; // this is give a signal to the delivery component to update the delivery list
+        // uistore.deliveryChange = true;
+        showCase.getAllDeliveryLocations();
         uistore.editDeliveryPopup = false;
         notification.success("Delivery location updated successfully");
         showCase.processingDeliveryLocation = null;
       }
     })
     .catch((error) => {
-      notification.error("Failed to update delivery location");
+      console.log('this is an error')
+      if (error.status == 400){
+        notification.error(error.data.message);
+      }else if (error.status == 422){
+        notification.error(error.data.message);
+      }else if(error.status == 500){
+        notification.error(error.data.message);
+
+      }
     });
+    showCase.processingDeliveryLocation = null;
 };
 
 // emit function - Delivery compoent - add delivery details
@@ -96,13 +115,17 @@ const addDelivery = () => {
       place: showCase.processingDeliveryLocation.place,
       stuatus: true,
       cost: parseInt(showCase.processingDeliveryLocation.cost),
-    })
+    }, {
+        headers: {
+          Authorization: "Bearer " + authontication.cookies_token,
+        },
+      })
     .then((response) => {
       if (response.status == 200) {
-        uistore.deliveryChange = true; // this is give a signal to the delivery component to update the delivery list
-        uistore.addDeliveryPopup = false;
         notification.success("Delivery location added successfully");
         showCase.processingDeliveryLocation = null;
+        showCase.getAllDeliveryLocations();
+        uistore.addDeliveryPopup = false;
       }
     })
     .catch((error) => {

@@ -63,6 +63,7 @@ const userAction = () => {
 onClickOutside(addDeliveryWindow, () => {
   uiStore.addDeliveryPopup = false;
   uiStore.editDeliveryPopup = false;
+  showCase.processingDeliveryLocation = null;
 });
 </script>
 

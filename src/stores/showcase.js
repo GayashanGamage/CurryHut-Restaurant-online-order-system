@@ -53,7 +53,7 @@ export const useShowCase = defineStore("showcase", () => {
     axios
     .get(`${import.meta.env.VITE_url}/delivery/get`)
     .then((response) => {
-      DeliveryLocationList.value = response.data;
+      DeliveryLocationList.value = response.data['data'];
     })
     .catch((error) => {
       if(error.stataus == 400){

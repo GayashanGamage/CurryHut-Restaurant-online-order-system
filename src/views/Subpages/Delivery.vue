@@ -60,12 +60,15 @@
 </template>
 
 <script setup>
+import { useAuthonticationStore } from "@/stores/authontication";
 import { useShowCase } from "@/stores/showcase";
 import { useUiStore } from "@/stores/ui";
 import axios from "axios";
 import { onBeforeMount, onUpdated } from "vue";
 import { useToast } from "vue-toast-notification";
 const notification = useToast();
+const authontication = useAuthonticationStore();
+
 
 // pinia stores
 const showcase = useShowCase();
@@ -76,7 +79,7 @@ const getDeliveryList = () => {
   axios
     .get(`${import.meta.env.VITE_url}/delivery/get`)
     .then((response) => {
-      showcase.DeliveryLocationList = response.data;
+      showcase.DeliveryLocationList = response.data['data'];
     })
     .catch((error) => {
       console.log(error);
@@ -86,6 +89,7 @@ const getDeliveryList = () => {
 // if the delivery list is not available, get the delivery list
 onBeforeMount(() => {
   if (showcase.DeliveryLocationList == null) {
+    authontication.restoreCredentials();
     getDeliveryList();
   }
 });
@@ -118,6 +122,11 @@ const setAvailability = (index, status) => {
     .post(`${import.meta.env.VITE_url}/delivery/set-status`, {
       _id: showcase.DeliveryLocationList[index].id,
       status: !status,
+    }, 
+    {
+      headers: {
+        Authorization: "Bearer " + authontication.cookies_token,
+      },
     })
     .then((response) => {
       if (response.status == 200) {

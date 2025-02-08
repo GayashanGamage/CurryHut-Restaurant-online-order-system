@@ -14,9 +14,9 @@
         <table class="table-outfit">
           <thead>
             <tr class="table-title-row">
-              <th class="table-row-title code">Code</th>
+              <th class="table-row-title name">Category</th>
               <th class="table-row-title name">Name</th>
-              <th class="table-row-title count center-text">Category</th>
+              <th class="table-row-title count center-text">Varieties</th>
               <th class="table-row-title added center-text">Aded date</th>
               <th class="table-row-title edited center-text">Last modified</th>
               <th class="table-row-title edited"></th>
@@ -27,14 +27,18 @@
             <tr
               class="table-row"
               v-for="item in showcase.foodItemList"
-              :key="item._id"
+              :key="item.id"
             >
-              <td class="table-row-data">
-                {{ item._id.slice(-4, item["_id"].length) }}
-              </td>
+              <!-- category name -->
+              <!-- <td class="table-row-data">{{ item.category_id   }}</td> -->
+              <td class="table-row-data">{{ findCategoryName(item.category_id) }}</td>
+            
+              <!-- food name -->
               <td class="table-row-data">{{ item.name }}</td>
+              
+              <!-- variety count -->
               <td class="table-row-data center-text">
-                {{ item.category_id.slice(-4, item.category_id.lenth) }}
+                {{ item.price.length }}
               </td>
               <td class="table-row-data center-text">
                 {{
@@ -53,7 +57,7 @@
               <td c lass="table-row-data table-row-data-button">
                 <button
                   class="action-button table-button"
-                  @click="uistore.foodViewOpen(item._id)"
+                  @click="uistore.foodViewOpen(item.id)"
                 >
                   View
                 </button>
@@ -81,58 +85,76 @@ const authontication = useAuthonticationStore();
 const showcase = useShowCase();
 
 onBeforeMount(() => {
-  if (
-    authontication.cookies_token == null ||
-    authontication.local_storage_email == null
-  ) {
-    const credencial = authontication.restoreCredentials();
-    if (credencial == false) {
-      router.replace({ name: "login" });
-    } else if (credencial == true) {
-      axios
+  if(showcase.foodItemList === null){
+    if (
+      authontication.cookies_token == null ||
+      authontication.local_storage_email == null
+    ) {
+      const credencial = authontication.restoreCredentials();
+      if (credencial == false) {
+        router.replace({ name: "login" });
+      } else if (credencial == true) {
+        axios
         .get(`${import.meta.env.VITE_url}/getallfood`, {
           headers: {
             Authorization: "Bearer " + authontication.cookies_token,
           },
         })
         .then((response) => {
-          showcase.foodItemList = response.data;
-        })
-        .catch((response) => {
-          if (response.status == 401) {
-            authontication.removeCredentials();
-            router.replace({ name: "login" });
-          } else {
-            toast.error("something go wrong");
-          }
-        });
-    }
+            showcase.foodItemList = response.data;
+          })
+          .catch((response) => {
+            if (response.status == 401) {
+              authontication.removeCredentials();
+              router.replace({ name: "login" });
+            } else {
+              toast.error("something go wrong");
+            }
+          });
+        }
+      }
+    
+  }
+  });
+  
+// if category still not loaded to categoryList variable, load it
+onBeforeMount(() => {
+if (showcase.categoryList === null) {
+  axios
+    .get(`${import.meta.env.VITE_url}/category/getcategories`, {
+      headers: {
+        Authorization: "Bearer " + authontication.cookies_token,
+      },
+    })
+    .then((response) => {
+      if (response.status == 200) {
+        showcase.categoryList = response.data;
+      }
+    })
+    .catch((error) => {
+      if (error.status == 401) {
+        authontication.removeCredentials();
+        router.replace({ name: "login" });
+      } else {
+        toast.error("something go wrong");
+      }
+    });
   }
 });
 
-onMounted(() => {
-  if (showcase.categoryList === null) {
-    axios
-      .get(`${import.meta.env.VITE_url}/getcategories`, {
-        headers: {
-          Authorization: "Bearer " + authontication.cookies_token,
-        },
-      })
-      .then((response) => {
-        if (response.status == 200) {
-          showcase.categoryList = response.data;
-        }
-      })
-      .catch((error) => {
-        if (error.status == 401) {
-          authontication.removeCredentials();
-          router.replace({ name: "login" });
-        } else {
-          toast.error("something go wrong");
-        }
-      });
+// find category name from category id
+const findCategoryName = (id) => {
+  if(showcase.categoryList !== null){
+    for(let i = 0; i <= showcase.categoryList.length; i++) {
+      if(showcase.categoryList[i].id == id) {
+        return showcase.categoryList[i].name;
+      }
+    }
+    return "something wrong";
   }
-});
+}
+
+
 </script>
 
 <style scoped>

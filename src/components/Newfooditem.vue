@@ -10,9 +10,9 @@
           <select class="user-input">
             <option
               v-for="item in showcase.categoryList"
-              :key="item._id"
-              :value="item._id"
-              @click="showcase.processingFoodItem.category_id = item._id"
+              :key="item.id"
+              :value="item.id"
+              @click="showcase.processingFoodItem.category_id = item.id"
             >
               {{ item.name }}
             </option>
@@ -107,7 +107,7 @@ import { useAuthonticationStore } from "@/stores/authontication";
 import { useShowCase } from "@/stores/showcase";
 import { useUiStore } from "@/stores/ui";
 import axios from "axios";
-import { onBeforeUnmount } from "vue";
+import { onBeforeMount, onBeforeUnmount } from "vue";
 import { useToast } from "vue-toast-notification";
 
 // pinia stores
@@ -137,7 +137,7 @@ const addNewFood = () => {
     .then((response) => {
       if (response.status == 200) {
         showcase.processingFoodItem = null;
-        showcase.getAllFoods();
+        showcase.getAllFoodItems();
         toast.success("new item added successfully");
         uistore.closeAddFoodWindow();
       }
@@ -148,6 +148,12 @@ const addNewFood = () => {
       toast.error("something go wrong. try again.");
     });
 };
+
+// load first category item as a default
+onBeforeMount(() => {
+  showcase.processingFoodItem.category_id = showcase.categoryList[0].id;
+})
+
 </script>
 
 <style scoped>

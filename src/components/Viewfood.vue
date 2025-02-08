@@ -21,7 +21,7 @@
                 class="category-item"
                 :value="item.name"
                 :key="item._id"
-                @click="changeCategory(item._id)"
+                @click="changeCategory(item.id)"
               >
                 {{ item.name }}
               </option>
@@ -33,9 +33,9 @@
               class="user-input"
               disabled
               :value="
-                showcase.processingFoodItem['_id'].slice(
+                showcase.processingFoodItem['id'].slice(
                   -4,
-                  showcase.processingFoodItem._id.lenth
+                  showcase.processingFoodItem.id.lenth
                 )
               "
             />
@@ -133,7 +133,7 @@ const authontication = useAuthonticationStore();
 onMounted(() => {
   for (let i = 0; i < showcase.categoryList.length; i++) {
     if (
-      showcase.categoryList[i]._id == showcase.processingFoodItem.category_id
+      showcase.categoryList[i].id == showcase.processingFoodItem.category_id
     ) {
       document.getElementById("categoryList").value =
         showcase.categoryList[i].name;
@@ -146,31 +146,31 @@ function changeCategory(value) {
   showcase.processingFoodItem.category_id = value;
 }
 
-const getAllFood = () => {
-  axios
-    .get(`${import.meta.env.VITE_url}/getallfood`, {
-      headers: {
-        Authorization: "Bearer " + authontication.cookies_token,
-      },
-    })
-    .then((response) => {
-      showcase.foodItemList = response.data;
-    })
-    .catch((error) => {
-      if (error.status == 401) {
-        authontication.removeCredentials();
-        router.replace({ name: "login" });
-      } else {
-        toast.error("something go wrong");
-      }
-    });
-};
+// const getAllFood = () => {
+  // axios
+  //   .get(`${import.meta.env.VITE_url}/getallfood`, {
+  //     headers: {
+  //       Authorization: "Bearer " + authontication.cookies_token,
+  //     },
+  //   })
+  //   .then((response) => {
+  //     showcase.foodItemList = response.data;
+  //   })
+  //   .catch((error) => {
+  //     if (error.status == 401) {
+  //       authontication.removeCredentials();
+  //       router.replace({ name: "login" });
+  //     } else {
+  //       toast.error("something go wrong");
+  //     }
+  //   });
+// };
 
 const deleteItem = () => {
   axios
     .delete(
       `${import.meta.env.VITE_url}/deletefood/${
-        showcase.processingFoodItem._id
+        showcase.processingFoodItem.id
       }`,
       {
         headers: {
@@ -182,7 +182,7 @@ const deleteItem = () => {
       if (response.status == 200) {
         toast.success("select item delete successfuly");
         showcase.processingFoodItem = null;
-        showcase.getAllFoods();
+        showcase.getAllFoodItems(); // get all fodd items form database after delete completion
         uistore.foodViewClose();
       }
     })
@@ -198,7 +198,7 @@ const updateItem = () => {
     .patch(
       `${import.meta.env.VITE_url}/editfood`,
       {
-        _id: showcase.processingFoodItem._id,
+        _id: showcase.processingFoodItem.id,
         category_id: showcase.processingFoodItem.category_id,
         name: showcase.processingFoodItem.name,
         description: showcase.processingFoodItem.description,
@@ -217,9 +217,8 @@ const updateItem = () => {
       }
     )
     .then((response) => {
-      console.log(response);
       toast.success("selected item update successfully");
-      getAllFood();
+      showcase.getAllFoodItems(); //get all food items from database after the udpate done
       uistore.foodViewClose();
     })
     .catch((error) => {

@@ -111,11 +111,12 @@ export const useUiStore = defineStore("ui", () => {
 
   function closeAddFoodWindow() {
     AddFoodWindow.value = false;
+    showCase.processingFoodItem = null;
   }
 
   function foodViewOpen(value) {
     for (let i = 0; i < showCase.foodItemList.length; i++) {
-      if (showCase.foodItemList[i]._id == value) {
+      if (showCase.foodItemList[i].id == value) {
         showCase.processingFoodItem = showCase.foodItemList[i];
       }
     }

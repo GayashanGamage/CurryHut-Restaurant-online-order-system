@@ -14,7 +14,7 @@
         <table class="table-outfit">
           <thead>
             <tr class="table-title-row">
-              <th class="table-row-title code">Code</th>
+              <!-- <th class="table-row-title code">Code</th> -->
               <th class="table-row-title name">Name</th>
               <th class="table-row-title count center-text">Item count</th>
               <th class="table-row-title added center-text">Aded date</th>
@@ -24,18 +24,17 @@
             </tr>
           </thead>
           <tbody>
-            <!-- this include all category data -->
             <tr
               class="table-row"
               v-for="item in showcase.categoryList"
               :key="item['_id']"
             >
-              <td class="table-row-data">
-                {{ item["id"].slice(-4, item["id"].length) }}
-              </td>
-              <td class="table-row-data">{{ item["name"] }}</td>
+              <td class="table-row-data">{{ item["name"].charAt(0).toUpperCase() + item["name"].slice(1).toLowerCase() }}</td>
+              
+              <!-- food item count  -->
               <td class="table-row-data center-text">
-                {{ item["item_count"] }}
+                {{ foodItemCount(item['id']) }}
+                <!-- 0 -->
               </td>
               <td class="table-row-data center-text">
                 {{
@@ -102,6 +101,7 @@ const toast = useToast();
 // pinia stores
 const showcase = useShowCase();
 const authontication = useAuthonticationStore();
+const uistore = useUiStore();
 
 onBeforeMount(() => {
   if (
@@ -117,7 +117,29 @@ onBeforeMount(() => {
   }
 });
 
-const uistore = useUiStore();
+onBeforeMount(() => {
+  if (showcase.foodItemList === null) {
+    showcase.getAllFoodItems();
+  }
+})
+
+
+const foodItemCount = (id) => {
+  console.log('called' + showcase.foodItemList)
+  if(showcase.foodItemList !== null){
+    
+    var foodCount = 0
+    for(let i = 0; i < showcase.foodItemList.length; i++){
+      if(showcase.foodItemList[i].category_id == id){
+        console.log('counted ')
+        foodCount += 1
+      }
+    }
+    return foodCount
+  }
+};
+
+
 </script>
 
 <style scoped>

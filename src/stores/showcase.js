@@ -62,6 +62,26 @@ export const useShowCase = defineStore("showcase", () => {
     });
   }
 
+  // get all foods
+  const getAllFoodItems = () => {
+    axios
+    .get(`${import.meta.env.VITE_url}/getallfood`, {
+      headers: {
+        Authorization: "Bearer " + authontication.cookies_token,
+      },
+    })
+    .then((response) => {
+      foodItemList.value = response.data;
+    })
+    .catch((error) => {
+      if (error.status == 401) {
+        authontication.removeCredentials();
+        router.replace({ name: "login" });
+      }
+    });
+  }
+
+
   return {
     unDeletable,
     categoryList,
@@ -72,5 +92,6 @@ export const useShowCase = defineStore("showcase", () => {
     processingDeliveryLocation,
     getAllCategories,
     getAllDeliveryLocations,
+    getAllFoodItems,
   };
 });

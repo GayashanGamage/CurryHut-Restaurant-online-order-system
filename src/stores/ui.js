@@ -67,10 +67,9 @@ export const useUiStore = defineStore("ui", () => {
   }
 
   function closeNewCategoryWindow() {
-    // console.log("new category window close");
-    showCase.getCategoryDetails();
-    showCase.processingCategory = null;
-    NewCategoryWindow.value = false;
+    showCase.getAllCategories(); //update entire category list from database
+    showCase.processingCategory = null; //clear the processing category
+    NewCategoryWindow.value = false; //close the add new category window
   }
 
   function openDeleteCategoryWindow(id, name) {
@@ -79,8 +78,8 @@ export const useUiStore = defineStore("ui", () => {
   }
 
   function closeDeleteCategoryWindow() {
-    showCase.processingCategory = null;
-    DeleteCategoryWindow.value = false;
+    showCase.processingCategory = null; // clear the processing category
+    DeleteCategoryWindow.value = false; // close the delete category window
   }
 
   function openEditCategoryWindow(item_id) {
@@ -90,8 +89,8 @@ export const useUiStore = defineStore("ui", () => {
   }
 
   function closeEditCategoryWindow() {
-    showCase.processingCategory = null;
-    EditCategoryWindow.value = false;
+    showCase.processingCategory = null; //clear the processing category
+    EditCategoryWindow.value = false; //close the edit category window
   }
 
   function openAddFoodWindow() {

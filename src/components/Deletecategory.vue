@@ -52,7 +52,7 @@ const deleteAction = () => {
   } else {
     axios
       .delete(
-        `${import.meta.env.VITE_url}/deletecategory/${
+        `${import.meta.env.VITE_url}/category/deletecategory/${
           showcase.processingCategory["_id"]
         }`,
         {
@@ -64,7 +64,7 @@ const deleteAction = () => {
       .then((response) => {
         if (response.status == 200) {
           toast.success("delete selecte category successfully");
-          showcase.getCategoryDetails();
+          showcase.getAllCategories();
           uistore.closeDeleteCategoryWindow();
         }
       })

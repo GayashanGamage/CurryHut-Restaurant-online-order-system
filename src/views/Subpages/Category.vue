@@ -31,7 +31,7 @@
               :key="item['_id']"
             >
               <td class="table-row-data">
-                {{ item["_id"].slice(-4, item["_id"].length) }}
+                {{ item["id"].slice(-4, item["id"].length) }}
               </td>
               <td class="table-row-data">{{ item["name"] }}</td>
               <td class="table-row-data center-text">
@@ -59,7 +59,7 @@
                   v-if="item['deletable']"
                   @click="
                     uistore.openEditCategoryWindow({
-                      id: item['_id'],
+                      id: item['id'],
                       current_name: item['name'],
                       categoryName: null,
                     })
@@ -73,7 +73,7 @@
                   class="action-button table-button delete-button"
                   v-if="item['deletable']"
                   @click="
-                    uistore.openDeleteCategoryWindow(item['_id'], item['name'])
+                    uistore.openDeleteCategoryWindow(item['id'], item['name'])
                   "
                 >
                   Delete
@@ -104,23 +104,17 @@ const showcase = useShowCase();
 const authontication = useAuthonticationStore();
 
 onBeforeMount(() => {
-  axios
-    .get(`${import.meta.env.VITE_url}/getcategories`, {
-      headers: {
-        Authorization: "Bearer " + authontication.cookies_token,
-      },
-    })
-    .then((response) => {
-      showcase.categoryList = response.data;
-    })
-    .catch((response) => {
-      if (response.status == 404) {
-        toast.error("sorry ! there is no any caterogy in your shop");
-      } else if (response.status == 401) {
-        authontication.removeCredentials();
-        router.push({ name: "login" });
-      }
-    });
+  if (
+    authontication.cookies_token == null ||
+    authontication.cookies_email == null
+  ) {
+    const credencials = authontication.restoreCredentials();
+    if (credencials == false) {
+      router.replace({ name: "login" });
+    } else if (credencials == true) {
+      showcase.getAllCategories(); // get all category details
+    }
+  }
 });
 
 const uistore = useUiStore();

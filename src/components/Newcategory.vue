@@ -69,7 +69,7 @@ const addNewCategory = () => {
   } else {
     axios
       .post(
-        `${import.meta.env.VITE_url}/addcategory`,
+        `${import.meta.env.VITE_url}/category/addcategory`,
         {
           name: userInput,
         },
@@ -86,7 +86,13 @@ const addNewCategory = () => {
         }
       })
       .catch((error) => {
-        toast.error(error.response.data);
+        if (error.status == 400) {
+          toast.error("you cannot enter duplicate catagory names");
+        } else if (error.status == 422) {
+          toast.error("invalied input");
+        } else if ((error.status = 500)) {
+          toast.error("something went wrong");
+        }
       });
   }
 };

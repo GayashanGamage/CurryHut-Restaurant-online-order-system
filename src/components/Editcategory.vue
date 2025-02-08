@@ -77,7 +77,7 @@ const editeCategory = () => {
   // else send request
   else {
     axios
-      .patch(`${import.meta.env.VITE_url}/editcategory`, null, {
+      .patch(`${import.meta.env.VITE_url}/category/editcategory`, null, {
         headers: {
           Authorization: "Bearer " + authontication.cookies_token,
         },
@@ -89,8 +89,8 @@ const editeCategory = () => {
       .then((response) => {
         if (response.status == 200) {
           toast.success("you successfully update category");
-          showcase.getCategoryDetails();
-          uistore.closeEditCategoryWindow();
+          showcase.getAllCategories(); // update category list from database
+          uistore.closeEditCategoryWindow(); // close the window
         }
       })
       .catch((response) => {

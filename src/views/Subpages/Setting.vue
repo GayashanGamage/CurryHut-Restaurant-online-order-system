@@ -24,7 +24,7 @@
         <hr class="ruller" />
         <div class="s-level-four-container shop">
           <p class="cell" id="shop1">Regular opening time :</p>
-          <p class="cell" id="shop2">{{ shop.open_time }}</p>
+          <p class="cell" id="shop2">{{ String(new Date(shop.open_time).getHours()).padStart(2, '0') }} : {{ String(new Date(shop.open_time).getMinutes()).padStart(2, '0') }}</p>
           <button
             class="action-button cell"
             id="shop3"
@@ -34,7 +34,7 @@
           </button>
 
           <p class="cell" id="shop4">Regular closing time :</p>
-          <p class="cell" id="shop5">{{ shop.close_time }}</p>
+          <p class="cell" id="shop5">{{ String(new Date(shop.close_time).getHours()).padStart(2, '0') }} : {{ String(new Date(shop.close_time).getMinutes()).padStart(2, '0') }}</p>
           <button
             class="action-button cell"
             id="shop6"
@@ -64,7 +64,7 @@
         <hr class="ruller" />
         <div class="s-level-four-container meal">
           <p class="cell" id="meal1">Breakfarst time</p>
-          <p class="cell" id="meal2">{{ shop.breakfast }}</p>
+          <p class="cell" id="meal2">{{ String(new Date(shop.breakfast).getHours()).padStart(2, '0') }} : {{ String(new Date(shop.breakfast).getMinutes()).padStart(2, '0') }}</p>
           <button
             class="cell action-button"
             id="meal3"
@@ -73,7 +73,7 @@
             Edit
           </button>
           <p class="cell" id="meal4">Lunch time</p>
-          <p class="cell" id="meal5">{{ shop.lunch }}</p>
+          <p class="cell" id="meal5">{{ String(new Date(shop.lunch).getHours()).padStart(2, '0') }} : {{ String(new Date(shop.lunch).getMinutes()).padStart(2, '0') }}</p>
           <button
             class="cell action-button"
             id="meal6"
@@ -82,7 +82,7 @@
             Edit
           </button>
           <p class="cell" id="meal7">Dinner</p>
-          <p class="cell" id="meal8">{{ shop.dinner }}</p>
+          <p class="cell" id="meal8">{{ String(new Date(shop.dinner).getHours()).padStart(2, '0') }} : {{ String(new Date(shop.dinner).getMinutes()).padStart(2, '0') }}</p>
           <button
             class="cell action-button"
             id="meal9"
@@ -125,7 +125,9 @@ const requestData = () => {
     })
     .then((response) => {
       if (response.status == 200) {
-        let APIdata = response.data;
+        // assign response data in to variabl 
+        let APIdata = response.data.data;
+
         shop.open_time = APIdata.open_time;
         shop.close_time = APIdata.close_time;
         shop.shutdown = APIdata.shutdown;
@@ -156,24 +158,17 @@ onBeforeMount(() => {
   }
 });
 
-function openPasswordResetWindow() {
-  // function : send email with 'secreate_code' to admin and open passwordChangeWindow
-  // 1. check authontication
-  // 2. if not available, then crean all credicials and direct to login page
-  // 3. otherwise send request to 'secretecode'
-  // 4. set CodeVerifyWindow visible
-  // 5. if it is successfull, then open password reset popup
-  authontication.checkAuthontication();
+const changePassword = () => {
   axios
     .get(`${import.meta.env.VITE_url}/secreatecode`, {
       params: {
-        email: authontication.email,
+        email_address: authontication.local_storage_email,
       },
     })
     .then((response) => {
       if (response.status == 200) {
-        uistore.CodeVerify = true;
-        uistore.PasswordChangeWindow = true;
+        uistore.CodeVerify = true; //to open code verify window
+        uistore.PasswordChangeWindow = true; //to open main window from home page
       }
     })
     .catch((error) => {
@@ -183,10 +178,34 @@ function openPasswordResetWindow() {
     });
 }
 
+
+function openPasswordResetWindow() {
+  // function : send email with 'secreate_code' to admin and open passwordChangeWindow
+  // 1. check authontication
+  // 2. if not available, then crean all credicials and direct to login page
+  // 3. otherwise send request to 'secretecode'
+  // 4. set CodeVerifyWindow visible
+  // 5. if it is successfull, then open password reset popup
+  // authontication.checkAuthontication();
+  if (
+    authontication.cookies_token == null ||
+    authontication.local_storage_email == null
+  ) {
+    const credencials = authontication.restoreCredentials();
+    if (credencials == false) {
+      router.replace({ name: "login" });
+    } else {
+      changePassword();
+    }
+  } else {
+    changePassword();
+  }
+}
+
 // exrtact hours and minutes from selected time
 const extractTime = (selecteTime) => {
-  shopStore.hours = parseInt(selecteTime.split(":")[0]);
-  shopStore.minutes = parseInt(selecteTime.split(":")[1]);
+  shopStore.hours = new Date(selecteTime).getHours();
+  shopStore.minutes = new Date(selecteTime).getMinutes();
 };
 
 // open time chage window - common for all windows ---------
@@ -229,17 +248,14 @@ const requestShopStatus = () => {
       },
     })
     .then((responce) => {
-      if (responce.status == 200) {
-        if (responce.data == "successfuly open") {
-          toast.success("Shop open successfully");
-        } else if (responce.data == "successfuly close") {
-          toast.warning("Shop close successfully");
-        }
-        uistore.refresh = true;
-      }
+      toast.success("Shop status changed successfully");
+      uistore.refresh = true; // this is do some critical changes in the page
     })
     .catch((error) => {
-      console.log(error);
+      if(error.status == 400){
+        toast.error("while shop close you cannot change status of the shop");
+        document.getElementById('checkbox').checked = shop.shutdown;
+      }
     });
 };
 

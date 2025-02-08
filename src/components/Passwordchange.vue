@@ -24,13 +24,13 @@
           type="password"
           class="user-input"
           placeholder="New password"
-          v-model="authontication.change_password1"
+          v-model="authontication.login_password.one"
         />
         <input
           type="password"
           class="user-input"
           placeholder="Re enter password"
-          v-model="authontication.change_password2"
+          v-model="authontication.login_password.two"
         />
         <button id="login-button" @click="confirmPassword">Set password</button>
       </div>
@@ -50,9 +50,48 @@ const toast = useToast();
 const uistore = useUiStore();
 const authontication = useAuthonticationStore();
 
-const verifyCode = () => {};
+const verifyCode = () => {
+  axios.post(`${import.meta.env.VITE_url}/codeverification`, {
+    email: authontication.local_storage_email,
+    code: authontication.secreate_code,
+  }).then((res) => {
+    console.log(res);
+    if (res.status == 200) {
+      uistore.PasswordRest = true;
+      uistore.CodeVerify = false;
+      authontication.login_password = {
+        'one' : null,
+        'two' : null
+      }
+    }
+  }).catch((err) => {
+    toast.error("Invalid token");
+    uistore.PasswordChangeWindow = false; // this is for close the window
+  });
+};
 
-const confirmPassword = () => {};
+const confirmPassword = () => {
+  if(authontication.login_password.one == authontication.login_password.two){
+    axios.post(`${import.meta.env.VITE_url}/resetpassword`, {
+      email: authontication.local_storage_email,
+      password: authontication.login_password.one,
+    }).then((res) => {
+      if (res.status == 200) {
+        uistore.PasswordRest = false;
+        toast.success("Password changed successfully");
+        uistore.PasswordChangeWindow = false; // this is for close the window
+        authontication.login_password = null; 
+      }
+    }).catch((err) => {
+      toast.error("something go wrong");
+      uistore.PasswordChangeWindow = false; // this is for close the window
+      authontication.login_password = null;
+    });
+  }
+  else{
+    toast.error("Password not match");
+  }
+};
 </script>
 
 <style scoped>

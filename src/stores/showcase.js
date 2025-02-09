@@ -10,10 +10,10 @@ const toast = useToast();
 export const useShowCase = defineStore("showcase", () => {
   // pinia store reference
   const authontication = useAuthonticationStore();
-
+  
   const DeliveryLocationList = ref(null);
   const processingDeliveryLocation = ref(null); //this is for edit, new-adds and delete perpose
-
+  
   const unDeletable = [
     "uncategorize",
     "curry",
@@ -23,7 +23,8 @@ export const useShowCase = defineStore("showcase", () => {
   ];
   const categoryList = ref(null);
   const processingCategory = ref(null); //this is for edit, new-adds and delete perpose
-
+  
+  const sortedFood = ref(null) // this is use for showcase food under category name in menu page
   const foodItemList = ref(null);
   const processingFoodItem = ref(null); //this is for edit, new-adds and delete perpose
   // const selectedFoodItem = ref();
@@ -72,6 +73,7 @@ export const useShowCase = defineStore("showcase", () => {
     })
     .then((response) => {
       foodItemList.value = response.data;
+      sortFoodList(response.data);
     })
     .catch((error) => {
       if (error.status == 401) {
@@ -81,10 +83,23 @@ export const useShowCase = defineStore("showcase", () => {
     });
   }
 
+  // sort food list accoring to the category name and remove uncatgory food items form this list
+  function sortFoodList(a){
+    sortedFood.value = a.reduce((acc, item) => {
+      if (item['category_id'] !== '670cbcf46e6b240be2d189e2') { // uncatgory's id
+          if (!acc[item['category_id']]) {
+              acc[item['category_id']] = []; // Initialize the category array if it doesn't exist
+          }
+          acc[item['category_id']].push(item); // Add the item to the corresponding category
+      }
+      return acc;
+  }, {});
+  }
 
   return {
     unDeletable,
     categoryList,
+    sortedFood,
     foodItemList,
     processingCategory,
     processingFoodItem,

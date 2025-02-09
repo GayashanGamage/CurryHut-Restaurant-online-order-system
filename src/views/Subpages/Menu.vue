@@ -21,7 +21,8 @@
           <tbody v-for="item in showcase.sortedFood" :key="item">
             <!-- this is category sub title bars -->
             <tr class="category-title">
-              <td colspan="6" class="category-title-text">{{ getCategoryName(item[0]['category_id']) }} category</td>
+              <!-- <td colspan="6" class="category-title-text">{{ getCategoryName(item[0]['category_id']) }} category</td> -->
+              <td colspan="6" class="category-title-text">{{ item[0]['category_id'] }} category</td>
             </tr> 
             <!-- this include all food data of above category -->
             <tr class="table-row" v-for="i in item" :key="i">
@@ -102,19 +103,19 @@ onBeforeMount(() => {
 const checked = ref(false)
 
 // get category name by id
-const getCategoryName = (id) => {
-  for(let i = 0; i < showcase.categoryList.length; i++){
-    if(showcase.categoryList[i].id == id){
-      // set default check value for each mealtime if category is un-deletable ( remove rice and curry from hear )
-      if(showcase.categoryList[i]['deletable'] == false && showcase.categoryList[i]['id'] != '670cbcfd6e6b240be2d189e3' && showcase.categoryList[i]['id'] != '670cbd076e6b240be2d189e4'){
-        checked.value = true
-      }else{
-        checked.value = false
-      }
-      return showcase.categoryList[i].name;
-    }
-  }
-}
+// const getCategoryName = (id) => {
+//   for(let i = 0; i < showcase.categoryList.length; i++){
+//     if(showcase.categoryList[i].id == id){
+//       // set default check value for each mealtime if category is un-deletable ( remove rice and curry from hear )
+//       if(showcase.categoryList[i]['deletable'] == false && showcase.categoryList[i]['id'] != '670cbcfd6e6b240be2d189e3' && showcase.categoryList[i]['id'] != '670cbd076e6b240be2d189e4'){
+//         checked.value = true
+//       }else{
+//         checked.value = false
+//       }
+//       return showcase.categoryList[i].name;
+//     }
+//   }
+// }
 
 </script>
 

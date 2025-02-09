@@ -61,14 +61,19 @@ const authontication = useAuthonticationStore();
 
 // if categories not available(null), then fetch from server
 onBeforeMount(() => {
-  if (
-    authontication.cookies_token == null ||
-    authontication.cookies_email == null
-  ) {
-    const credencials = authontication.restoreCredentials();
-    if (credencials == false) {
-      router.replace({ name: "login" });
-    } else if (credencials == true) {
+  if(showcase.categoryList == null){
+    if (
+      authontication.cookies_token == null ||
+      authontication.cookies_email == null
+    ) {
+      const credencials = authontication.restoreCredentials();
+      if (credencials == false) {
+        router.replace({ name: "login" });
+      } else if (credencials == true) {
+        showcase.getAllCategories();
+      }
+    }
+    else{
       showcase.getAllCategories();
     }
   }
@@ -76,14 +81,19 @@ onBeforeMount(() => {
 
 // if food items not availble(null), then fetch from server
 onBeforeMount(() => {
-  if (
-    authontication.cookies_token == null ||
-    authontication.cookies_email == null
-  ) {
-    const credencials = authontication.restoreCredentials();
-    if (credencials == false) {
-      router.replace({ name: "login" });
-    } else if (credencials == true) {
+  if(showcase.foodItemList == null){
+    if (
+      authontication.cookies_token == null ||
+      authontication.cookies_email == null
+    ) {
+      const credencials = authontication.restoreCredentials();
+      if (credencials == false) {
+        router.replace({ name: "login" });
+      } else if (credencials == true) {
+        showcase.getAllFoodItems();
+      }
+    }
+    else{
       showcase.getAllFoodItems();
     }
   }

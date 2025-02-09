@@ -103,23 +103,45 @@ const showcase = useShowCase();
 const authontication = useAuthonticationStore();
 const uistore = useUiStore();
 
+
+// get all categories from database if not available
 onBeforeMount(() => {
-  if (
-    authontication.cookies_token == null ||
-    authontication.cookies_email == null
-  ) {
-    const credencials = authontication.restoreCredentials();
-    if (credencials == false) {
-      router.replace({ name: "login" });
-    } else if (credencials == true) {
-      showcase.getAllCategories(); // get all category details
+  if(showcase.categoryList == null){
+    if (
+      authontication.cookies_token == null ||
+      authontication.cookies_email == null
+    ) {
+      const credencials = authontication.restoreCredentials();
+      if (credencials == false) {
+        router.replace({ name: "login" });
+      } else if (credencials == true) {
+        showcase.getAllCategories(); // get all category details
+      }
+    }
+    else{
+      showcase.getAllCategories();
     }
   }
 });
 
+// get all food items from database if not available
 onBeforeMount(() => {
   if (showcase.foodItemList === null) {
-    showcase.getAllFoodItems();
+    if (
+      authontication.cookies_token == null ||
+      authontication.cookies_email == null
+    ) {
+      const credencials = authontication.restoreCredentials();
+      if (credencials == false) {
+        router.replace({ name: "login" });
+      } else if (credencials == true) {
+        showcase.getAllFoodItems(); // get all category details
+      }
+    }
+    else{
+      showcase.getAllCategories();
+    }
+
   }
 })
 

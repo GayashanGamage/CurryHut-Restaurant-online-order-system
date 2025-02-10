@@ -18,25 +18,25 @@
               <th class="table-row-title dinner center-text">Dinner</th>
             </tr>
           </thead>
-          <tbody v-for="item in showcase.sortedFood" :key="item">
+          <tbody v-for="(value, key) in showcase.sortedFood" :key="key">
             <!-- this is category sub title bars -->
             <tr class="category-title">
-              <!-- <td colspan="6" class="category-title-text">{{ getCategoryName(item[0]['category_id']) }} category</td> -->
-              <td colspan="6" class="category-title-text">{{ item[0]['category_id'] }} category</td>
+              <td colspan="6" class="category-title-text">{{ key }} category</td>
+              <!-- <td colspan="6" class="category-title-text">{{ item[0]['category_id'] }} category</td> -->
             </tr> 
             <!-- this include all food data of above category -->
-            <tr class="table-row" v-for="i in item" :key="i">
+            <tr class="table-row" v-for="i in value" :key="i">
               <td class="table-row-data food-name">{{ i.name }}</td>
               <!-- <td class="table-row-data"></td> -->
               <!-- <td class="table-row-data center-text"></td> -->
               <td class="table-row-data center-text">
-                <input type="checkbox" class="tikbox" v-model="checked"/>
+                <input type="checkbox" class="tikbox" v-model="i.breakfast" @click="changeMealtime(i.id, 'breakfast', i.breakfast)"/>
               </td>
               <td class="table-row-data center-text">
-                <input type="checkbox" class="tikbox" v-model="checked"/>
+                <input type="checkbox" class="tikbox" v-model="i.lunch" @click="changeMealtime(i.id, 'lunch', i.lunch)"/>
               </td>
               <td class="table-row-data center-text">
-                <input type="checkbox" class="tikbox" v-model="checked"/>
+                <input type="checkbox" class="tikbox" v-model="i.dinner" @click="changeMealtime(i.id, 'dinner', i.dinner)" />
               </td>
             </tr>
           </tbody>
@@ -100,22 +100,14 @@ onBeforeMount(() => {
   }
 });
 
-const checked = ref(false)
-
-// get category name by id
-// const getCategoryName = (id) => {
-//   for(let i = 0; i < showcase.categoryList.length; i++){
-//     if(showcase.categoryList[i].id == id){
-//       // set default check value for each mealtime if category is un-deletable ( remove rice and curry from hear )
-//       if(showcase.categoryList[i]['deletable'] == false && showcase.categoryList[i]['id'] != '670cbcfd6e6b240be2d189e3' && showcase.categoryList[i]['id'] != '670cbd076e6b240be2d189e4'){
-//         checked.value = true
-//       }else{
-//         checked.value = false
-//       }
-//       return showcase.categoryList[i].name;
-//     }
-//   }
-// }
+const changeMealtime = (id, meal, availability) => {
+  console.log(availability)
+  showcase.shop_menu.find((item) => {
+    if(item.id == id){
+      item[meal] = !availability;
+    }
+  });
+}
 
 </script>
 

@@ -71,6 +71,7 @@
 </template>
 
 <script setup>
+// 1️⃣ import necesary packages
 import { useAuthonticationStore } from "@/stores/authontication";
 import { useShowCase } from "@/stores/showcase";
 import { useUiStore } from "@/stores/ui";
@@ -79,42 +80,30 @@ import { onBeforeMount, onMounted } from "vue";
 import { useToast } from "vue-toast-notification";
 const uistore = useUiStore();
 
-const toast = useToast();
-
+// 2️⃣ reactive variables
 const authontication = useAuthonticationStore();
 const showcase = useShowCase();
+const toast = useToast();
 
+
+// 3️⃣ lifecycle hooks
 onBeforeMount(() => {
+  
   if(showcase.foodItemList === null){
-    if (
-      authontication.cookies_token == null ||
-      authontication.local_storage_email == null
-    ) {
+    if ( authontication.cookies_token == null || authontication.local_storage_email == null) {
       const credencial = authontication.restoreCredentials();
       if (credencial == false) {
         router.replace({ name: "login" });
       } else if (credencial == true) {
-        axios
-        .get(`${import.meta.env.VITE_url}/getallfood`, {
-          headers: {
-            Authorization: "Bearer " + authontication.cookies_token,
-          },
-        })
-        .then((response) => {
-            showcase.foodItemList = response.data;
-          })
-          .catch((response) => {
-            if (response.status == 401) {
-              authontication.removeCredentials();
-              router.replace({ name: "login" });
-            } else {
-              toast.error("something go wrong");
-            }
-          });
-        }
+        showcase.getAllFoodItems()
       }
-    
-  }
+    }else{
+        showcase.getAllFoodItems()
+      }
+    }
+    else{
+      showcase.getAllFoodItems()
+    }
   });
   
 // if category still not loaded to categoryList variable, load it
@@ -142,7 +131,7 @@ if (showcase.categoryList === null) {
   }
 });
 
-// find category name from category id
+// 4️⃣ Methords
 const findCategoryName = (id) => {
   if(showcase.categoryList !== null){
     for(let i = 0; i <= showcase.categoryList.length; i++) {

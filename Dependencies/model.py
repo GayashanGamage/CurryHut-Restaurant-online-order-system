@@ -267,3 +267,18 @@ class RiderContactUpdate(BaseModel):
     new_mobile: int
     old_mobile: int
     secreate_code: int
+
+
+class MenuItem(BaseModel):
+    id: str
+    breakfast: bool
+    lunch: bool
+    dinner: bool
+
+    @field_validator('id', check_fields=False)
+    def convertToId(cls, value):
+        return ObjectId(value)
+
+
+class Menu(BaseModel):
+    menu: list[MenuItem]

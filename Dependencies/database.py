@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, UpdateOne
 from . import model
 from bson.objectid import ObjectId
 import os
@@ -589,6 +589,51 @@ class DataBase:
                 ) for rider in data
             ]
             return jsonable_encoder(all_riders)
+        else:
+            return False
+
+    def update_menu(self, menu):
+        # perpose : update menu as a bulk
+        # result : true : successfull, false : failed
+        updatedData = [
+            UpdateOne(
+                {'_id': food.id},
+                {'$set': {'breakfast': food.breakfast,
+                          'lunch': food.lunch, 'dinner': food.dinner}}
+            ) for food in menu.menu
+        ]
+        updated = self.food.bulk_write(updatedData)
+        if updated.acknowledged:
+            return True
+        else:
+            return False
+
+    def update_menu_status(self):
+        # perpose : identify whether today's manu is available or not. end of the day this becume a false -
+        data = self.shop.update_one({}, {'$set': {'menu': True}})
+        if data.acknowledged:
+            return True
+        else:
+            return False
+
+    def check_meal_time(self, id):
+        # perpose : check any meal is set for any of meal time.
+        # return : true - set for meal time, false : not set for any meal time
+        data = self.food.find_one({'_id': ObjectId(id)})
+        # when the data is not available
+        if data == None:
+            return False
+        else:
+            if data['breakfast'] == True or data['lunch'] == True or data['dinner'] == True:
+                return True
+            else:
+                return False
+
+    def update_availability(self, id):
+        data = self.food.update_one({"_id": ObjectId(id)}, [
+                                    {'$set': {'availability': {'$not': f'$availability'}}}])
+        if data.modified_count == 1:
+            return True
         else:
             return False
 

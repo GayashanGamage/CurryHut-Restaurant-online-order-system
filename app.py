@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from Router import delivery, customer, category, food, adminAuth, seting, rider
+from Router import delivery, customer, category, food, adminAuth, seting, rider, menu
 
 app = FastAPI()
 
@@ -12,6 +12,7 @@ app.include_router(food.route)
 app.include_router(adminAuth.route)
 app.include_router(seting.route)
 app.include_router(rider.route)
+app.include_router(menu.route)
 
 
 # CORS midleware

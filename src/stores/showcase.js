@@ -24,12 +24,15 @@ export const useShowCase = defineStore("showcase", () => {
   const categoryList = ref(null);
   const processingCategory = ref(null); //this is for edit, new-adds and delete perpose
   
+  // only for views
   const sortedFood = ref(null) // this is use for showcase food under category name in menu page
+  const availableFood = ref(null) // this is use for showcase food under category name in menu page
   const foodItemList = ref(null);
-  const processingFoodItem = ref(null); //this is for edit, new-adds and delete perpose
   // const selectedFoodItem = ref();
-
+  
+  // only for procesing
   const shop_menu = ref([]); //  this data structure for update shop menu ( for API request )
+  const processingFoodItem = ref(null); //this is for edit, new-adds and delete perpose
 
   const preventCategories = ['670cbd156e6b240be2d189e6', '670cbd0e6e6b240be2d189e5']
 
@@ -77,8 +80,10 @@ export const useShowCase = defineStore("showcase", () => {
     })
     .then((response) => {
       foodItemList.value = response.data;
+      // updateMenu(response.data)
       sortFoodList(response.data);
       setMenu();
+      setAvailableFood(response.data);
     })
     .catch((error) => {
       if (error.status == 401) {
@@ -90,6 +95,34 @@ export const useShowCase = defineStore("showcase", () => {
 
   // ---------------------- if you change sortFoodList then change setMenu function also ----------------------
   // sort food list accoring to the category name and remove uncatgory food items form this list
+  // function sortFoodList(a){
+  //   sortedFood.value = a.reduce((acc, item) => {
+  //     if (item['category_id'] !== '670cbcf46e6b240be2d189e2') { // uncatgory's id
+  //       let category_name = categoryList.value.find(category => category.id === item['category_id']).name;
+  //         if (!acc[category_name]) {
+  //             acc[category_name] = []; // Initialize the category array if it doesn't exist
+  //         }
+  //         // add availability of food item
+  //         if(preventCategories.includes(item['category_id'])){
+  //           item['breakfast'] = true;
+  //           item['lunch'] = true;
+  //           item['dinner'] = true;
+  //           // itme['availability'] = false;
+  //         }
+  //         // else{
+  //         //   item['breakfast'] = false;
+  //         //   item['lunch'] = false;
+  //         //   item['dinner'] = false;
+  //         //   // itme['availability'] = false;
+  //         // }
+  //         acc[category_name].push(item); // Add the item to the corresponding category
+  //     }
+  //     return acc;
+  // }, {});
+  // }
+
+
+  // sort food list accoring to the category name and remove uncatgory food items form this list
   function sortFoodList(a){
     sortedFood.value = a.reduce((acc, item) => {
       if (item['category_id'] !== '670cbcf46e6b240be2d189e2') { // uncatgory's id
@@ -97,54 +130,79 @@ export const useShowCase = defineStore("showcase", () => {
           if (!acc[category_name]) {
               acc[category_name] = []; // Initialize the category array if it doesn't exist
           }
-          // add availability of food item
-          if(preventCategories.includes(item['category_id'])){
-            item['breakfast'] = true;
-            item['lunch'] = true;
-            item['dinner'] = true;
-          }else{
-            item['breakfast'] = false;
-            item['lunch'] = false;
-            item['dinner'] = false;
-          }
           acc[category_name].push(item); // Add the item to the corresponding category
       }
       return acc;
   }, {});
   }
 
+  // set available food list according to the category
+  function setAvailableFood(a){
+    availableFood.value = a.reduce((acc, item) => {
+      console.log(item)
+      if (item['category_id'] !== '670cbcf46e6b240be2d189e2' && (item['breakfast'] == true || item['lunch'] == true || item['dinner'] == true)) { // uncatgory's id
+        let category_name = categoryList.value.find(category => category.id === item['category_id']).name;
+        if (!acc[category_name]) {
+            acc[category_name] = []; // Initialize the category array if it doesn't exist
+        }
+        acc[category_name].push({'id' : item.id, 'availability' : item.availability, 'name' : item.name}); // Add the item to the corresponding category
+      }
+      return acc;
+  }, {});
+  }
+
+  // datastructure of send api request
+  // function setMenu() {
+  //   let temp_menu = []
+  //   for(let a = 0; a < foodItemList.value.length; a++){
+  //     if(preventCategories.includes(foodItemList.value[a].category_id))
+  //       {
+  //       temp_menu.push({
+  //         id: foodItemList.value[a].id,
+  //         breakfast: true,
+  //         lunch: true,
+  //         dinner: true,
+  //         availability : true,
+  //         name : foodItemList.value[a].name
+  //       });
+  //     }else
+  //     {
+  //       temp_menu.push({
+  //         id: foodItemList.value[a].id,
+  //         breakfast: foodItemList.value[a].breakfast,
+  //         lunch: foodItemList.value[a].lunch,
+  //         dinner: foodItemList.value[a].dinner,
+  //         availability : foodItemList.value[a].availability,
+  //         name : foodItemList.value[a].name
+  //       });
+  //     }
+  //   }
+  //   shop_menu.value = temp_menu;  
+  // }
+
+
   // datastructure of send api request
   function setMenu() {
     let temp_menu = []
     for(let a = 0; a < foodItemList.value.length; a++){
-      if(preventCategories.includes(foodItemList.value[a].category_id)){
         temp_menu.push({
           id: foodItemList.value[a].id,
-          breakfast: true,
-          lunch: true,
-          dinner: true,
-          availability : true,
-          name : foodItemList.value[a].name
-        });
-      }else{
-        temp_menu.push({
-          id: foodItemList.value[a].id,
-          breakfast: false,
-          lunch: false,
-          dinner: false,
-          availability : false,
+          breakfast: foodItemList.value[a].breakfast,
+          lunch: foodItemList.value[a].lunch,
+          dinner: foodItemList.value[a].dinner,
+          availability : foodItemList.value[a].availability,
           name : foodItemList.value[a].name
         });
       }
+      shop_menu.value = temp_menu;  
     }
-    shop_menu.value = temp_menu;
-    
-  }
+
 
   return {
     unDeletable,
     categoryList,
     sortedFood,
+    availableFood,
     foodItemList,
     shop_menu,
     processingCategory,
@@ -154,5 +212,6 @@ export const useShowCase = defineStore("showcase", () => {
     getAllCategories,
     getAllDeliveryLocations,
     getAllFoodItems,
+    setAvailableFood
   };
 });

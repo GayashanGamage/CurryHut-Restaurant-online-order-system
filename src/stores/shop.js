@@ -1,6 +1,7 @@
 // this is only store store related data
 import { ref, computed, watch } from "vue";
 import { defineStore } from "pinia";
+import axios from "axios";
 
 export const useShopStore = defineStore("shop", () => {
   const open_time = ref(null);
@@ -9,6 +10,7 @@ export const useShopStore = defineStore("shop", () => {
   const breakfast = ref(null);
   const lunch = ref(null);
   const dinner = ref(null);
+  const menu = ref(null);
 
   // Timechange component
   const hours = ref(0);
@@ -46,6 +48,34 @@ export const useShopStore = defineStore("shop", () => {
     }
   }
 
+  function requestSettingData(token){
+    axios
+    .get(`${import.meta.env.VITE_url}/shopdetails`, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+    .then((response) => {
+      if (response.status == 200) {
+        // assign response data in to variabl 
+        let APIdata = response.data.data;
+
+        open_time.value = APIdata.open_time;
+        close_time.value = APIdata.close_time;
+        shutdown.value = APIdata.shutdown;
+        breakfast.value = APIdata.breakfast;
+        lunch.value = APIdata.lunch;
+        dinner.value = APIdata.dinner;
+        menu.value = APIdata.menu
+      }
+    })
+    .catch((error) => {
+      if (error.status == 401) {
+        router.replace({ name: "login" });
+      }
+    });
+  }
+
   return {
     open_time,
     close_time,
@@ -56,9 +86,11 @@ export const useShopStore = defineStore("shop", () => {
     // Timechange component
     hours,
     minutes,
+    menu,
     increaseHours,
     decreaseHours,
     increaseMinutes,
     decreaseMinutes,
+    requestSettingData,
   };
 });

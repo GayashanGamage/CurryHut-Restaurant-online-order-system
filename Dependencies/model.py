@@ -72,6 +72,7 @@ class shop_details(BaseModel):
     breakfast: datetime
     lunch: datetime
     dinner: datetime
+    menu: bool
     shutdown: bool
 
 
@@ -135,6 +136,10 @@ class FoodData(BaseModel):
     price: list[FoodDataPrice]
     added_data: datetime = Field(default=datetime.now())
     modified_data: datetime = Field(default=datetime.now())
+    breakfast: Optional[bool] = Field(default=False)
+    lunch: Optional[bool] = Field(default=False)
+    dinner: Optional[bool] = Field(default=False)
+    availability: Optional[bool] = Field(default=False)
 
     @validator('category_id', pre=False)
     def convertCategoryId(cls, value):
@@ -149,6 +154,10 @@ class getFood(BaseModel):
     price: list[FoodDataPrice]
     added_data: datetime
     modified_data: datetime
+    breakfast: bool
+    lunch: bool
+    dinner: bool
+    availability: bool
 
     @validator('id', pre=False)
     def convertToId(cls, value):
@@ -274,6 +283,7 @@ class MenuItem(BaseModel):
     breakfast: bool
     lunch: bool
     dinner: bool
+    availability: bool
 
     @field_validator('id', check_fields=False)
     def convertToId(cls, value):

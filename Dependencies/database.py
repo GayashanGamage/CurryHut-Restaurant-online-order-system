@@ -283,6 +283,10 @@ class DataBase:
                     description=food['description'],
                     added_data=food['added_data'],
                     modified_data=food['modified_data'],
+                    breakfast=food['breakfast'],
+                    lunch=food['lunch'],
+                    dinner=food['dinner'],
+                    availability=food['availability'],
                     price=[
                         model.FoodDataPrice(
                             name=price['name'],
@@ -599,7 +603,7 @@ class DataBase:
             UpdateOne(
                 {'_id': food.id},
                 {'$set': {'breakfast': food.breakfast,
-                          'lunch': food.lunch, 'dinner': food.dinner}}
+                          'lunch': food.lunch, 'dinner': food.dinner, 'availability': food.availability}}
             ) for food in menu.menu
         ]
         updated = self.food.bulk_write(updatedData)

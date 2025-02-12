@@ -6,7 +6,7 @@ app = FastAPI()
 
 # register routers
 app.include_router(delivery.route)
-app.include_router(customer.router)
+app.include_router(customer.route)
 app.include_router(category.route)
 app.include_router(food.route)
 app.include_router(adminAuth.route)

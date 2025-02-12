@@ -6,14 +6,13 @@ from fastapi.responses import JSONResponse
 # from fastapi.encoders import jsonable_encoder
 from Dependencies.shop import doesShopOpen, get_current_meal_time
 from datetime import datetime
-from dateutil import parser
-import pytz
+from .docs.doc_customer import doc
 
-router = APIRouter(prefix="/customer", tags=["customer"])
+route = APIRouter(prefix="/customer", tags=["customer"])
 db = get_database()
 
 
-@router.get('/')
+@route.get('/')
 async def getFood():
     shopStatus = doesShopOpen()
     if shopStatus['status'] == True:
@@ -26,7 +25,7 @@ async def getFood():
             return JSONResponse(content=shopStatus['data'], status_code=403)
 
 
-@router.get('/cagegories')
+@route.get('/cagegories')
 async def getCategories():
     shopStatus = doesShopOpen()
     if shopStatus['status'] == True:
@@ -43,7 +42,7 @@ async def getCategories():
             return JSONResponse(content=shopStatus['data'], status_code=403)
 
 
-@router.get('/testtime')
+@route.get('/riceAndCurry', **doc['riceAndCurry'])
 async def getRiceAndCurry():
     # get current time
     meal_time = get_current_meal_time()
@@ -56,4 +55,4 @@ async def getRiceAndCurry():
         if data['status'] == True:
             return JSONResponse(status_code=200, content={'curry': data['curry'], 'rice': data['rice'], 'rice&curry': data['rice&curry']})
         elif data['status'] == False:
-            return JSONResponse(status_code=404, content={'message': 'rice and curry not available  '})
+            return JSONResponse(status_code=404, content={'message': 'rice and curry not available'})

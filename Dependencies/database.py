@@ -23,6 +23,9 @@ class DataBase:
         self.category = self.db['Category']
         self.food = self.db['Food']
         self.rider = self.db['Rider']
+        self.plainRiceCategory = '670cbd076e6b240be2d189e4'
+        self.curryCategory = '670cbcfd6e6b240be2d189e3'
+        self.riceAndCurryCategory = '67ac267debd37b4276c3aebd'
 
     def find_duplicate_location(self, location):
         # perpose : find duplicate name available in the delivery collection - by name
@@ -640,6 +643,66 @@ class DataBase:
             return True
         else:
             return False
+
+    def riceAndCurryData(self, mealTime):
+        # perpose : get matched rice and curry, curries and rice from food collection
+        # return : ?
+        data = list(self.food.find({
+            '$and': [
+                {'category_id': {
+                    '$in': [ObjectId(self.plainRiceCategory), ObjectId(self.curryCategory), ObjectId(self.riceAndCurryCategory)]
+                }},
+                {mealTime: True}
+            ]
+        }))
+        if len(data) == 0:
+            return {'status': False, 'data': []}
+        else:
+            curryCount = 0
+            riceCount = 0
+            riceAndCurry = 0
+            for item in data:
+                if str(item['category_id']) == self.curryCategory:
+                    curryCount += 1
+                elif str(item['category_id']) == self.plainRiceCategory:
+                    riceCount += 1
+                elif str(item['category_id']) == self.riceAndCurryCategory:
+                    riceAndCurry += 1
+            if curryCount <= 2 or riceCount <= 0 or riceAndCurry == 0:
+                return {'status': False, 'data': []}
+            else:
+                curry = [
+                    model.curry(
+                        id=str(item["_id"]),
+                        name=item['name'],
+                        availability=item['availability']
+                    ) for item in data if str(item['category_id']) == self.curryCategory
+
+                ]
+                plain_rice = [
+                    model.plain_rice(
+                        id=str(item["_id"]),
+                        name=item['name'],
+                        availability=item['availability']
+                    ) for item in data if str(item['category_id']) == self.plainRiceCategory
+
+                ]
+                rice_and_curry = [
+                    model.plain_rice(
+                        id=str(item["_id"]),
+                        name=item['name'],
+                        availability=item['availability'],
+                        price=[
+                            model.get_price(
+                                price=i['price'],
+                                name=i['name'],
+                                portion=i['portion']
+                            )for i in item['price']
+                        ]
+                    ) for item in data if str(item['category_id']) == self.riceAndCurryCategory
+
+                ]
+                return {'status': True, 'curry': jsonable_encoder(curry), 'rice': jsonable_encoder(plain_rice), 'rice&curry': jsonable_encoder(rice_and_curry)}
 
 
 def get_database():

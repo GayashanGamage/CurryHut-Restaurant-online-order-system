@@ -22,3 +22,19 @@ def doesShopOpen():
         shopTime = model.shop_time(open_time=datetime.fromisoformat(str(
             data['open_time'])), close_time=datetime.fromisoformat(str(data['close_time'])), shutdown=data['shutdown'])
         return {'status': False, 'type': 'closed', 'data': jsonable_encoder(shopTime)}
+
+
+def get_current_meal_time():
+    # get current time
+    timeZoon = pytz.timezone('Asia/Colombo')
+    current_time = datetime.now(timeZoon).time()
+    # get shop data
+    shop = db.get_shopdetails_row()
+    if shop['dinner'].time() < current_time < shop['close_time'].time():
+        return 'breakfast'
+    elif shop['lunch'].time() < current_time < shop['dinner'].time():
+        return 'lunch'
+    elif shop['breakfast'].time() < current_time < shop['lunch'].time():
+        return 'dinner'
+    else:
+        return False

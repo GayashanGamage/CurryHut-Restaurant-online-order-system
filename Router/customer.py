@@ -4,10 +4,12 @@ from fastapi.responses import JSONResponse
 # from Dependencies import model
 # from datetime import datetime
 # from fastapi.encoders import jsonable_encoder
-from Dependencies.shop import doesShopOpen
+from Dependencies.shop import doesShopOpen, get_current_meal_time
 from datetime import datetime
+from dateutil import parser
+import pytz
 
-router = APIRouter(prefix="/customer" , tags=["customer"])
+router = APIRouter(prefix="/customer", tags=["customer"])
 db = get_database()
 
 
@@ -19,10 +21,10 @@ async def getFood():
         return data
     else:
         if shopStatus['type'] == 'closed':
-            return JSONResponse(content = shopStatus['data'], status_code = 403)
+            return JSONResponse(content=shopStatus['data'], status_code=403)
         elif shopStatus['type'] == 'shutdown':
-            return JSONResponse(content = shopStatus['data'], status_code = 403)
-    
+            return JSONResponse(content=shopStatus['data'], status_code=403)
+
 
 @router.get('/cagegories')
 async def getCategories():
@@ -31,12 +33,27 @@ async def getCategories():
         # return all food items
         data = db.get_categories_customer()
         if len(data) > 0:
-            return JSONResponse(content = data, status_code = 200)
+            return JSONResponse(content=data, status_code=200)
         else:
-            return JSONResponse(content = {'message' : 'No categories found'}, status_code = 404)
+            return JSONResponse(content={'message': 'No categories found'}, status_code=404)
     else:
         if shopStatus['type'] == 'closed':
-            return JSONResponse(content = shopStatus['data'], status_code = 403)
+            return JSONResponse(content=shopStatus['data'], status_code=403)
         elif shopStatus['type'] == 'shutdown':
-            return JSONResponse(content = shopStatus['data'], status_code = 403)
+            return JSONResponse(content=shopStatus['data'], status_code=403)
 
+
+@router.get('/testtime')
+async def getRiceAndCurry():
+    # get current time
+    meal_time = get_current_meal_time()
+    if meal_time == False:
+        return JSONResponse(status_code=400, content={"message": 'shop is closed'})
+    else:
+        # get availablie food form database
+        data = db.riceAndCurryData(meal_time)
+        print(meal_time)
+        if data['status'] == True:
+            return JSONResponse(status_code=200, content={'curry': data['curry'], 'rice': data['rice'], 'rice&curry': data['rice&curry']})
+        elif data['status'] == False:
+            return JSONResponse(status_code=404, content={'message': 'rice and curry not available  '})

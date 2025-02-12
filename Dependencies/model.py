@@ -292,3 +292,22 @@ class MenuItem(BaseModel):
 
 class Menu(BaseModel):
     menu: list[MenuItem]
+
+
+class curry(BaseModel):
+    id: str
+    name: str
+    availability: bool
+
+
+class plain_rice(BaseModel):
+    id: str
+    name: str
+    availability: bool
+
+
+class rice_and_curry_pack(BaseModel):
+    id: str
+    name: str
+    price: List[get_price]
+    availability: bool

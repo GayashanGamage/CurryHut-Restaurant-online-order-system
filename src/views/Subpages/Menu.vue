@@ -16,10 +16,15 @@
               <th class="table-row-title name"></th>
               <!-- <th class="table-row-title code center-text">Item code</th> -->
               <th class="table-row-title breakfirst center-text">
-                Breackfirst
+                Breackfirst<br>
+                <span class="meal-time">{{ String(new Date(shopstore.breakfast).getHours()).padStart(2, '0') }}:{{ String(new Date(shopstore.breakfast).getHours()).padStart(2, '0') }} - {{ String(new Date(shopstore.lunch).getHours()).padStart(2, '0') }}:{{ String(new Date(shopstore.lunch).getHours()).padStart(2, '0') }}</span>
               </th>
-              <th class="table-row-title lunch center-text">Lunch</th>
-              <th class="table-row-title dinner center-text">Dinner</th>
+              <th class="table-row-title lunch center-text">Lunch<br>
+                <span class="meal-time">{{ String(new Date(shopstore.lunch).getHours()).padStart(2, '0') }}:{{ String(new Date(shopstore.lunch).getHours()).padStart(2, '0') }} - {{ String(new Date(shopstore.dinner).getHours()).padStart(2, '0') }}:{{ String(new Date(shopstore.dinner).getHours()).padStart(2, '0') }}</span>
+              </th>
+              <th class="table-row-title dinner center-text">Dinner<br>
+                <span class="meal-time">{{ String(new Date(shopstore.lunch).getHours()).padStart(2, '0') }}:{{ String(new Date(shopstore.lunch).getHours()).padStart(2, '0') }} - {{ String(new Date(shopstore.close_time).getHours()).padStart(2, '0') }}:{{ String(new Date(shopstore.close_time).getHours()).padStart(2, '0') }}</span>
+              </th>
             </tr>
           </thead>
           <tbody v-for="(value, key) in showcase.sortedFood" :key="key">
@@ -292,6 +297,13 @@ const backToMenu = () => {
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+}
+.meal-time{
+  font-size: 12px;
+  color: white;
+  background-color: #41b06e;
+  border-radius: 20px;
+  padding: 2px 18px;
 }
 .table-row-data {
   font-size: 17px;

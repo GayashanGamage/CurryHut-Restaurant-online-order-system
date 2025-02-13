@@ -32,7 +32,7 @@ async def setAvailability(id: str, data=Depends(authontication.authVerification)
     if data == False or data['role'] != 'admin':
         return JSONResponse(status_code=401, content='unathorized')
     # check the meal time
-    meal_time = db.check_meal_time(id)
+    meal_time = db.check_meal_time_by_id(id)
     if meal_time == True:
         update = db.update_availability(id)
         if update == True:

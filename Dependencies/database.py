@@ -623,7 +623,7 @@ class DataBase:
         else:
             return False
 
-    def check_meal_time(self, id):
+    def check_meal_time_by_id(self, id):
         # perpose : check any meal is set for any of meal time.
         # return : true - set for meal time, false : not set for any meal time
         data = self.food.find_one({'_id': ObjectId(id)})

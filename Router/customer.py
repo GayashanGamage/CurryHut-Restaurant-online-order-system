@@ -46,6 +46,7 @@ async def getCategories():
 async def getRiceAndCurry():
     # get current time
     meal_time = get_current_meal_time()
+    print(meal_time)
     if meal_time == False:
         return JSONResponse(status_code=400, content={"message": 'shop is closed'})
     else:

@@ -23,9 +23,15 @@ class DataBase:
         self.category = self.db['Category']
         self.food = self.db['Food']
         self.rider = self.db['Rider']
+        # rice and curry related category list
         self.plainRiceCategory = '670cbd076e6b240be2d189e4'
         self.curryCategory = '670cbcfd6e6b240be2d189e3'
         self.riceAndCurryCategory = '67ac267debd37b4276c3aebd'
+
+        # undeletable category list
+        self.uncategorize = '670cbcf46e6b240be2d189e2'
+        self.drinksCategory = '670cbd0e6e6b240be2d189e5'
+        self.decertCategory = '670cbd156e6b240be2d189e6'
 
     def find_duplicate_location(self, location):
         # perpose : find duplicate name available in the delivery collection - by name
@@ -125,7 +131,8 @@ class DataBase:
             return data
 
     def get_foods(self):
-        data = list(self.food.find({}))
+        data = list(self.food.find({'category_id': {'$nin': [
+                    ObjectId(self.drinksCategory), ObjectId(self.decertCategory), ObjectId(self.uncategorize), ObjectId(self.riceAndCurryCategory), ObjectId(self.curryCategory), ObjectId(self.plainRiceCategory)]}}))
         if len(data) > 0:
             serialized = [
                 model.get_foods(
@@ -688,16 +695,16 @@ class DataBase:
 
                 ]
                 rice_and_curry = [
-                    model.plain_rice(
+                    model.rice_and_curry_pack(
                         id=str(item["_id"]),
                         name=item['name'],
                         availability=item['availability'],
                         price=[
-                            model.get_price(
-                                price=i['price'],
+                            model.FoodDataPrice(
                                 name=i['name'],
+                                price=i['price'],
                                 portion=i['portion']
-                            )for i in item['price']
+                            ) for i in item['price']
                         ]
                     ) for item in data if str(item['category_id']) == self.riceAndCurryCategory
 

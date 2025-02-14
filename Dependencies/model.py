@@ -309,5 +309,5 @@ class plain_rice(BaseModel):
 class rice_and_curry_pack(BaseModel):
     id: str
     name: str
-    price: List[get_price]
+    price: List[FoodDataPrice]
     availability: bool

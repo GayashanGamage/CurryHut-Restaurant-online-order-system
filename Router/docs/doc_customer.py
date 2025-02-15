@@ -62,5 +62,58 @@ doc = {
                 }
             },
         }
+    },
+    'undeletableCategory': {
+        'summary': 'get food by undeletabl category id',
+        'description': 'get all foods those are related to undeletable category',
+        'responses': {
+            200: {
+                "description": "get all foods successfuly",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            'message': 'succssfull',
+                            'data': [
+                                {
+                                    'id': 'str',
+                                    'category_id': 'str',
+                                    'name': 'str',
+                                    'description': 'str',
+                                    'added_data': 'datetime',
+                                    'modified_data': 'datetime',
+                                    'price': {
+                                        "name": 'str',
+                                        "price": 'int',
+                                        "portion": 'int'
+                                    }
+                                }
+                            ]
+                        }
+
+                    }
+                }
+            },
+            404: {
+                "description": "foods are not available under mentioned category",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            'message': 'foods not available',
+                            'data': []
+                        }
+                    }
+                }
+            },
+            400: {
+                "description": "provided category is deletable.",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            'message': 'category is deletable'
+                        }
+                    }
+                }
+            },
+        }
     }
 }

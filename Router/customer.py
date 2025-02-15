@@ -57,3 +57,19 @@ async def getRiceAndCurry():
             return JSONResponse(status_code=200, content={'curry': data['curry'], 'rice': data['rice'], 'rice&curry': data['rice&curry']})
         elif data['status'] == False:
             return JSONResponse(status_code=404, content={'message': 'rice and curry not available'})
+
+
+@route.get('/category/{id}')
+async def getUndeletableCategory(id: str):
+    # check category is undeletable or not
+    category_data = db.check_undeletable_category(id)
+    if category_data == False:
+        return JSONResponse(status_code=400, content={'message': 'category is deletable'})
+    else:
+        # get data from database with serialize
+        data = db.getFoodByCategory(id)
+        if data['availability'] == False:
+            return JSONResponse(status_code=400, content={'message': 'foods not available', 'data': []})
+        elif data['availability'] == True:
+            return JSONResponse(status_code=200, content={'message': 'succssfull', 'data': data['data']})
+        # return data

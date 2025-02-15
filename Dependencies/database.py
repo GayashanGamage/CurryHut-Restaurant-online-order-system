@@ -153,6 +153,30 @@ class DataBase:
         else:
             return {'availability': False, 'data': []}
 
+    def getFoodByCategory(self, id):
+        # perpose : get uncategorize foods form database
+        # result : data : successfull | false : not found
+        data = list(self.food.find({'category_id': ObjectId(id)}))
+        if len(data) > 0:
+            serialized = [
+                model.get_foods(
+                    id=str(food['_id']),
+                    name=food['name'],
+                    category_id=str(food['category_id']),
+                    description=food['description'],
+                    price=[
+                        model.get_price(
+                            price=price['price'],
+                            name=price['name'],
+                            portion=price['portion']
+                        ).dict() for price in food['price']
+                    ]
+                ).dict() for food in data
+            ]
+            return {'availability': True, 'data': jsonable_encoder(serialized)}
+        elif len(data) == 0:
+            return {'availability': False, 'data': []}
+
     def check_deletable_category(self, id):
         # perpose : chack category is deletable or not
         # result : true : deletable, false : not deletable
@@ -233,6 +257,16 @@ class DataBase:
         # perpose : check category id is available or not
         # result : true : available, false : not available
         data = self.category.find_one({'_id': ObjectId(categoryId)})
+        if data != None:
+            return True
+        else:
+            return False
+
+    def check_undeletable_category(self, id):
+        # perpose : check provided category is undeletable or not
+        # result : true - undeletable | false : deletable
+        data = self.category.find_one(
+            {'_id': ObjectId(id), 'deletable': False})
         if data != None:
             return True
         else:

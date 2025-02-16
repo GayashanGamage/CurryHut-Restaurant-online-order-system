@@ -66,10 +66,15 @@ async def getUndeletableCategory(id: str):
     if category_data == False:
         return JSONResponse(status_code=400, content={'message': 'category is deletable'})
     else:
-        # get data from database with serialize
-        data = db.getFoodByCategory(id)
-        if data['availability'] == False:
-            return JSONResponse(status_code=404, content={'message': 'foods not available', 'data': []})
-        elif data['availability'] == True:
-            return JSONResponse(status_code=200, content={'message': 'succssfull', 'data': data['data']})
-        # return data
+        # get current meal time
+        mealTime = get_current_meal_time()
+        if mealTime == False:
+            return JSONResponse(status_code=400, content={'message': 'shop is closed'})
+        else:
+            # get data from database with serialize
+            data = db.getFoodByCategory(id, mealTime)
+            if data['availability'] == False:
+                return JSONResponse(status_code=404, content={'message': 'foods not available', 'data': []})
+            elif data['availability'] == True:
+                return JSONResponse(status_code=200, content={'message': 'succssfull', 'data': data['data']})
+            # return data

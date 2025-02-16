@@ -32,6 +32,7 @@ class DataBase:
         self.uncategorize = '670cbcf46e6b240be2d189e2'
         self.drinksCategory = '670cbd0e6e6b240be2d189e5'
         self.decertCategory = '670cbd156e6b240be2d189e6'
+        self.extraPortionCategory = '67b1baa519f60cfa444a0afc'
 
     def find_duplicate_location(self, location):
         # perpose : find duplicate name available in the delivery collection - by name
@@ -132,7 +133,7 @@ class DataBase:
 
     def get_foods(self):
         data = list(self.food.find({'category_id': {'$nin': [
-                    ObjectId(self.drinksCategory), ObjectId(self.decertCategory), ObjectId(self.uncategorize), ObjectId(self.riceAndCurryCategory), ObjectId(self.curryCategory), ObjectId(self.plainRiceCategory)]}}))
+                    ObjectId(self.drinksCategory), ObjectId(self.decertCategory), ObjectId(self.uncategorize), ObjectId(self.riceAndCurryCategory), ObjectId(self.curryCategory), ObjectId(self.plainRiceCategory), ObjectId(self.extraPortionCategory)]}}))
         if len(data) > 0:
             serialized = [
                 model.get_foods(
@@ -153,10 +154,11 @@ class DataBase:
         else:
             return {'availability': False, 'data': []}
 
-    def getFoodByCategory(self, id):
+    def getFoodByCategory(self, id, mealtime):
         # perpose : get uncategorize foods form database
         # result : data : successfull | false : not found
-        data = list(self.food.find({'category_id': ObjectId(id)}))
+        data = list(self.food.find(
+            {'category_id': ObjectId(id), mealtime: True}))
         if len(data) > 0:
             serialized = [
                 model.get_foods(

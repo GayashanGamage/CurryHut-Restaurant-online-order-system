@@ -264,7 +264,7 @@ class DataBase:
 
     def check_undeletable_category(self, id):
         # perpose : check provided category is undeletable or not
-        # result : true - undeletable | false : deletable
+        # result : false - category is deletable | true : category is undeletable
         data = self.category.find_one(
             {'_id': ObjectId(id), 'deletable': False})
         if data != None:

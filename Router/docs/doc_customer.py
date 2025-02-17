@@ -115,5 +115,55 @@ doc = {
                 }
             },
         }
+    },
+    'getFood': {
+        'summary': 'get all deletable foods and related category list',
+        'description': 'get all foods those are deletable and related category list',
+        'responses': {
+            200: {
+                "description": "get all foods successfuly",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            'availability': 'bool',
+                            'data': [
+                                {
+                                    'id': 'str',
+                                    'category_id': 'str',
+                                    'name': 'str',
+                                    'description': 'str',
+                                    'added_data': 'datetime',
+                                    'modified_data': 'datetime',
+                                    'price': {
+                                        "name": 'str',
+                                        "price": 'int',
+                                        "portion": 'int'
+                                    }
+                                }
+                            ],
+                            'categories': [
+                                {
+                                    'id': 'str',
+                                    'name': 'str'
+                                }
+                            ]
+                        }
+
+                    }
+                }
+            },
+            403: {
+                "description": "shop is closed or shutdown",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            'open_time': 'datetime',
+                            'close_time': 'datetime',
+                            'shutdown': 'bool'
+                        }
+                    }
+                }
+            },
+        }
     }
 }

@@ -7,39 +7,40 @@ from fastapi.responses import JSONResponse
 from Dependencies.shop import doesShopOpen, get_current_meal_time
 from datetime import datetime
 from .docs.doc_customer import doc
+from fastapi.encoders import jsonable_encoder
 
 route = APIRouter(prefix="/customer", tags=["customer"])
 db = get_database()
 
 
-@route.get('/')
+@route.get('/', **doc['getFood'])
 async def getFood():
     shopStatus = doesShopOpen()
     if shopStatus['status'] == True:
         data = db.get_foods()
         return data
-    else:
+    elif shopStatus['status'] == False:
         if shopStatus['type'] == 'closed':
             return JSONResponse(content=shopStatus['data'], status_code=403)
         elif shopStatus['type'] == 'shutdown':
             return JSONResponse(content=shopStatus['data'], status_code=403)
 
 
-@route.get('/cagegories')
-async def getCategories():
-    shopStatus = doesShopOpen()
-    if shopStatus['status'] == True:
-        # return all food items
-        data = db.get_categories_customer()
-        if len(data) > 0:
-            return JSONResponse(content=data, status_code=200)
-        else:
-            return JSONResponse(content={'message': 'No categories found'}, status_code=404)
-    else:
-        if shopStatus['type'] == 'closed':
-            return JSONResponse(content=shopStatus['data'], status_code=403)
-        elif shopStatus['type'] == 'shutdown':
-            return JSONResponse(content=shopStatus['data'], status_code=403)
+# @route.get('/cagegories')
+# async def getCategories():
+#     shopStatus = doesShopOpen()
+#     if shopStatus['status'] == True:
+#         # return all food items
+#         data = db.get_categories_customer()
+#         if len(data) > 0:
+#             return JSONResponse(content=data, status_code=200)
+#         else:
+#             return JSONResponse(content={'message': 'No categories found'}, status_code=404)
+#     else:
+#         if shopStatus['type'] == 'closed':
+#             return JSONResponse(content=shopStatus['data'], status_code=403)
+#         elif shopStatus['type'] == 'shutdown':
+#             return JSONResponse(content=shopStatus['data'], status_code=403)
 
 
 @route.get('/riceAndCurry', **doc['riceAndCurry'])

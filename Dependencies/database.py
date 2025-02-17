@@ -120,39 +120,63 @@ class DataBase:
         data = self.shop.find_one({'_id': ObjectId(id)})
         return data
 
-    def get_categories_customer(self):
-        data = list(self.category.find({'deletable': True}, {
-                    "aded_date": 0, "last_modify_date": 0, "item_count": 0}))
-        if len(data) > 0:
-            categories = [
-                model.get_categories_customer(id=str(category['_id']), name=category['name'], deletable=category['deletable']).dict() for category in data
-            ]
-            return jsonable_encoder(categories)
-        else:
-            return data
+    # def get_categories_customer(self):
+    #     data = list(self.category.find({'deletable': True}, {
+    #                 "aded_date": 0, "last_modify_date": 0, "item_count": 0}))
+    #     if len(data) > 0:
+    #         categories = [
+    #             model.get_categories_customer(id=str(category['_id']), name=category['name'], deletable=category['deletable']).dict() for category in data
+    #         ]
+    #         return jsonable_encoder(categories)
+    #     else:
+    #         return data
+
+    def map_available_categories(self, data):
+        # perpose : get available unique categories of available foods
+        # return : false : categories not available | list : available categories
+        unique_categories = []  # get all categories from available foods list
+        for item in data:
+            unique_categories.append(item['category_id'])
+        unique_categories = list(set(unique_categories))
+
+        # find all unique category list
+        category_list = list(self.category.find({}))
+        if len(category_list) <= 0:
+            return False
+        elif len(category_list) > 0:
+            for item in category_list:
+                if item['_id'] in unique_categories:
+                    unique_categories.append(
+                        # create object category name and category id
+                        {'id': str(item['_id']), 'name': item['name']})
+        return unique_categories[int(len(unique_categories)/2):]
 
     def get_foods(self):
         data = list(self.food.find({'category_id': {'$nin': [
                     ObjectId(self.drinksCategory), ObjectId(self.decertCategory), ObjectId(self.uncategorize), ObjectId(self.riceAndCurryCategory), ObjectId(self.curryCategory), ObjectId(self.plainRiceCategory), ObjectId(self.extraPortionCategory)]}}))
         if len(data) > 0:
-            serialized = [
-                model.get_foods(
-                    id=str(food['_id']),
-                    name=food['name'],
-                    category_id=str(food['category_id']),
-                    description=food['description'],
-                    price=[
-                        model.get_price(
-                            price=price['price'],
-                            name=price['name'],
-                            portion=price['portion']
-                        ).dict() for price in food['price']
-                    ]
-                ).dict() for food in data
-            ]
-            return {'availability': True, 'data': jsonable_encoder(serialized)}
+            available_categories = self.map_available_categories(data)
+            if available_categories == False:
+                return JSONResponse(status_code=404, content={'message': 'categories not available'})
+            else:
+                serialized = [
+                    model.get_foods(
+                        id=str(food['_id']),
+                        name=food['name'],
+                        category_id=str(food['category_id']),
+                        description=food['description'],
+                        price=[
+                            model.get_price(
+                                price=price['price'],
+                                name=price['name'],
+                                portion=price['portion']
+                            ).dict() for price in food['price']
+                        ]
+                    ).dict() for food in data
+                ]
+                return JSONResponse(status_code=200, content={'availability': True, 'data': jsonable_encoder(serialized), 'categories': jsonable_encoder(available_categories)})
         else:
-            return {'availability': False, 'data': []}
+            return JSONResponse(status_code=400, content={'availability': False, 'data': []})
 
     def getFoodByCategory(self, id, mealtime):
         # perpose : get uncategorize foods form database

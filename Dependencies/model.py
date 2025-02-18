@@ -93,6 +93,7 @@ class get_foods (BaseModel):
     name: str
     category_id: str
     description: str
+    availability: bool
     price: List[get_price]
 
 

@@ -165,6 +165,7 @@ class DataBase:
                         name=food['name'],
                         category_id=str(food['category_id']),
                         description=food['description'],
+                        availability=food['availability'],
                         price=[
                             model.get_price(
                                 price=price['price'],
@@ -190,6 +191,7 @@ class DataBase:
                     name=food['name'],
                     category_id=str(food['category_id']),
                     description=food['description'],
+                    availability=food['availability'],
                     price=[
                         model.get_price(
                             price=price['price'],

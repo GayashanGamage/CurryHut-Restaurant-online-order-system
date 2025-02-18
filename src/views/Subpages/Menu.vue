@@ -23,7 +23,7 @@
                 <span class="meal-time">{{ String(new Date(shopstore.lunch).getHours()).padStart(2, '0') }}:{{ String(new Date(shopstore.lunch).getHours()).padStart(2, '0') }} - {{ String(new Date(shopstore.dinner).getHours()).padStart(2, '0') }}:{{ String(new Date(shopstore.dinner).getHours()).padStart(2, '0') }}</span>
               </th>
               <th class="table-row-title dinner center-text">Dinner<br>
-                <span class="meal-time">{{ String(new Date(shopstore.lunch).getHours()).padStart(2, '0') }}:{{ String(new Date(shopstore.lunch).getHours()).padStart(2, '0') }} - {{ String(new Date(shopstore.close_time).getHours()).padStart(2, '0') }}:{{ String(new Date(shopstore.close_time).getHours()).padStart(2, '0') }}</span>
+                <span class="meal-time">{{ String(new Date(shopstore.dinner).getHours()).padStart(2, '0') }}:{{ String(new Date(shopstore.dinner).getHours()).padStart(2, '0') }} - {{ String(new Date(shopstore.close_time).getHours()).padStart(2, '0') }}:{{ String(new Date(shopstore.close_time).getHours()).padStart(2, '0') }}</span>
               </th>
             </tr>
           </thead>

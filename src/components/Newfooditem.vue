@@ -71,16 +71,16 @@
                 </td>
                 <td>
                   <input
-                    type="number"
-                    class="table-data potion-column potion-column-data"
-                    v-model="showcase.processingFoodItem.price[0].price"
+                    type="text"
+                    class="table-data price-column price-column-data"
+                    v-model="showcase.processingFoodItem.price[0].portion"
                   />
                 </td>
                 <td>
                   <input
-                    type="text"
-                    class="table-data price-column price-column-data"
-                    v-model="showcase.processingFoodItem.price[0].portion"
+                    type="number"
+                    class="table-data potion-column potion-column-data"
+                    v-model="showcase.processingFoodItem.price[0].price"
                   />
                 </td>
               </tr>

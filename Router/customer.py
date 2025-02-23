@@ -80,7 +80,7 @@ async def getUndeletableCategory(id: str):
             # return data
 
 
-@route.post('/mobile')
+@route.post('/auth/mobile', **doc['mobile'])
 async def checkCustomer(customer: model.customerData):
     """
     status code refference for successful message ( 200 ) :
@@ -108,14 +108,14 @@ async def checkCustomer(customer: model.customerData):
             if sequrity_code == True:
                 return JSONResponse(status_code=200, content={'message': 'successful', 'status': 1002})
             elif sequrity_code == False:
-                return JSONResponse(status_code=400, content={"message": 'something go wrong - server'})
+                return JSONResponse(status_code=500, content={"message": 'something go wrong - server'})
 
 
-@route.get('/customerKey/{customer_key}')
+@route.get('/auth/customerKey/{customer_key}', **doc['customerKey'])
 async def verifyCustomerByKey(customer_key: str):
     """
     status code refference for successful message ( 200 ) :
-        1000 : verified customer
+        1000 : unverified customer
         1001 : alredy verified customer
     """
     # find customer by user_key
@@ -132,3 +132,13 @@ async def verifyCustomerByKey(customer_key: str):
                 return JSONResponse(status_code=200, content={'message': 'something went wrong - server'})
         elif data['data']['verified'] == True:
             return JSONResponse(status_code=200, content={'message': 'successfull', 'status': 1001})
+
+
+@route.post('/auth/verification', **doc['verification'])
+async def verifyCustomer(customer_verify: model.CustomerVerification):
+    # check the secreate code
+    data = db.check_secreate_code(customer_verify)
+    if data == True:
+        return JSONResponse(status_code=200, content={'message': 'successful'})
+    else:
+        return JSONResponse(status_code=406, content={'message': 'credencials are not matched'})

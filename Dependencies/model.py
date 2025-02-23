@@ -322,3 +322,8 @@ class customerData(BaseModel):
     verified: Optional[bool] = Field(default=False)
     secreate_code: Optional[int] = Field(default=None)
     created: Optional[datetime] = Field(default=datetime.now())
+
+
+class CustomerVerification(BaseModel):
+    user_key: str
+    secreate_code: int

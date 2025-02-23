@@ -852,6 +852,16 @@ class DataBase:
         else:
             return {'status': False}
 
+    def check_secreate_code(self, userData):
+        # perpose : if user_key and secreate_code are matched, remove secreate_key and add verified_at field ( verified_time )
+        # return True : all fileds match and updated, False : fileds not match and not updated
+        data = self.customer.find_one_and_update(
+            {'user_key': userData.user_key, 'secreate_code': userData.secreate_code}, {'$set': {'verified_at': datetime.now(), 'verified': True}, '$unset': {'secreate_code': ''}})
+        if data == None:
+            return False
+        else:
+            return True
+
 
 def get_database():
     return DataBase()

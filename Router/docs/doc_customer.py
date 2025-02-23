@@ -165,5 +165,87 @@ doc = {
                 }
             },
         }
-    }
+    },
+    'mobile': {
+        'summary': 'check contact number is verified or not',
+        'description': 'check the contact number in customer collection. if so check verified or not. if not verified send serification code. if contact number is not in customer collection create new customer',
+        'responses': {
+            200: {
+                "description": "successfull - there are several options by 'status' in return value. 1000 : new account created. 1001 : alredy verified number. 1002 : verification code send to provide mobile number ( not verified number )",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            'message': 'str',
+                            'status': 'int - 1000 | 1001 | 1002',
+                            'customer': 'str - masked customer contact number'
+                        }
+                    }
+                }
+            },
+            500: {
+                "description": "customer database not update expectedly",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            'message': 'str',
+                        }
+                    }
+                }
+            },
+        }
+    },
+    'customerKey': {
+        'summary': 'contact number identify by masked customer key',
+        'description': 'check contact number by customer key.',
+        'responses': {
+            200: {
+                "description": "contact number identified by customer key. but base on the verified status it's give responce. 1000 : unverified customer. 1001 : alredy verified customer",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            'message': 'str',
+                            'status': 'int - 1000 | 1001',
+                            'mobile_number': 'str - 071****098'
+                        }
+                    }
+                }
+            },
+            404: {
+                "description": "customer database not update expectedly",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            'message': 'str',
+                        }
+                    }
+                }
+            },
+        }
+    },
+    'verification': {
+        'summary': 'contact number verification',
+        'description': 'when create a new customer by new mobile number, it should verify by the verification code that send to customers mobile via sms',
+        'responses': {
+            200: {
+                "description": "successfully verified contact number",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            'message': 'str',
+                        }
+                    }
+                }
+            },
+            406: {
+                "description": "user provide secreate key and masked contact number are not matche",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            'message': 'str',
+                        }
+                    }
+                }
+            },
+        }
+    },
 }

@@ -801,6 +801,23 @@ class DataBase:
             elif send_sms == False:
                 return False
 
+    def create_security_code_by_user_key(self, customer_key, mobileNumber):
+        # perpose : create sequlity code and send to provided mobile number
+        # responce : True : store and send the code, Flase : attempt fail somehow
+        code = randint(1000, 9999)
+        data = self.customer.update_one(
+            {'user_key': customer_key}, {'$set': {'secreate_code': code}})
+        if data.modified_count == 0:
+            return False
+        elif data.modified_count == 1:
+            # send sms to the customer
+            send_sms = sms.sendSMS(
+                f'94{mobileNumber[1:]}', f'your verification code is {code}')
+            if send_sms == True:
+                return True
+            elif send_sms == False:
+                return False
+
     def create_customer_profile(self, customer_data, customer_key):
         # perpose : create cusotmer profile base on mobile number
         # response : True : store successfully, False : data not store properly
@@ -825,6 +842,15 @@ class DataBase:
             return data
         elif data == None:
             return False
+
+    def find_customer_by_key(self, user_key):
+        # perpose : find customer by user_key
+        # responce : True : customer available, Flase : customer not available
+        data = self.customer.find_one({'user_key': user_key})
+        if data != None:
+            return {'status': True, 'data': data}
+        else:
+            return {'status': False}
 
 
 def get_database():

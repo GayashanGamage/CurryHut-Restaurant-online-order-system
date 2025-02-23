@@ -104,8 +104,31 @@ async def checkCustomer(customer: model.customerData):
             return JSONResponse(status_code=200, content={'message': 'successful', 'status': 1001})
         elif contact_number['verified'] == False:
             # send sequrity code
-            sequrity_code = db.create_sequrity_code(customer.mobile)
+            sequrity_code = db.create_security_code(customer.mobile)
             if sequrity_code == True:
                 return JSONResponse(status_code=200, content={'message': 'successful', 'status': 1002})
             elif sequrity_code == False:
                 return JSONResponse(status_code=400, content={"message": 'something go wrong - server'})
+
+
+@route.get('/customerKey/{customer_key}')
+async def verifyCustomerByKey(customer_key: str):
+    """
+    status code refference for successful message ( 200 ) :
+        1000 : verified customer
+        1001 : alredy verified customer
+    """
+    # find customer by user_key
+    data = db.find_customer_by_key(customer_key)
+    if data['status'] == False:
+        return JSONResponse(status_code=404, content={'message': 'customer not found'})
+    elif data['status'] == True:
+        if data['data']['verified'] == False:
+            security_key = db.create_security_code_by_user_key(
+                customer_key, data['data']['mobile'])
+            if security_key == True:
+                return JSONResponse(status_code=200, content={'message': 'successful', 'status': 1000, 'mobile_number': f'{data['data']['mobile'][:3]}****{data['data']['mobile'][7:]}'})
+            else:
+                return JSONResponse(status_code=200, content={'message': 'something went wrong - server'})
+        elif data['data']['verified'] == True:
+            return JSONResponse(status_code=200, content={'message': 'successfull', 'status': 1001})

@@ -309,6 +309,16 @@ class plain_rice(BaseModel):
 
 class rice_and_curry_pack(BaseModel):
     id: str
+    category_id: str
     name: str
     price: List[FoodDataPrice]
     availability: bool
+
+
+class customerData(BaseModel):
+    mobile: str
+    # this is act like a mask for customers mobile number in the broser. - inseterd of store plain customers mobile number, this user key store
+    user_key: Optional[str] = Field(default=None)
+    verified: Optional[bool] = Field(default=False)
+    secreate_code: Optional[int] = Field(default=None)
+    created: Optional[datetime] = Field(default=datetime.now())

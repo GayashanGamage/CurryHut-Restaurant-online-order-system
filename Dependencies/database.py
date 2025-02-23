@@ -1,5 +1,5 @@
 from pymongo import MongoClient, UpdateOne
-from . import model
+from . import model, sms
 from bson.objectid import ObjectId
 import os
 from dotenv import load_dotenv
@@ -23,6 +23,7 @@ class DataBase:
         self.category = self.db['Category']
         self.food = self.db['Food']
         self.rider = self.db['Rider']
+        self.customer = self.db['customer']
         # rice and curry related category list
         self.plainRiceCategory = '670cbd076e6b240be2d189e4'
         self.curryCategory = '670cbcfd6e6b240be2d189e3'
@@ -759,6 +760,7 @@ class DataBase:
                 rice_and_curry = [
                     model.rice_and_curry_pack(
                         id=str(item["_id"]),
+                        category_id=str(item['category_id']),
                         name=item['name'],
                         availability=item['availability'],
                         price=[
@@ -772,6 +774,57 @@ class DataBase:
 
                 ]
                 return {'status': True, 'curry': jsonable_encoder(curry), 'rice': jsonable_encoder(plain_rice), 'rice&curry': jsonable_encoder(rice_and_curry)}
+
+    def check_contact_number(self, mobileNumber):
+        # perspose : check contact numner alredy in the customer database
+        # response : data : contact nubmer available, Flase : contact not available in database
+        data = self.customer.find_one({'mobile': mobileNumber})
+        if data == None:
+            return False
+        elif data != None:
+            return data
+
+    def create_security_code(self, mobileNumber):
+        # perpose : create sequlity code and send to provided mobile number
+        # responce : True : store and send the code, Flase : attempt fail somehow
+        code = randint(1000, 9999)
+        data = self.customer.update_one(
+            {'mobile': mobileNumber}, {'$set': {'secreate_code': code}})
+        if data.modified_count == 0:
+            return False
+        elif data.modified_count == 1:
+            # send sms to the customer
+            send_sms = sms.sendSMS(
+                f'94{mobileNumber[1:]}', f'your verification code is {code}')
+            if send_sms == True:
+                return True
+            elif send_sms == False:
+                return False
+
+    def create_customer_profile(self, customer_data, customer_key):
+        # perpose : create cusotmer profile base on mobile number
+        # response : True : store successfully, False : data not store properly
+        customer_data.user_key = customer_key
+        customer_data.secreate_code = randint(1000, 9999)
+        data = self.customer.insert_one(customer_data.dict())
+        if data.acknowledged:
+            send_sms = sms.sendSMS(
+                f'94{customer_data.mobile[1:]}', f'Your verification code is {customer_data.secreate_code}')
+            if send_sms == True:
+                return {'status': True, 'customer': customer_data.user_key}
+            else:
+                return {'status': False}
+        else:
+            return {'status': False}
+
+    def customer_by_user_key(self, user_key):
+        # perpose : find customer by 'user_key'. this user_key use for masking customers plain mobile number in the browser
+        # response : data : customer available under 'user_key', false: customer not available
+        data = self.customer.find_one({'user_key': user_key})
+        if data != None:
+            return data
+        elif data == None:
+            return False
 
 
 def get_database():

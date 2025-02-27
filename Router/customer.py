@@ -101,12 +101,12 @@ async def checkCustomer(customer: model.customerData):
     else:
         # check number is verified or not
         if contact_number['verified'] == True:
-            return JSONResponse(status_code=200, content={'message': 'successful', 'status': 1001})
+            return JSONResponse(status_code=200, content={'message': 'successful', 'status': 1001, 'customer': customer_account['customer']})
         elif contact_number['verified'] == False:
             # send sequrity code
             sequrity_code = db.create_security_code(customer.mobile)
             if sequrity_code == True:
-                return JSONResponse(status_code=200, content={'message': 'successful', 'status': 1002})
+                return JSONResponse(status_code=200, content={'message': 'successful', 'status': 1002, 'customer': customer_account['customer']})
             elif sequrity_code == False:
                 return JSONResponse(status_code=500, content={"message": 'something go wrong - server'})
 

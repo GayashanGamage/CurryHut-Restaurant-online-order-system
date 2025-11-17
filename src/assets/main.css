@@ -1,0 +1,15 @@
+:root {
+  /* button colors */
+  --button-deactivate : #d3d3d3;
+  --button-default: #9dba6c;
+  --button-hover: #85a947;
+  --button-select: #6a8739;
+
+  /* text colors */
+  --text-color-primary: #ffffff;
+  --text-color-secondary: #000000;
+  --text-color-defalut-button : #6a8739;
+
+  /* error */
+  --notice-red : #E52020;
+}

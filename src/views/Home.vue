@@ -1,0 +1,206 @@
+<template>
+  <div class="level-one-container">
+    <div class="level-two-container">
+      <div class="menu">
+        <Menubar></Menubar>
+      </div>
+      <div class="content">
+        <router-view></router-view>
+      </div>
+    </div>
+    <Logout v-if="uistore.logoutPopupWindow"></Logout>
+    <Passwordchange v-if="uistore.PasswordChangeWindow"></Passwordchange>
+
+    <!-- open time window -->
+    <Timechange v-if="uistore.timeWindow"></Timechange>
+
+    <Newcategory v-if="uistore.NewCategoryWindow"></Newcategory>
+    <Deletecategory v-if="uistore.DeleteCategoryWindow"></Deletecategory>
+    <Editcategory v-if="uistore.EditCategoryWindow"></Editcategory>
+    <Newfooditem v-if="uistore.AddFoodWindow"></Newfooditem>
+    <Viewfood v-if="uistore.FoodView"></Viewfood>
+    <AddDelivery v-if="uistore.addDeliveryPopup"></AddDelivery>
+    <Delivery
+      v-if="uistore.addDeliveryPopup"
+      title="Add delivery location"
+      place="Nawala"
+      price="100"
+      buttonText="Confirm"
+      action="add"
+      @userAction="addDelivery"
+    ></Delivery>
+    <Delivery
+      v-if="uistore.editDeliveryPopup"
+      title="Edit delivery location"
+      :place="showCase.processingDeliveryLocation.place"
+      :price="showCase.processingDeliveryLocation.cost"
+      buttonText="Update"
+      action="edit"
+      @userAction="editDelivery"
+    ></Delivery>
+    <RemoveDeliveryPlace
+      v-if="uistore.removeDeliveryPopup"
+    ></RemoveDeliveryPlace>
+  </div>
+</template>
+
+<script setup>
+import Menubar from "@/components/Menubar.vue";
+import Logout from "@/components/Logout.vue";
+import { useUiStore } from "@/stores/ui";
+import Passwordchange from "@/components/Passwordchange.vue";
+import Timechange from "@/components/Timechange.vue";
+import Newcategory from "@/components/Newcategory.vue";
+import Deletecategory from "@/components/Deletecategory.vue";
+import Editcategory from "@/components/Editcategory.vue";
+import Newfooditem from "@/components/Newfooditem.vue";
+import Viewfood from "@/components/Viewfood.vue";
+import Delivery from "@/components/popups/DeliveryCommon.vue";
+import RemoveDeliveryPlace from "@/components/popups/RemoveDeliveryPlace.vue";
+import { useShowCase } from "@/stores/showcase";
+import axios from "axios";
+import { useToast } from "vue-toast-notification";
+import { useAuthonticationStore } from "@/stores/authontication";
+
+// use pinia stores
+const uistore = useUiStore();
+const showCase = useShowCase();
+const authontication = useAuthonticationStore();
+
+// use floating notifications
+const notification = useToast();
+
+// emit function - Delivery compoent - edit delivery details
+const editDelivery = () => {
+  axios
+    .put(`${import.meta.env.VITE_url}/delivery/update`, 
+    {
+      _id: showCase.processingDeliveryLocation.id,
+      place: showCase.processingDeliveryLocation.place,
+      cost: showCase.processingDeliveryLocation.cost,
+    },
+    {
+        headers: {
+          Authorization: "Bearer " + authontication.cookies_token,
+        },
+      })
+    .then((response) => {
+      if (response.status == 200) {
+        // uistore.deliveryChange = true;
+        showCase.getAllDeliveryLocations();
+        notification.success("Delivery location updated successfully");
+        uistore.editDeliveryPopup = false;
+        showCase.processingDeliveryLocation = null;
+      }
+    })
+    .catch((error) => {
+      if (error.status == 400){
+        notification.error(error.data.message);
+      }else if (error.status == 422){
+        notification.error(error.data.message);
+      }else if(error.status == 500){
+        notification.error(error.data.message);
+
+      }
+    });
+};
+
+// emit function - Delivery compoent - add delivery details
+const addDelivery = () => {
+  axios
+    .post(`${import.meta.env.VITE_url}/delivery/create`, {
+      place: showCase.processingDeliveryLocation.place,
+      stuatus: true,
+      cost: parseInt(showCase.processingDeliveryLocation.cost),
+    }, {
+        headers: {
+          Authorization: "Bearer " + authontication.cookies_token,
+        },
+      })
+    .then((response) => {
+      if (response.status == 200) {
+        notification.success("Delivery location added successfully");
+        showCase.processingDeliveryLocation = null;
+        showCase.getAllDeliveryLocations();
+        uistore.addDeliveryPopup = false;
+      }
+    })
+    .catch((error) => {
+      notification.error("Failed to add delivery location");
+    });
+};
+</script>
+
+<style scoped>
+.level-one-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+.level-two-container {
+  width: 98vw;
+  height: 96vh;
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  grid-template-rows: auto;
+  grid-template-areas: "menu content";
+  grid-gap: 10px;
+}
+.menu {
+  grid-area: menu;
+}
+</style>
+
+<style>
+.page-title {
+  color: #41b06e;
+  font-family: "Space Grotesk";
+  font-size: 32px;
+  font-weight: 700;
+  padding: 53px 0px 0px 19px;
+}
+.s-level-one-container {
+  background: rgba(207, 244, 206, 0.5);
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  padding-bottom: 12px;
+}
+.s-level-two-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: auto;
+}
+.s-level-three-container {
+  width: 98%;
+  height: auto;
+  border-radius: 6px;
+  background: #fff;
+  margin-top: 26px;
+}
+.action-button {
+  font-size: 18px;
+  border-radius: 4px;
+  border: 1.5px solid #41b06e;
+  background: #fff;
+  color: #41b06e;
+  font-family: "Space Grotesk";
+  font-size: 18px;
+  font-weight: 400;
+  padding: 4px 18px;
+  width: fit-content;
+  height: 34px;
+}
+.action-button:hover {
+  background: #41b06e;
+  color: #fff;
+}
+</style>
